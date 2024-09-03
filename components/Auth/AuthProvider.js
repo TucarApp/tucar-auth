@@ -4,6 +4,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const AuthContext = createContext();
 
+
+////KKK
+
 export const AuthProvider = ({ children, ...props }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [emailOrPhone, setEmailOrPhone] = useState('');
@@ -16,6 +19,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [googleClientId, setGoogleClientId] = useState('');
   const [isGoogleFlow, setIsGoogleFlow] = useState(false);
   const [response, setResponse] = useState(null);
+  const [xd, setXd] = setResponse('')
 
   useEffect(() => {
     if (props.authMethods) {
