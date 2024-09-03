@@ -36,19 +36,22 @@ const Auth = () => {
   const authorize = async () => {
     const baseUrl = 'https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize';
     const params = {
-      response_type: 'code',
+      response_type: 'code', // Aquí va el tipo de respuesta que esperas
       client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
-      redirect_uri: 'http://localhost:3000',
-      scope: 'driver',
+      redirect_uri: 'http://localhost:3000', // Cambia esto al URI de redirección deseado
+      scope: 'driver', // Alcance de la solicitud
       state: 'random-state',
       tenancy: 'development'
     };
   
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
-    
-    console.log('URL completa para autorización:', fullUrl);
   
+    console.log('URL completa para autorización:', fullUrl);
+
+    // Redirigir automáticamente a la URL construida
+    window.history.pushState(null, '', `/?${queryString}`);
+
     try {
       const response = await axios.get(fullUrl, {
         withCredentials: true
@@ -76,7 +79,6 @@ const Auth = () => {
     }
   };
   
-
   const updateFingerprint = async (authSessionId) => {
     try {
       const response = await axios.patch('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/udi-fingerprint', {
