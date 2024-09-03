@@ -16,5 +16,5 @@ const GoogleButton = styled.button`
               -6px -6px 20px 0px #FFF,
               4px 4px 20px 0px rgba(111, 140, 176, 0.41);
 `;
-
+///kaz
 export default GoogleButton;
