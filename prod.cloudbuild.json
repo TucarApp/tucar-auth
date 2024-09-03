@@ -1,0 +1,49 @@
+{
+    "steps": [
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "entrypoint": "bash",
+        "args": [
+          "-c",
+          "docker pull us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest || exit 0"
+        ]
+      },
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": [
+          "build",
+          "-t",
+          "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest",
+          "--cache-from",
+          "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest",
+          "-f", 
+          "./Dockerfile",
+          "."
+        ]
+      },
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": [
+          "push",
+          "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest"
+        ]
+      },
+      {
+        "name": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+        "entrypoint": "gcloud",
+        "args": [
+          "run",
+          "deploy",
+          "tucar-auth",
+          "--image",
+          "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest",
+          "--region",
+          "us-central1"
+        ]
+      }
+    ],
+    "images": [
+      "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest"
+    ],
+    "timeout": "1000s"
+  }
