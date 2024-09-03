@@ -29,8 +29,10 @@ const Auth = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    // Inicia automáticamente la autenticación al montar el componente
-    authorize();
+    // Esperar hasta que todo haya cargado completamente antes de iniciar la autenticación
+    window.onload = () => {
+      authorize();
+    };
   }, []);
 
   const authorize = async () => {
@@ -78,7 +80,7 @@ const Auth = () => {
       console.error('Error en la autorización', error);
     }
   };
-  
+
   const updateFingerprint = async (authSessionId) => {
     try {
       const response = await axios.patch('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/udi-fingerprint', {
