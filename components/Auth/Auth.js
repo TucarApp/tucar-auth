@@ -34,40 +34,48 @@ const Auth = () => {
   }, []);
 
   const authorize = async () => {
+    const baseUrl = 'https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize';
+    const params = {
+      response_type: 'code',
+      client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
+      redirect_uri: 'http://localhost:3000',
+      scope: 'driver',
+      state: 'random-state',
+      tenancy: 'development'
+    };
+  
+    const queryString = new URLSearchParams(params).toString();
+    const fullUrl = `${baseUrl}?${queryString}`;
+    
+    console.log('URL completa para autorización:', fullUrl);
+  
     try {
-      const response = await axios.get('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize', {
-        params: {
-          response_type: 'code',
-          client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
-          redirect_uri: 'http://localhost:3000',
-          scope: 'driver',
-          state: 'random-state',
-          tenancy: 'development'
-        },
+      const response = await axios.get(fullUrl, {
         withCredentials: true
       });
-
+  
       const data = response.data;
       console.log('Respuesta completa del servidor:', data);
-
+  
       if (data.authMethods && data.authMethods.length > 0) {
         setAuthMethods(data.authMethods);
       } else {
         console.error('authMethods no está presente en la respuesta o está vacío');
       }
-
+  
       setAuthSessionId(data.authSessionId);
       localStorage.setItem('authSessionId', data.authSessionId);
       setAuthFlow(data.authFlow);
       setCompleted(data.completed);
       setAuthData(data.authData);
-
+  
       // Actualizar fingerprint después de recibir authSessionId
       updateFingerprint(data.authSessionId);
     } catch (error) {
       console.error('Error en la autorización', error);
     }
   };
+  
 
   const updateFingerprint = async (authSessionId) => {
     try {
