@@ -19,7 +19,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [googleClientId, setGoogleClientId] = useState('');
   const [isGoogleFlow, setIsGoogleFlow] = useState(false);
   const [response, setResponse] = useState(null);
-  const [xd, setXd] = setResponse('')
+
 
   useEffect(() => {
     if (props.authMethods) {
