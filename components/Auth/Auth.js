@@ -1,0 +1,146 @@
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import AuthForm from './AuthForm';
+import AuthProvider from './AuthProvider';
+import Logo from '../LogoTucar/LogoTucar';
+
+const Auth = () => {
+  const router = useRouter();
+  const [authSessionId, setAuthSessionId] = useState('');
+  const [authFlow, setAuthFlow] = useState('');
+  const [completed, setCompleted] = useState(false);
+  const [authData, setAuthData] = useState({});
+  const [authMethods, setAuthMethods] = useState([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
+  const [state, setState] = useState('random-state');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const storedAuthSessionId = localStorage.getItem('authSessionId');
+    if (storedAuthSessionId && completed) {
+      verifyAuthentication(storedAuthSessionId);
+    }
+  }, [completed]);
+
+  useEffect(() => {
+    console.log('currentStep actualizado:', currentStep);
+  }, [currentStep]);
+
+  const authorize = async () => {
+    try {
+      const response = await axios.get('/api/v1/oauth/authorize', {
+        params: {
+          response_type: 'code',
+          client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
+          redirect_uri: 'http://localhost:3000',
+          scope: 'driver',
+          state: 'random-state',
+          tenancy: 'development'
+        },
+        withCredentials: true
+      });
+
+      const data = response.data;
+      console.log('Respuesta completa del servidor:', data);
+
+      if (data.authMethods && data.authMethods.length > 0) {
+        setAuthMethods(data.authMethods);
+      } else {
+        console.error('authMethods no está presente en la respuesta o está vacío');
+      }
+
+      setAuthSessionId(data.authSessionId);
+      localStorage.setItem('authSessionId', data.authSessionId);
+      setAuthFlow(data.authFlow);
+      setCompleted(data.completed);
+      setAuthData(data.authData);
+
+      // Actualizar fingerprint después de recibir authSessionId
+      updateFingerprint(data.authSessionId);
+    } catch (error) {
+      console.error('Error en la autorización', error);
+    }
+  };
+
+  const updateFingerprint = async (authSessionId) => {
+    try {
+      const response = await axios.patch('/api/v1/oauth/udi-fingerprint', {
+        authSessionId,
+        udiFingerprint
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+
+      console.log('Fingerprint actualizado:', response.data);
+      setCurrentStep(1);
+    } catch (error) {
+      console.error('Error en la actualización del fingerprint', error);
+    }
+  };
+
+  const verifyAuthentication = async (authSessionId) => {
+    try {
+      const response = await axios.post('/api/v1/oauth/verify-authentication', {
+        authSessionId,
+        udiFingerprint,
+        state
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+
+      console.log('Autenticación verificada:', response.data);
+      if (typeof window !== 'undefined') {
+        
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error en la verificación de la autenticación:', error);
+      setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
+    }
+  };
+
+  return (
+    <AuthProvider
+      currentStep={currentStep}
+      setCurrentStep={setCurrentStep}
+      authSessionId={authSessionId}
+      udiFingerprint={udiFingerprint}
+      authMethods={authMethods}
+      setAuthMethods={setAuthMethods}
+      authFlow={authFlow}
+      setAuthFlow={setAuthFlow}
+      completed={completed}
+      setCompleted={setCompleted}
+      authData={authData}
+      setAuthData={setAuthData}
+      isSubmitting={isSubmitting}
+      setIsSubmitting={setIsSubmitting}
+      errorMessage={errorMessage}
+      setErrorMessage={setErrorMessage}
+      verifyAuthentication={verifyAuthentication}
+    >
+      <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
+       
+        {errorMessage && (
+          <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
+        )}
+        {!authSessionId ? (
+          <button className='text-center' onClick={authorize}>Iniciar Autenticación</button>
+        ) : (
+          <AuthForm />
+        )}
+      </div>
+    </AuthProvider>
+  );
+};
+
+export default Auth;
