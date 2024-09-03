@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import AuthForm from './AuthForm';
 import AuthProvider from './AuthProvider';
-import Logo from '../LogoTucar/LogoTucar';
 
 const Auth = () => {
   const router = useRouter();
@@ -29,9 +28,14 @@ const Auth = () => {
     console.log('currentStep actualizado:', currentStep);
   }, [currentStep]);
 
+  useEffect(() => {
+    // Inicia automáticamente la autenticación al montar el componente
+    authorize();
+  }, []);
+
   const authorize = async () => {
     try {
-      const response = await axios.get('/api/v1/oauth/authorize', {
+      const response = await axios.get('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize', {
         params: {
           response_type: 'code',
           client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
@@ -67,7 +71,7 @@ const Auth = () => {
 
   const updateFingerprint = async (authSessionId) => {
     try {
-      const response = await axios.patch('/api/v1/oauth/udi-fingerprint', {
+      const response = await axios.patch('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/udi-fingerprint', {
         authSessionId,
         udiFingerprint
       }, {
@@ -86,7 +90,7 @@ const Auth = () => {
 
   const verifyAuthentication = async (authSessionId) => {
     try {
-      const response = await axios.post('/api/v1/oauth/verify-authentication', {
+      const response = await axios.post('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
         state
@@ -99,7 +103,6 @@ const Auth = () => {
 
       console.log('Autenticación verificada:', response.data);
       if (typeof window !== 'undefined') {
-        
         router.push('/dashboard');
       }
     } catch (error) {
@@ -129,12 +132,11 @@ const Auth = () => {
       verifyAuthentication={verifyAuthentication}
     >
       <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
-       
         {errorMessage && (
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
         {!authSessionId ? (
-          <button className='text-center' onClick={authorize}>Iniciar Autenticación</button>
+          <p>Cargando...</p> // Indicador de carga mientras se obtiene el authSessionId
         ) : (
           <AuthForm />
         )}
