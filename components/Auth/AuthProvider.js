@@ -59,8 +59,8 @@ export const AuthProvider = ({ children, ...props }) => {
     const iniciarAutenticacion = async () => {
       try {
        
-        // setFingerprint(response.data);
-        // setFingerprintIsLoaded(true);
+        setFingerprint(response.data);
+        setFingerprintIsLoaded(true);
 
         // Aquí inicias automáticamente la autenticación
         await submitAuthentication();
