@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import AuthForm from './AuthForm';
 import AuthProvider from './AuthProvider';
@@ -17,6 +18,8 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const searchParams = useSearchParams(); // Captura los parámetros de la URL
+
   useEffect(() => {
     const storedAuthSessionId = localStorage.getItem('authSessionId');
     if (storedAuthSessionId && completed) {
@@ -31,24 +34,43 @@ const Auth = () => {
   useEffect(() => {
     // Esperar hasta que todo haya cargado completamente antes de iniciar la autenticación
     window.onload = () => {
+      console.log('Parámetros capturados desde la URL:', {
+        response_type: searchParams.get('response_type'),
+        client_id: searchParams.get('client_id'),
+        redirect_uri: searchParams.get('redirect_uri'),
+        scope: searchParams.get('scope'),
+        state: searchParams.get('state'),
+        tenancy: searchParams.get('tenancy')
+      });
+
       authorize();
     };
-  }, []);
+  }, [searchParams]); // Asegurarse de que searchParams esté disponible
 
   const authorize = async () => {
     const baseUrl = 'https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize';
+
+    // Capturar los parámetros de la URL o usar valores por defecto
+    const responseType = searchParams.get('response_type') || 'code';
+    const stateParam = searchParams.get('state') || 'random-state'; // Usar el estado desde la URL o uno por defecto
+    const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
+    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000'; // Cambia esto al URI de redirección deseado
+    const scope = searchParams.get('scope') || 'driver';
+    const tenancy = searchParams.get('tenancy') || 'development';
+
+    // Parámetros que se deben enviar en la solicitud
     const params = {
-      response_type: 'code', // Aquí va el tipo de respuesta que esperas
-      client_id: 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s',
-      redirect_uri: 'http://localhost:3000', // Cambia esto al URI de redirección deseado
-      scope: 'driver', // Alcance de la solicitud
-      state: 'random-state',
-      tenancy: 'development'
+      response_type: responseType,
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      scope: scope,
+      state: stateParam,
+      tenancy: tenancy
     };
-  
+
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
-  
+
     console.log('URL completa para autorización:', fullUrl);
 
     // Redirigir automáticamente a la URL construida
