@@ -39,6 +39,14 @@ const Auth = () => {
     const scope = searchParams.get('scope');
     const stateParam = searchParams.get('state');
 
+    // Aca vemos si los parámetros están presentes en la URL
+    if (!responseType || !clientId || !redirectUri || !scope || !stateParam) {
+      console.log('No hay suficientes parámetros en la URL, redirigiendo...');
+      // Redirigir a una página específica o mostrar un mensaje
+      router.push('/error'); // Puedes redirigir a una página de error o al inicio
+      return;
+    }
+
     if (responseType && clientId && redirectUri && scope && stateParam) {
       console.log('Parámetros capturados desde la URL:', {
         response_type: responseType,
@@ -61,7 +69,7 @@ const Auth = () => {
     const responseType = searchParams.get('response_type') || 'code';
     const stateParam = searchParams.get('state') || 'random-state'; // Usar el estado desde la URL o uno por defecto
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
-    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000'; // Cambia esto al URI de redirección deseado
+    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000'; 
     const scope = searchParams.get('scope') || 'driver';
     const tenancy = 'production'; // Hardcodeado a 'production'
 
