@@ -32,19 +32,26 @@ const Auth = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    // Esperar hasta que todo haya cargado completamente antes de iniciar la autenticación
-    window.onload = () => {
+    // Capturar los parámetros solo si están presentes
+    const responseType = searchParams.get('response_type');
+    const clientId = searchParams.get('client_id');
+    const redirectUri = searchParams.get('redirect_uri');
+    const scope = searchParams.get('scope');
+    const stateParam = searchParams.get('state');
+
+    if (responseType && clientId && redirectUri && scope && stateParam) {
       console.log('Parámetros capturados desde la URL:', {
-        response_type: searchParams.get('response_type'),
-        client_id: searchParams.get('client_id'),
-        redirect_uri: searchParams.get('redirect_uri'),
-        scope: searchParams.get('scope'),
-        state: searchParams.get('state'),
-        tenancy: searchParams.get('tenancy')
+        response_type: responseType,
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        scope: scope,
+        state: stateParam,
       });
 
-      authorize();
-    };
+      authorize(); // Llamar a authorize solo si se capturan todos los parámetros
+    } else {
+      console.log('Esperando los parámetros en la URL...');
+    }
   }, [searchParams]); // Asegurarse de que searchParams esté disponible
 
   const authorize = async () => {
@@ -56,7 +63,7 @@ const Auth = () => {
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
     const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000'; // Cambia esto al URI de redirección deseado
     const scope = searchParams.get('scope') || 'driver';
-    const tenancy = searchParams.get('tenancy') || 'development';
+    const tenancy = 'production'; // Hardcodeado a 'production'
 
     // Parámetros que se deben enviar en la solicitud
     const params = {
