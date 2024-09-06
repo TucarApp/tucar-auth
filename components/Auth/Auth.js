@@ -43,8 +43,7 @@ const Auth = () => {
     if (!responseType || !clientId || !redirectUri || !scope || !stateParam) {
       console.log('No hay suficientes parámetros en la URL, redirigiendo...');
       // Redirigir a una página específica o mostrar un mensaje
-      // Puedes redirigir a una página de error o al inicio
-      return;
+      
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
