@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const InputField = styled.input`
-  width: 100%;
+  width: 355px;
   height: 45px;
   flex: 1;
   border-radius: 4px;
@@ -19,7 +19,7 @@ const InputField = styled.input`
   padding-left: 15px;
   margin-top: 15px;
   color: #5b5d71;
-//// listo
+
 
 `;
 

@@ -16,6 +16,14 @@ module.exports = {
         Poppins: ["Poppins"],
         Gilroy: ["Gilroy"],
       },
+      screens: {
+        xxs: '390px',
+        xs: "475px",
+        pantalla: "1080px",
+        pantallalg: "1600px",
+        pantallapc: "1920px",
+  
+      },
     },
   },
   plugins: [],

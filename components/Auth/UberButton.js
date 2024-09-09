@@ -4,8 +4,8 @@ const UberButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 274px;
-  padding: 12px 32px;
+  width: 355px;
+  padding: 12px 0px;
   gap: 12px;
   border-radius: 10px;
   background: #000;
