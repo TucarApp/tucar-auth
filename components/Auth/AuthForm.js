@@ -200,7 +200,7 @@ const AuthForm = () => {
                 ¡Bienvenido de vuelta!
               </h1>
             </div>
-            <div className="pantallapc:w-[340px] w-[355px]">
+            <div className="pantallapc:w-[345px] w-[355px]">
               <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
                 Ingresa correo o número de teléfono
               </p>
