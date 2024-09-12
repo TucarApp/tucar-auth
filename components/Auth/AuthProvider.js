@@ -33,6 +33,24 @@ export const AuthProvider = ({ children, ...props }) => {
     }
   }, [props.udiFingerprint]);
 
+  // Autocompletar los campos con los datos de la respuesta del servidor
+  useEffect(() => {
+    if (response && response.authData) {
+      const { email, phone, firstname, lastname } = response.authData;
+      if (email) setEmail(email);
+      if (phone) setPhone(phone);
+      if (firstname) setFirstname(firstname);
+      if (lastname) setLastname(lastname);
+    }
+  }, [response]);
+
+  // Limpiar errores al escribir en los campos
+  useEffect(() => {
+    if (emailOrPhone || firstname || lastname || email || phone || password || verificationCode) {
+      setErrorMessage(''); // Limpiar el mensaje de error
+    }
+  }, [emailOrPhone, firstname, lastname, email, phone, password, verificationCode]);
+
   const determineNextStep = (authMethods, currentStep, authFlow) => {
     const authMethod = authMethods.find(method => method.inUse);
     const remainingSteps = authMethod?.steps.filter(step => !step.completed) || [];
@@ -48,26 +66,10 @@ export const AuthProvider = ({ children, ...props }) => {
     return undefined; // Si no hay más pasos
   };
 
-  useEffect(() => {
-    const iniciarAutenticacion = async () => {
-      try {
-        setFingerprint(response.data);
-        setFingerprintIsLoaded(true);
-
-        // Aquí inicias automáticamente la autenticación
-        await submitAuthentication();
-      } catch (error) {
-        console.error('Error en la autenticación:', error);
-        setErrorMessage('Error en la autenticación');
-      }
-    };
-
-    iniciarAutenticacion();
-  }, []);
-
   const submitAuthentication = async () => {
     let authenticationActions = [];
 
+    // Validación de campos en el paso 1
     if (currentStep === 1) {
       if (!emailOrPhone) {
         setErrorMessage('Por favor, ingresa tu correo electrónico o número de teléfono');
@@ -79,7 +81,10 @@ export const AuthProvider = ({ children, ...props }) => {
         stepType: 'emailOrPhone',
         value: emailOrPhone
       });
-    } else if (currentStep === 2) {
+    }
+
+    // Validación de campos en el paso 2 (Registro)
+    else if (currentStep === 2) {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Por favor, completa todos los campos.');
         return;
@@ -107,7 +112,10 @@ export const AuthProvider = ({ children, ...props }) => {
           value: phone
         }
       );
-    } else if (currentStep === 3) {
+    }
+
+    // Validación de campos en el paso 3 (Código de verificación)
+    else if (currentStep === 3) {
       if (!verificationCode) {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
@@ -118,7 +126,10 @@ export const AuthProvider = ({ children, ...props }) => {
         stepType: 'verificationCode',
         value: verificationCode
       });
-    } else if (currentStep === 4) {
+    }
+
+    // Validación de campos en el paso 4 (Contraseña)
+    else if (currentStep === 4) {
       if (!password) {
         setErrorMessage('Por favor, ingresa tu contraseña.');
         return;
@@ -163,9 +174,13 @@ export const AuthProvider = ({ children, ...props }) => {
 
     } catch (error) {
       console.error('Error en la autenticación:', error.response ? error.response.data : error);
+
+      // Manejo de errores específicos
       const serverErrors = error.response?.data?.detail?.errors;
 
-      if (serverErrors === "JWT session expired") {
+      if (serverErrors.includes('phone')) {
+        setErrorMessage('Por favor completa el campo de número de teléfono');
+      } else if (serverErrors === "JWT session expired") {
         setErrorMessage('La sesión ha expirado. Por favor, vuelve a intentarlo.');
       } else if (serverErrors === "Invalid code") {
         setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
@@ -207,6 +222,11 @@ export const AuthProvider = ({ children, ...props }) => {
         }
       );
     } else if (props.authFlow === 'sign_in' || currentStep === 3) {
+      if (!verificationCode) {
+        setErrorMessage('Por favor, ingresa el código de verificación.');
+        return;
+      }
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
@@ -237,7 +257,10 @@ export const AuthProvider = ({ children, ...props }) => {
         props.setCompleted(response.data.completed);
       }
     } catch (error) {
-      if (error.response?.data?.detail?.errors === "JWT session expired") {
+      const serverErrors = error.response?.data?.detail?.errors;
+      if (serverErrors.includes('phone')) {
+        setErrorMessage('Por favor completa el campo de número de teléfono');
+      } else if (serverErrors === "JWT session expired") {
         setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
       } else {
         setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
@@ -279,6 +302,13 @@ export const AuthProvider = ({ children, ...props }) => {
       setIsGoogleFlow(true);
       setResponse(response.data);
 
+      // Autocompletar campos con la respuesta de Google
+      const { email, phone, firstname, lastname } = response.data.authData;
+      if (email) setEmail(email);
+      if (phone) setPhone(phone);
+      if (firstname) setFirstname(firstname);
+      if (lastname) setLastname(lastname);
+
       if (response.data.authFlow === 'sign_up') {
         setCurrentStep(2);
       } else if (response.data.authFlow === 'sign_in') {
@@ -297,9 +327,13 @@ export const AuthProvider = ({ children, ...props }) => {
       const errorMessage = error.response?.data?.errors || 'Error en la autenticación con Google';
       if (errorMessage.includes('User does not have Google account')) {
         setErrorMessage('No tienes cuenta de Google');
-      } else {
-        setErrorMessage(errorMessage);
       }
+      if (error.response?.data?.detail?.errors === "JWT session expired") {
+        setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
+      } else {
+        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+      }
+
       props.setIsSubmitting(false);
     }
   };
@@ -332,7 +366,7 @@ export const AuthProvider = ({ children, ...props }) => {
               console.log('La ventana de Uber se cerró. Procediendo con submit-authentication.');
               const authCode = new URLSearchParams(authWindow.location.search).get('code');
               if (authCode) {
-                handleUberCallback(authCode);  
+                handleUberCallback(authCode);
               } else {
                 console.error('No se recibió ningún código de autorización de Uber');
               }
@@ -361,7 +395,7 @@ export const AuthProvider = ({ children, ...props }) => {
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'social',
-        value: code  
+        value: code
       });
 
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
@@ -389,11 +423,14 @@ export const AuthProvider = ({ children, ...props }) => {
       console.error('Error en la autenticación con Uber:', error);
 
       const serverError = error.response?.data?.detail?.errors;
-      const errorMessage = typeof serverError === 'string' && serverError.includes('User does not have Uber partner account')
-        ? 'No tienes cuenta de Uber Driver. Por favor, crea una cuenta para continuar.'
-        : serverError || 'Error en la autenticación con Uber';
 
-      setErrorMessage(errorMessage);
+      if (serverError === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Por favor, recarga la página e intenta de nuevo.');
+      } else if (serverError === "JWT session expired") {
+        setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
+      } else {
+        setErrorMessage('Error en la autenticación con Uber.');
+      }
     } finally {
       props.setIsSubmitting(false);
     }

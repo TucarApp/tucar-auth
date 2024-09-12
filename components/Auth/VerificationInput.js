@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const VerificatonInput = styled.input`
-  width: 100%;
+  width: 20px;
   height: 66px;
   flex: 1;
   border-radius: 4px;

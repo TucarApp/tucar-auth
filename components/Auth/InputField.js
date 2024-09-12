@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const InputField = styled.input`
-  width: 355px;
+  width: 360px;
   height: 45px;
   flex: 1;
   border-radius: 4px;

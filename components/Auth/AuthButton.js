@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const AuthButton = styled.button`
-width: 149px;
+width: 348px;
 height: 42px;
   display: inline-flex;
   padding: 18px 42px;
