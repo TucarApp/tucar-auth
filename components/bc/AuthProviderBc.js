@@ -4,6 +4,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const AuthContext = createContext();
 
+
+////KKK
+
 export const AuthProvider = ({ children, ...props }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [emailOrPhone, setEmailOrPhone] = useState('');
@@ -17,6 +20,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [isGoogleFlow, setIsGoogleFlow] = useState(false);
   const [response, setResponse] = useState(null);
 
+
   useEffect(() => {
     if (props.authMethods) {
       const googleMethod = props.authMethods.find(method => method.methodType === 'Google');
@@ -26,6 +30,8 @@ export const AuthProvider = ({ children, ...props }) => {
     }
     console.log(googleClientId);
   }, [props.authMethods]);
+
+
 
  
   useEffect(() => {
@@ -48,6 +54,24 @@ export const AuthProvider = ({ children, ...props }) => {
     
     return undefined; // Si no hay más pasos
   };
+
+  useEffect(() => {
+    const iniciarAutenticacion = async () => {
+      try {
+       
+        setFingerprint(response.data);
+        setFingerprintIsLoaded(true);
+
+        // Aquí inicias automáticamente la autenticación
+        await submitAuthentication();
+      } catch (error) {
+        console.error('Error en la autenticación:', error);
+        // Manejar error si es necesario
+      }
+    };
+
+    iniciarAutenticacion();
+  }, []);
 
   const submitAuthentication = async () => {
     let authenticationActions = [];
@@ -405,7 +429,7 @@ export const AuthProvider = ({ children, ...props }) => {
         getCurrentStepType,
         googleClientId,
         isGoogleFlow,
-        response, // Pasamos response al contexto
+        response, 
       }}
     >
       {googleClientId ? (
