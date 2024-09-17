@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useRouter } from 'next/router'; // Importamos useRouter para redireccionar
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children, ...props }) => {
+  const router = useRouter(); // Usamos useRouter para la redirección
   const [currentStep, setCurrentStep] = useState(0);
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -17,6 +19,10 @@ export const AuthProvider = ({ children, ...props }) => {
   const [isGoogleFlow, setIsGoogleFlow] = useState(false);
   const [response, setResponse] = useState(null);
   const [errorMessage, setErrorMessage] = useState(''); // Manejo de errores centralizado
+  const [authSessionId, setAuthSessionId] = useState('');
+const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
+const [state, setState] = useState('random-state'); // Cambia el valor según sea necesario
+
 
   useEffect(() => {
     if (props.authMethods) {
@@ -26,6 +32,52 @@ export const AuthProvider = ({ children, ...props }) => {
       }
     }
   }, [props.authMethods]);
+
+  useEffect(() => {
+    console.log('Valores en AuthProvider:', { authSessionId, udiFingerprint, state });
+  }, [authSessionId, udiFingerprint, state]);
+
+  useEffect(() => {
+    const fetchAuthSessionId = async () => {
+      try {
+        const storedAuthSessionId = localStorage.getItem('authSessionId');
+        if (!storedAuthSessionId) {
+          console.error('authSessionId no está definido');
+          return;
+        }
+        setAuthSessionId(storedAuthSessionId); // Asegúrate de que este valor se está guardando
+      } catch (error) {
+        console.error('Error obteniendo authSessionId', error);
+      }
+    };
+    
+    fetchAuthSessionId();
+  }, []); 
+  
+  useEffect(() => {
+    if (authSessionId) {
+      const updateFingerprint = async () => {
+        try {
+          const response = await axios.patch('/api/v1/oauth/udi-fingerprint', {
+            authSessionId,
+            udiFingerprint
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true
+          });
+
+          console.log('Fingerprint actualizado:', response.data);
+        } catch (error) {
+          console.error('Error en la actualización del fingerprint', error);
+        }
+      };
+      
+      updateFingerprint();
+    }
+  }, [authSessionId])
+  
 
   useEffect(() => {
     if (props.udiFingerprint) {
@@ -50,6 +102,12 @@ export const AuthProvider = ({ children, ...props }) => {
       setErrorMessage(''); // Limpiar el mensaje de error
     }
   }, [emailOrPhone, firstname, lastname, email, phone, password, verificationCode]);
+
+  const reloadPage = () => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 2500); // 2.5 segundos
+  };
 
   const determineNextStep = (authMethods, currentStep, authFlow) => {
     const authMethod = authMethods.find(method => method.inUse);
@@ -168,7 +226,8 @@ export const AuthProvider = ({ children, ...props }) => {
         if (nextStepIndex !== undefined) {
           setCurrentStep(nextStepIndex);
         } else {
-          props.setCompleted(response.data.completed);
+          // Redirigir a la página de verificación al completar el flujo
+          router.push('/verify');
         }
       }
 
@@ -180,8 +239,12 @@ export const AuthProvider = ({ children, ...props }) => {
 
       if (serverErrors.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
-      } else if (serverErrors === "JWT session expired") {
-        setErrorMessage('La sesión ha expirado. Por favor, vuelve a intentarlo.');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
+        reloadPage();
       } else if (serverErrors === "Invalid code") {
         setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
       } else {
@@ -254,14 +317,19 @@ export const AuthProvider = ({ children, ...props }) => {
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
-        props.setCompleted(response.data.completed);
+        // Redirigir a la página de verificación al completar el flujo
+        router.push('/verify');
       }
     } catch (error) {
       const serverErrors = error.response?.data?.detail?.errors;
       if (serverErrors.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
-      } else if (serverErrors === "JWT session expired") {
-        setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
+        reloadPage();
       } else {
         setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
       }
@@ -317,7 +385,8 @@ export const AuthProvider = ({ children, ...props }) => {
         if (nextStep !== undefined) {
           setCurrentStep(nextStep);
         } else {
-          props.setCompleted(response.data.completed);
+          // Redirigir a la página de verificación al completar el flujo
+          router.push('/verify');
         }
       }
 
@@ -329,7 +398,8 @@ export const AuthProvider = ({ children, ...props }) => {
         setErrorMessage('No tienes cuenta de Google');
       }
       if (error.response?.data?.detail?.errors === "JWT session expired") {
-        setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
+        setErrorMessage('La sesión ha expirado. Recargando...');
+        reloadPage();
       } else {
         setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
       }
@@ -416,7 +486,8 @@ export const AuthProvider = ({ children, ...props }) => {
       if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
         setCurrentStep(5);
       } else {
-        await props.verifyAuthentication(storedAuthSessionId);
+        // Redirigir a la página de verificación al completar el flujo
+        router.push('/verify');
       }
 
     } catch (error) {
@@ -426,8 +497,9 @@ export const AuthProvider = ({ children, ...props }) => {
 
       if (serverError === "Internal server error") {
         setErrorMessage('Ups, ocurrió un error. Por favor, recarga la página e intenta de nuevo.');
-      } else if (serverError === "JWT session expired") {
-        setErrorMessage('La sesión ha expirado. Por favor, recargue la página e intente de nuevo.');
+      } else if (serverError === "JWT session expired" || serverError === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
       } else {
         setErrorMessage('Error en la autenticación con Uber.');
       }
@@ -447,45 +519,49 @@ export const AuthProvider = ({ children, ...props }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        currentStep,
-        setCurrentStep,
-        authMethods: props.authMethods,
-        emailOrPhone,
-        firstname,
-        lastname,
-        email,
-        phone,
-        verificationCode,
-        password,
-        setEmailOrPhone,
-        setFirstname,
-        setLastname,
-        setEmail,
-        setPhone,
-        setVerificationCode,
-        setPassword,
-        submitAuthentication,
-        submitAuthenticationGoogle,
-        handleGoogleSuccess,
-        handleGoogleFailure,
-        handleUberLogin,
-        getCurrentStepType,
-        googleClientId,
-        isGoogleFlow,
-        response,
-        errorMessage, // Exponemos el mensaje de error
-        setErrorMessage // Exponemos la función para cambiar el mensaje de error
-      }}
-    >
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          {children}
-        </GoogleOAuthProvider>
-      ) : (
-        children
-      )}
-    </AuthContext.Provider>
+    value={{
+      currentStep,
+      setCurrentStep,
+      authSessionId,   // Asegúrate de que authSessionId esté aquí
+      udiFingerprint,  // Asegúrate de que udiFingerprint esté aquí
+      state,           // Asegúrate de que state esté aquí
+      authMethods: props.authMethods,
+      emailOrPhone,
+      firstname,
+      lastname,
+      email,
+      phone,
+      verificationCode,
+      password,
+      setEmailOrPhone,
+      setFirstname,
+      setLastname,
+      setEmail,
+      setPhone,
+      setVerificationCode,
+      setPassword,
+      submitAuthentication,
+      submitAuthenticationGoogle,
+      handleGoogleSuccess,
+      handleGoogleFailure,
+      handleUberLogin,
+      getCurrentStepType,
+      googleClientId,
+      isGoogleFlow,
+      response,
+      errorMessage,
+      setErrorMessage
+    }}
+  >
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        {children}
+      </GoogleOAuthProvider>
+    ) : (
+      children
+    )}
+  </AuthContext.Provider>
+  
   );
 };
 
