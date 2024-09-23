@@ -2,8 +2,29 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useRouter } from 'next/router'; // Importamos useRouter para redireccionar
+import styled from 'styled-components';
 
 const AuthContext = createContext();
+
+const ThankYouPopup = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+`;
+
+const PopupText = styled.p`
+  font-size: 16px;
+  margin: 10px 0;
+`;
 
 export const AuthProvider = ({ children, ...props }) => {
   const router = useRouter(); // Usamos useRouter para la redirección
@@ -20,9 +41,9 @@ export const AuthProvider = ({ children, ...props }) => {
   const [response, setResponse] = useState(null);
   const [errorMessage, setErrorMessage] = useState(''); // Manejo de errores centralizado
   const [authSessionId, setAuthSessionId] = useState('');
-const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
-const [state, setState] = useState('random-state'); // Cambia el valor según sea necesario
-
+  const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
+  const [state, setState] = useState('random-state'); // Cambia el valor según sea necesario
+  const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
 
   useEffect(() => {
     if (props.authMethods) {
@@ -76,7 +97,7 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
       
       updateFingerprint();
     }
-  }, [authSessionId])
+  }, [authSessionId]);
   
 
   useEffect(() => {
@@ -123,6 +144,36 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
 
     return undefined; // Si no hay más pasos
   };
+
+  // Función modificada para mostrar el popup de agradecimiento
+  const verifyAuthentication = async (authSessionId) => {
+    try {
+      const response = await axios.post('/api/v1/oauth/verify-authentication', {
+        authSessionId,
+        udiFingerprint, 
+        state          
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+  
+      console.log('Autenticación verificada:', response.data);
+  
+      // Aquí obtenemos el redirectUri y redirigimos a él
+      const { redirectUri } = response.data;
+      if (redirectUri) {
+        router.push(redirectUri); // Redirigimos a la URL obtenida
+      } else {
+        setErrorMessage('No se encontró una URL de redirección.');
+      }
+    } catch (error) {
+      console.error('Error en la verificación de la autenticación:', error);
+      setErrorMessage('Error en la verificación de la autenticación');
+    }
+  };
+  
 
   const submitAuthentication = async () => {
     let authenticationActions = [];
@@ -226,8 +277,8 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
         if (nextStepIndex !== undefined) {
           setCurrentStep(nextStepIndex);
         } else {
-          // Redirigir a la página de verificación al completar el flujo
-          router.push('/verify');
+          // Ya no redirigimos a `/verify`, verificamos directamente
+          await verifyAuthentication(response.data.authSessionId);
         }
       }
 
@@ -317,8 +368,8 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
-        // Redirigir a la página de verificación al completar el flujo
-        router.push('/verify');
+        // Verificamos al completar el flujo
+        await verifyAuthentication(response.data.authSessionId);
       }
     } catch (error) {
       const serverErrors = error.response?.data?.detail?.errors;
@@ -385,8 +436,8 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
         if (nextStep !== undefined) {
           setCurrentStep(nextStep);
         } else {
-          // Redirigir a la página de verificación al completar el flujo
-          router.push('/verify');
+          // Verificamos al completar el flujo
+          await verifyAuthentication(response.data.authSessionId);
         }
       }
 
@@ -486,8 +537,8 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
       if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
         setCurrentStep(5);
       } else {
-        // Redirigir a la página de verificación al completar el flujo
-        router.push('/verify');
+        // Verificamos al completar el flujo
+        await verifyAuthentication(response.data.authSessionId);
       }
 
     } catch (error) {
@@ -559,6 +610,13 @@ const [state, setState] = useState('random-state'); // Cambia el valor según se
       </GoogleOAuthProvider>
     ) : (
       children
+    )}
+
+    {showThankYouPopup && (
+      <ThankYouPopup>
+      <PopupText>¡Gracias por registrarte!</PopupText>
+      <PopupText>Serás redirigido en unos segundos...</PopupText>
+    </ThankYouPopup>
     )}
   </AuthContext.Provider>
   

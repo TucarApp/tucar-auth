@@ -1,13 +1,35 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useRouter } from 'next/router'; // Importamos useRouter para redireccionar
+import styled from 'styled-components';
 
 const AuthContext = createContext();
 
 
-////KKK
+
+const ThankYouPopup = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+`;
+
+const PopupText = styled.p`
+  font-size: 16px;
+  margin: 10px 0;
+`;
 
 export const AuthProvider = ({ children, ...props }) => {
+  const router = useRouter(); // Usamos useRouter para la redirección
   const [currentStep, setCurrentStep] = useState(0);
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -19,7 +41,11 @@ export const AuthProvider = ({ children, ...props }) => {
   const [googleClientId, setGoogleClientId] = useState('');
   const [isGoogleFlow, setIsGoogleFlow] = useState(false);
   const [response, setResponse] = useState(null);
-
+  const [errorMessage, setErrorMessage] = useState(''); // Manejo de errores centralizado
+  const [authSessionId, setAuthSessionId] = useState('');
+  const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
+  const [state, setState] = useState('random-state'); // Cambia el valor según sea necesario
+  const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
 
   useEffect(() => {
     if (props.authMethods) {
@@ -28,60 +54,149 @@ export const AuthProvider = ({ children, ...props }) => {
         setGoogleClientId(googleMethod.clientId);
       }
     }
-    console.log(googleClientId);
   }, [props.authMethods]);
 
+  useEffect(() => {
+    console.log('Valores en AuthProvider:', { authSessionId, udiFingerprint, state });
+  }, [authSessionId, udiFingerprint, state]);
 
+  useEffect(() => {
+    const fetchAuthSessionId = async () => {
+      try {
+        const storedAuthSessionId = localStorage.getItem('authSessionId');
+        if (!storedAuthSessionId) {
+          console.error('authSessionId no está definido');
+          return;
+        }
+        setAuthSessionId(storedAuthSessionId); // Asegúrate de que este valor se está guardando
+      } catch (error) {
+        console.error('Error obteniendo authSessionId', error);
+      }
+    };
+    
+    fetchAuthSessionId();
+  }, []); 
+  
+  useEffect(() => {
+    if (authSessionId) {
+      const updateFingerprint = async () => {
+        try {
+          const response = await axios.patch('/api/v1/oauth/udi-fingerprint', {
+            authSessionId,
+            udiFingerprint
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true
+          });
 
- 
+          console.log('Fingerprint actualizado:', response.data);
+        } catch (error) {
+          console.error('Error en la actualización del fingerprint', error);
+        }
+      };
+      
+      updateFingerprint();
+    }
+  }, [authSessionId])
+  
+
   useEffect(() => {
     if (props.udiFingerprint) {
       setCurrentStep(1);
     }
   }, [props.udiFingerprint]);
 
+  // Autocompletar los campos con los datos de la respuesta del servidor
+  useEffect(() => {
+    if (response && response.authData) {
+      const { email, phone, firstname, lastname } = response.authData;
+      if (email) setEmail(email);
+      if (phone) setPhone(phone);
+      if (firstname) setFirstname(firstname);
+      if (lastname) setLastname(lastname);
+    }
+  }, [response]);
+
+  // Limpiar errores al escribir en los campos
+  useEffect(() => {
+    if (emailOrPhone || firstname || lastname || email || phone || password || verificationCode) {
+      setErrorMessage(''); // Limpiar el mensaje de error
+    }
+  }, [emailOrPhone, firstname, lastname, email, phone, password, verificationCode]);
+
+  const reloadPage = () => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 2500); // 2.5 segundos
+  };
+
   const determineNextStep = (authMethods, currentStep, authFlow) => {
     const authMethod = authMethods.find(method => method.inUse);
     const remainingSteps = authMethod?.steps.filter(step => !step.completed) || [];
-    
+
     if (remainingSteps.length > 0) {
-        const nextStepIndex = authMethod ? authMethod.steps.findIndex(step => !step.completed) : -1;
-        if (nextStepIndex !== -1) {
-            const stepIncrement = authFlow === 'sign_in' ? 2 : 1;
-            return nextStepIndex + stepIncrement;
-        }
+      const nextStepIndex = authMethod ? authMethod.steps.findIndex(step => !step.completed) : -1;
+      if (nextStepIndex !== -1) {
+        const stepIncrement = authFlow === 'sign_in' ? 2 : 1;
+        return nextStepIndex + stepIncrement;
+      }
     }
-    
+
     return undefined; // Si no hay más pasos
   };
 
-  useEffect(() => {
-    const iniciarAutenticacion = async () => {
-      try {
-       
-        setFingerprint(response.data);
-        setFingerprintIsLoaded(true);
-
-        // Aquí inicias automáticamente la autenticación
-        await submitAuthentication();
-      } catch (error) {
-        console.error('Error en la autenticación:', error);
-        // Manejar error si es necesario
-      }
-    };
-
-    iniciarAutenticacion();
-  }, []);
+  // Función modificada para mostrar el popup de agradecimiento
+  const verifyAuthentication = async (authSessionId) => {
+    try {
+      const response = await axios.post('/api/v1/oauth/verify-authentication', {
+        authSessionId,
+        udiFingerprint, 
+        state          
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+  
+      console.log('Autenticación verificada:', response.data);
+  
+      // Redirigir a la ruta /verify
+      router.push('/verify');
+  
+    } catch (error) {
+      console.error('Error en la verificación de la autenticación:', error);
+      setErrorMessage('Error en la verificación de la autenticación');
+    }
+  };
+  
 
   const submitAuthentication = async () => {
     let authenticationActions = [];
+
+    // Validación de campos en el paso 1
     if (currentStep === 1) {
+      if (!emailOrPhone) {
+        setErrorMessage('Por favor, ingresa tu correo electrónico o número de teléfono');
+        return;
+      }
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'emailOrPhone',
         value: emailOrPhone
       });
-    } else if (currentStep === 2) {
+    }
+
+    // Validación de campos en el paso 2 (Registro)
+    else if (currentStep === 2) {
+      if (!firstname || !lastname || !email || !phone) {
+        setErrorMessage('Por favor, completa todos los campos.');
+        return;
+      }
+
       authenticationActions.push(
         {
           submitAction: 'resolve',
@@ -104,13 +219,29 @@ export const AuthProvider = ({ children, ...props }) => {
           value: phone
         }
       );
-    } else if (currentStep === 3) {
+    }
+
+    // Validación de campos en el paso 3 (Código de verificación)
+    else if (currentStep === 3) {
+      if (!verificationCode) {
+        setErrorMessage('Por favor, ingresa el código de verificación.');
+        return;
+      }
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
         value: verificationCode
       });
-    } else if (currentStep === 4) {
+    }
+
+    // Validación de campos en el paso 4 (Contraseña)
+    else if (currentStep === 4) {
+      if (!password) {
+        setErrorMessage('Por favor, ingresa tu contraseña.');
+        return;
+      }
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'password',
@@ -131,32 +262,43 @@ export const AuthProvider = ({ children, ...props }) => {
         withCredentials: true
       });
 
-      console.log('Autenticación enviada:', response.data);
-
-      const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
-      console.log('AuthMethods disponibles:', availableAuthMethods);
-
       setResponse(response.data);
 
+      const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
+
       if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Google')) {
-        console.log("Solo Google está disponible, cambiando currentStep a 6");
         setCurrentStep(6);
       } else if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
-        console.log("Solo Uber está disponible, cambiando currentStep a 5");
         setCurrentStep(5);
       } else {
         const nextStepIndex = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
         if (nextStepIndex !== undefined) {
           setCurrentStep(nextStepIndex);
         } else {
-          props.setCompleted(response.data.completed);
-          console.log('Todos los pasos completados');
+          // Ya no redirigimos a `/verify`, verificamos directamente
+          await verifyAuthentication(response.data.authSessionId);
         }
       }
 
     } catch (error) {
-      console.error('Error en la autenticación:', error);
-      props.setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+      console.error('Error en la autenticación:', error.response ? error.response.data : error);
+
+      // Manejo de errores específicos
+      const serverErrors = error.response?.data?.detail?.errors;
+
+      if (serverErrors.includes('phone')) {
+        setErrorMessage('Por favor completa el campo de número de teléfono');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Invalid code") {
+        setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
+      } else {
+        setErrorMessage(serverErrors || 'Error en la autenticación');
+      }
     }
   };
 
@@ -165,7 +307,7 @@ export const AuthProvider = ({ children, ...props }) => {
 
     if (currentStep === 2 && props.authFlow === 'sign_up') {
       if (!firstname || !lastname || !email || !phone) {
-        props.setErrorMessage('Todos los campos son obligatorios');
+        setErrorMessage('Todos los campos son obligatorios');
         return;
       }
 
@@ -192,6 +334,11 @@ export const AuthProvider = ({ children, ...props }) => {
         }
       );
     } else if (props.authFlow === 'sign_in' || currentStep === 3) {
+      if (!verificationCode) {
+        setErrorMessage('Por favor, ingresa el código de verificación.');
+        return;
+      }
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
@@ -212,8 +359,6 @@ export const AuthProvider = ({ children, ...props }) => {
         withCredentials: true
       });
 
-      console.log('Autenticación con Google enviada:', response.data);
-
       setResponse(response.data);
 
       const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
@@ -221,18 +366,27 @@ export const AuthProvider = ({ children, ...props }) => {
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
-        props.setCompleted(response.data.completed);
-        console.log('Todos los pasos completos. Verificando...');
+        // Verificamos al completar el flujo
+        await verifyAuthentication(response.data.authSessionId);
       }
     } catch (error) {
-      console.error('Error en la autenticación con Google:', error);
-      props.setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+      const serverErrors = error.response?.data?.detail?.errors;
+      if (serverErrors.includes('phone')) {
+        setErrorMessage('Por favor completa el campo de número de teléfono');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
+        reloadPage();
+      } else {
+        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+      }
     }
   };
 
   const handleGoogleSuccess = async (response) => {
     const { credential } = response;
-    console.log('Código recibido de Google:', credential);
 
     props.setIsSubmitting(true);
     const storedAuthSessionId = localStorage.getItem('authSessionId');
@@ -262,21 +416,26 @@ export const AuthProvider = ({ children, ...props }) => {
         withCredentials: true
       });
 
-      console.log('Autenticación con Google completada:', response.data);
-
-      setIsGoogleFlow(true); // Indica que estamos en el flujo de Google
+      setIsGoogleFlow(true);
       setResponse(response.data);
 
+      // Autocompletar campos con la respuesta de Google
+      const { email, phone, firstname, lastname } = response.data.authData;
+      if (email) setEmail(email);
+      if (phone) setPhone(phone);
+      if (firstname) setFirstname(firstname);
+      if (lastname) setLastname(lastname);
+
       if (response.data.authFlow === 'sign_up') {
-        setCurrentStep(2); // Actualizamos al siguiente paso para ingresar firstname, lastname, etc.
+        setCurrentStep(2);
       } else if (response.data.authFlow === 'sign_in') {
         const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
 
         if (nextStep !== undefined) {
           setCurrentStep(nextStep);
         } else {
-          props.setCompleted(response.data.completed);
-          console.log('Autenticación completada con Google.');
+          // Verificamos al completar el flujo
+          await verifyAuthentication(response.data.authSessionId);
         }
       }
 
@@ -285,17 +444,22 @@ export const AuthProvider = ({ children, ...props }) => {
       console.error('Error en la autenticación con Google:', error);
       const errorMessage = error.response?.data?.errors || 'Error en la autenticación con Google';
       if (errorMessage.includes('User does not have Google account')) {
-        props.setErrorMessage('No tienes cuenta de Google');
-      } else {
-        props.setErrorMessage(errorMessage);
+        setErrorMessage('No tienes cuenta de Google');
       }
+      if (error.response?.data?.detail?.errors === "JWT session expired") {
+        setErrorMessage('La sesión ha expirado. Recargando...');
+        reloadPage();
+      } else {
+        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+      }
+
       props.setIsSubmitting(false);
     }
   };
 
   const handleGoogleFailure = (error) => {
     console.error('Error al autenticar con Google:', error);
-    props.setErrorMessage('No se pudo completar la autenticación con Google');
+    setErrorMessage('No se pudo completar la autenticación con Google');
   };
 
   const handleUberLogin = () => {
@@ -321,7 +485,7 @@ export const AuthProvider = ({ children, ...props }) => {
               console.log('La ventana de Uber se cerró. Procediendo con submit-authentication.');
               const authCode = new URLSearchParams(authWindow.location.search).get('code');
               if (authCode) {
-                handleUberCallback(authCode);  
+                handleUberCallback(authCode);
               } else {
                 console.error('No se recibió ningún código de autorización de Uber');
               }
@@ -350,7 +514,7 @@ export const AuthProvider = ({ children, ...props }) => {
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'social',
-        value: code  
+        value: code
       });
 
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
@@ -365,27 +529,29 @@ export const AuthProvider = ({ children, ...props }) => {
         withCredentials: true
       });
 
-      console.log('Autenticación con Uber completada:', response.data);
-
       setResponse(response.data);
 
       const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
       if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
         setCurrentStep(5);
       } else {
-        await props.verifyAuthentication(storedAuthSessionId);
+        // Verificamos al completar el flujo
+        await verifyAuthentication(response.data.authSessionId);
       }
 
     } catch (error) {
       console.error('Error en la autenticación con Uber:', error);
-      
-      const serverError = error.response?.data?.detail?.errors;
-      console.log(serverError, '');
-      const errorMessage = typeof serverError === 'string' && serverError.includes('User does not have Uber partner account')
-        ? 'No tienes cuenta de Uber Driver. Por favor, crea una cuenta para continuar.'
-        : serverError || 'Error en la autenticación con Uber';
 
-      props.setErrorMessage(errorMessage);
+      const serverError = error.response?.data?.detail?.errors;
+
+      if (serverError === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Por favor, recarga la página e intenta de nuevo.');
+      } else if (serverError === "JWT session expired" || serverError === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else {
+        setErrorMessage('Error en la autenticación con Uber.');
+      }
     } finally {
       props.setIsSubmitting(false);
     }
@@ -394,7 +560,6 @@ export const AuthProvider = ({ children, ...props }) => {
   const getCurrentStepType = () => {
     const authMethod = props.authMethods.find(method => method.inUse);
     const remainingSteps = authMethod?.steps.filter(step => !step.completed) || [];
-    console.log('Remaining Steps:', remainingSteps, 'getCurrentStepType');
     if (remainingSteps.length > 0) {
       return remainingSteps[0]?.stepType || [];
     }
@@ -403,43 +568,56 @@ export const AuthProvider = ({ children, ...props }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        currentStep,
-        setCurrentStep,
-        authMethods: props.authMethods,
-        emailOrPhone,
-        firstname,
-        lastname,
-        email,
-        phone,
-        verificationCode,
-        password,
-        setEmailOrPhone,
-        setFirstname,
-        setLastname,
-        setEmail,
-        setPhone,
-        setVerificationCode,
-        setPassword,
-        submitAuthentication,
-        submitAuthenticationGoogle,
-        handleGoogleSuccess,
-        handleGoogleFailure,
-        handleUberLogin,
-        getCurrentStepType,
-        googleClientId,
-        isGoogleFlow,
-        response, 
-      }}
-    >
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          {children}
-        </GoogleOAuthProvider>
-      ) : (
-        children
-      )}
-    </AuthContext.Provider>
+    value={{
+      currentStep,
+      setCurrentStep,
+      authSessionId,   // Asegúrate de que authSessionId esté aquí
+      udiFingerprint,  // Asegúrate de que udiFingerprint esté aquí
+      state,           // Asegúrate de que state esté aquí
+      authMethods: props.authMethods,
+      emailOrPhone,
+      firstname,
+      lastname,
+      email,
+      phone,
+      verificationCode,
+      password,
+      setEmailOrPhone,
+      setFirstname,
+      setLastname,
+      setEmail,
+      setPhone,
+      setVerificationCode,
+      setPassword,
+      submitAuthentication,
+      submitAuthenticationGoogle,
+      handleGoogleSuccess,
+      handleGoogleFailure,
+      handleUberLogin,
+      getCurrentStepType,
+      googleClientId,
+      isGoogleFlow,
+      response,
+      errorMessage,
+      setErrorMessage
+    }}
+  >
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        {children}
+      </GoogleOAuthProvider>
+    ) : (
+      children
+    )}
+
+    {showThankYouPopup && (
+      <ThankYouPopup>
+      <PopupText>¡Gracias por registrarte!</PopupText>
+      <PopupText>Serás redirigido en unos segundos...</PopupText>
+    </ThankYouPopup>
+    )}
+  </AuthContext.Provider>
+  
   );
 };
 
