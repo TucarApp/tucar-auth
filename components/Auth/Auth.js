@@ -177,16 +177,19 @@ const Auth = () => {
       setErrorMessage={setErrorMessage}
       verifyAuthentication={verifyAuthentication}
     >
-      <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
+      <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] mt-[-14px] flex flex-col justify-center items-center'>
         {errorMessage && (
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
         {!authSessionId ? (
-        <div className="flex flex-row gap-2">
-        <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-        <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-        <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
-      </div>
+         <div className='w-full h-screen flex justify-center items-center'>
+         <div className="flex flex-row gap-2">
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+         </div>
+       </div>
+       
         ) : (
           <AuthForm />
         )}

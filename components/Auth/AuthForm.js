@@ -108,6 +108,8 @@ const AuthForm = () => {
     const completeCode = `${code1}${code2}${code3}${code4}`;
     setVerificationCode(completeCode);
 
+    console.log(completeCode, "completeCode");
+
     // Si los 4 campos están completos, hacer el submit automáticamente
     if (completeCode.length === 4) {
       setTimeout(() => {
@@ -170,7 +172,9 @@ const AuthForm = () => {
     // Si el flujo es de Google, omitir la validación de emailOrPhone
     if (!isGoogleFlow) {
       if (!emailOrPhone) {
-        setInputError("Por favor, completa el campo o inicia sesión con Google o Uber.");
+        setInputError(
+          "Por favor, completa el campo o inicia sesión con Google o Uber."
+        );
         return;
       }
 
@@ -245,8 +249,15 @@ const AuthForm = () => {
                 </div>
                 <div className="flex flex-col gap-y-[15px]">
                   <UberButton onClick={handleUberLogin}>
-                    <img src="uberlog.png" alt="Uber Logo" width={18} className="ml-[px]" />
-                    <span className="font-Poppins font-normal">Continuar con Uber</span>
+                    <img
+                      src="uberlog.png"
+                      alt="Uber Logo"
+                      width={18}
+                      className="ml-[px]"
+                    />
+                    <span className="font-Poppins font-normal">
+                      Continuar con Uber
+                    </span>
                   </UberButton>
                   {googleClientId && (
                     <div className="flex justify-center">
@@ -353,7 +364,9 @@ const AuthForm = () => {
                 value={code1}
                 onChange={handleInputChange(setCode1, "input2")}
                 pattern="\d*"
-                className={`font-Poppins font-medium ${inputError ? "border-red-500" : ""}`}
+                className={`font-Poppins font-medium ${
+                  inputError ? "border-red-500" : ""
+                }`}
               />
               <VerificatonInput
                 id="input2"
@@ -362,7 +375,9 @@ const AuthForm = () => {
                 value={code2}
                 onChange={handleInputChange(setCode2, "input3")}
                 pattern="\d*"
-                className={`font-Poppins font-medium ${inputError ? "border-red-500" : ""}`}
+                className={`font-Poppins font-medium ${
+                  inputError ? "border-red-500" : ""
+                }`}
               />
               <VerificatonInput
                 id="input3"
@@ -371,7 +386,9 @@ const AuthForm = () => {
                 value={code3}
                 onChange={handleInputChange(setCode3, "input4")}
                 pattern="\d*"
-                className={`font-Poppins font-medium ${inputError ? "border-red-500" : ""}`}
+                className={`font-Poppins font-medium ${
+                  inputError ? "border-red-500" : ""
+                }`}
               />
               <VerificatonInput
                 id="input4"
@@ -380,12 +397,16 @@ const AuthForm = () => {
                 value={code4}
                 onChange={handleInputChange(setCode4, null)} // Null para el último campo
                 pattern="\d*"
-                className={`font-Poppins font-medium ${inputError ? "border-red-500" : ""}`}
+                className={`font-Poppins font-medium ${
+                  inputError ? "border-red-500" : ""
+                }`}
               />
             </div>
 
             {inputError && (
-              <div className="text-red-500 mt-2">*Por favor completa todos los campos.</div>
+              <div className="text-red-500 mt-2">
+                *Por favor completa todos los campos.
+              </div>
             )}
 
             {errorMessage && (
@@ -416,7 +437,7 @@ const AuthForm = () => {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setErrorMessage(''); // Limpiar el mensaje de error cuando el usuario escribe
+                  setErrorMessage(""); // Limpiar el mensaje de error cuando el usuario escribe
                 }}
               />
               {errorMessage && (
@@ -444,8 +465,15 @@ const AuthForm = () => {
             </div>
             <div className="flex justify-center items-center mt-4">
               <UberButton onClick={handleUberLogin}>
-                <img src="uberlog.png" alt="Uber Logo" width={18} className="ml-[-15px]" />
-                <span className="font-Poppins font-normal">Continuar con Uber</span>
+                <img
+                  src="uberlog.png"
+                  alt="Uber Logo"
+                  width={18}
+                  className="ml-[-15px]"
+                />
+                <span className="font-Poppins font-normal">
+                  Continuar con Uber
+                </span>
               </UberButton>
             </div>
           </div>
@@ -461,7 +489,7 @@ const AuthForm = () => {
                 <span className="block">cuenta de Google</span>
               </p>
             </div>
-            <div className="flex justify-center items-center mt-[25px] mb-[35px] p-[250px]">
+            <div className="flex justify-center items-center mt-4">
               {googleClientId && (
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
