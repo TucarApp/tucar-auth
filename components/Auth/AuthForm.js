@@ -107,16 +107,18 @@ const AuthForm = () => {
   useEffect(() => {
     const completeCode = `${code1}${code2}${code3}${code4}`;
     setVerificationCode(completeCode);
+
+    // Si los 4 campos están completos, hacer el submit automáticamente
+    if (completeCode.length === 4) {
+      handleVerificationSubmit();
+    }
   }, [code1, code2, code3, code4, setVerificationCode]);
 
   const handleInputChange = (setCode, nextInputId) => (e) => {
     const value = e.target.value.replace(/\D/, ""); // Permitir solo números
     setCode(value);
-    
-    // Si se completa el último campo, automáticamente hace submit
-    if (!nextInputId && value.length === 1 && code1 && code2 && code3 && code4) {
-      handleVerificationSubmit(); // Llamar al submit cuando todos los campos están completos
-    } else if (value && nextInputId) {
+
+    if (value && nextInputId) {
       const nextInput = document.getElementById(nextInputId);
       if (nextInput) {
         nextInput.focus();
