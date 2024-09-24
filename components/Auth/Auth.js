@@ -182,7 +182,12 @@ const Auth = () => {
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
         {!authSessionId ? (
-          <p>Cargando...</p> // Indicador de carga mientras se obtiene el authSessionId
+         /* From Uiverse.io by Javierrocadev */ 
+{/* <div class="flex flex-row gap-2">
+  <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
+  <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
+  <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+</div> */}
         ) : (
           <AuthForm />
         )}
@@ -271,7 +276,7 @@ export default Auth;
 //       setCompleted(data.completed);
 //       setAuthData(data.authData);
 
-//       // Actualizar fingerprint después de recibir authSessionId
+//       Actualizar fingerprint después de recibir authSessionId
 //       updateFingerprint(data.authSessionId);
 //     } catch (error) {
 //       console.error("Error en la autorización", error);
@@ -307,7 +312,7 @@ export default Auth;
 //         authSessionId,
 //         udiFingerprint,
 //         state,
-//       },{
+//       }, {
 //         headers: {
 //           "Content-Type": "application/json",
 //         },
@@ -318,7 +323,7 @@ export default Auth;
 //       const redirectUri = response.data?.redirectUri;
 
 //       if (redirectUri) {
-//         // Redirigir al `redirectUri` en lugar de /dashboard
+//         Redirigir al `redirectUri` en lugar de /dashboard
 //         router.push(redirectUri);
 //       } else {
 //         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");

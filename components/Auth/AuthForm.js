@@ -74,7 +74,7 @@ const AuthForm = () => {
     googleClientId,
     isGoogleFlow,
     errorMessage,
-    setErrorMessage,  
+    setErrorMessage,
   } = useAuthContext();
 
   const [code1, setCode1] = useState("");
@@ -110,7 +110,9 @@ const AuthForm = () => {
 
     // Si los 4 campos están completos, hacer el submit automáticamente
     if (completeCode.length === 4) {
-      handleVerificationSubmit();
+      setTimeout(() => {
+        handleVerificationSubmit();
+      }, 1500); // Tiempo adicional para asegurarse de que se capturen los 4 inputs
     }
   }, [code1, code2, code3, code4, setVerificationCode]);
 
@@ -152,32 +154,34 @@ const AuthForm = () => {
   const handleSubmit = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$/;
-  
+
     // Validación de contraseña con mensaje de advertencia
     if (currentStep === 4) {
       if (!passwordRegex.test(password)) {
-        setPasswordWarning("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, un número y un símbolo especial.");
+        setPasswordWarning(
+          "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, un número y un símbolo especial."
+        );
         return;
       } else {
         setPasswordWarning(""); // Limpiar la advertencia si la validación es correcta
       }
     }
-  
+
     // Si el flujo es de Google, omitir la validación de emailOrPhone
     if (!isGoogleFlow) {
       if (!emailOrPhone) {
         setInputError("Por favor, completa el campo o inicia sesión con Google o Uber.");
         return;
       }
-  
+
       if (!emailRegex.test(emailOrPhone)) {
         setInputError("Por favor, ingresa un correo electrónico válido.");
         return;
       }
-  
+
       setInputError(""); // Limpiar el error si la validación es correcta
     }
-  
+
     try {
       if (isGoogleFlow) {
         await submitAuthenticationGoogle();
@@ -235,23 +239,14 @@ const AuthForm = () => {
                 <div className="flex items-center justify-center my-8 w-[61%]">
                   <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                   <div className="mx-4">
-                    <div className="text-[#5B5D71] font-Poppins font-bold">
-                      O
-                    </div>
+                    <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
                   </div>
                   <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                 </div>
                 <div className="flex flex-col gap-y-[15px]">
                   <UberButton onClick={handleUberLogin}>
-                    <img
-                      src="uberlog.png"
-                      alt="Uber Logo"
-                      width={18}
-                      className="ml-[px]"
-                    />
-                    <span className="font-Poppins font-normal">
-                      Continuar con Uber
-                    </span>
+                    <img src="uberlog.png" alt="Uber Logo" width={18} className="ml-[px]" />
+                    <span className="font-Poppins font-normal">Continuar con Uber</span>
                   </UberButton>
                   {googleClientId && (
                     <div className="flex justify-center">
@@ -390,15 +385,11 @@ const AuthForm = () => {
             </div>
 
             {inputError && (
-              <div className="text-red-500 mt-2">
-                *Por favor completa todos los campos.
-              </div>
+              <div className="text-red-500 mt-2">*Por favor completa todos los campos.</div>
             )}
 
             {errorMessage && (
-              <div className="text-red-500 mt-2">
-                {errorMessage}
-              </div>
+              <div className="text-red-500 mt-2">{errorMessage}</div>
             )}
 
             <AuthButton onClick={handleVerificationSubmit}>
@@ -429,14 +420,10 @@ const AuthForm = () => {
                 }}
               />
               {errorMessage && (
-                <div className="text-red-500 mt-2">
-                  {errorMessage}
-                </div>
+                <div className="text-red-500 mt-2">{errorMessage}</div>
               )}
               {passwordWarning && (
-                <div className="text-red-500 mt-2">
-                  {passwordWarning}
-                </div>
+                <div className="text-red-500 mt-2">{passwordWarning}</div>
               )}
               <AuthButton onClick={handleSubmit}>
                 <p className="font-Poppins font-medium">Registrarse</p>
@@ -457,15 +444,8 @@ const AuthForm = () => {
             </div>
             <div className="flex justify-center items-center mt-4">
               <UberButton onClick={handleUberLogin}>
-                <img
-                  src="uberlog.png"
-                  alt="Uber Logo"
-                  width={18}
-                  className="ml-[-15px]"
-                />
-                <span className="font-Poppins font-normal">
-                  Continuar con Uber
-                </span>
+                <img src="uberlog.png" alt="Uber Logo" width={18} className="ml-[-15px]" />
+                <span className="font-Poppins font-normal">Continuar con Uber</span>
               </UberButton>
             </div>
           </div>
@@ -481,7 +461,7 @@ const AuthForm = () => {
                 <span className="block">cuenta de Google</span>
               </p>
             </div>
-            <div className="flex justify-center items-center mt-4">
+            <div className="flex justify-center items-center mt-[25px] mb-[35px] p-[250px]">
               {googleClientId && (
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
