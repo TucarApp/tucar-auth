@@ -128,7 +128,7 @@ const Auth = () => {
     }
   };
 
-Verificar autenticación con redirección dinámica
+// Verificar autenticación con redirección dinámica
 const verifyAuthentication = async (authSessionId) => {
   if (isVerifying) return; // Si ya estamos verificando, no hacemos más solicitudes.
   setIsVerifying(true); // Marcamos que la verificación ha comenzado.
