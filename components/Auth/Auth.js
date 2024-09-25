@@ -177,7 +177,7 @@ const Auth = () => {
       setErrorMessage={setErrorMessage}
       verifyAuthentication={verifyAuthentication}
     >
-      <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] mt-[-14px] flex flex-col justify-center items-center'>
+      <div className="max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]">
         {errorMessage && (
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
