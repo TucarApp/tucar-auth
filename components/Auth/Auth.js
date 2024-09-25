@@ -63,7 +63,7 @@ const Auth = () => {
     const responseType = searchParams.get('response_type') || 'code';
     const stateParam = searchParams.get('state') || 'random-state';
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
-    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000';
+    const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
     const scope = searchParams.get('scope') || 'driver';
     const tenancy = 'production';
 
