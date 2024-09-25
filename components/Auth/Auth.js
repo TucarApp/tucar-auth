@@ -229,13 +229,6 @@ export default Auth;
 //   }, [completed]);
 
 //   useEffect(() => {
-//     const storedAuthSessionId = localStorage.getItem('authSessionId');
-//     if (storedAuthSessionId && completed) {
-//       verifyAuthentication(storedAuthSessionId);
-//     }
-//   }, [completed]);
-
-//   useEffect(() => {
 //     console.log("currentStep actualizado:", currentStep);
 //   }, [currentStep]);
 
@@ -325,11 +318,11 @@ export default Auth;
 //       const redirectUri = response.data?.redirectUri;
 
 //       if (redirectUri) {
-//         // Redirigir al `redirectUri` en lugar de /dashboard
-//         router.push(redirectUri);
+//         // Guarda el redirectUri en localStorage y redirige a /verify
+//         localStorage.setItem("redirectUri", redirectUri);
+//         router.push("/verify");
 //       } else {
-//         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");
-//         router.push("/dashboard");
+//         console.error("No se recibió un redirectUri.");
 //       }
 //     } catch (error) {
 //       console.error("Error en la verificación de la autenticación:", error);
@@ -374,6 +367,7 @@ export default Auth;
 // };
 
 // export default Auth;
+
 
 
 

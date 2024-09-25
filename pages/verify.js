@@ -1,7 +1,6 @@
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import { useAuthContext } from '../components/Auth/AuthProvider';
 
 const VerifyContainer = styled.div`
   display: flex;
@@ -31,43 +30,28 @@ const RedirectButton = styled.button`
 
 const Verify = () => {
   const router = useRouter();
-  const { authSessionId, udiFingerprint, state, verifyAuthentication } = useAuthContext();
-  const [isVerifying, setIsVerifying] = useState(true); // Controlar si estamos verificando
-  const [errorMessage, setErrorMessage] = useState('');
-  const [redirectUri, setRedirectUri] = useState(''); // Estado para almacenar la URL de redirección
-  const [secondsLeft, setSecondsLeft] = useState(6); // Estado para el temporizador de 6 segundos
+  const [secondsLeft, setSecondsLeft] = useState(6);
+  const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
-    const handleVerifyAuthentication = async () => {
-      try {
-        const response = await verifyAuthentication(authSessionId);
-        const redirectUri = response?.redirectUri;
-
-        if (redirectUri) {
-          setRedirectUri(redirectUri);
-          setIsVerifying(false);
-        } else {
-          setErrorMessage('No se encontró una URL de redirección.');
-        }
-      } catch (error) {
-        setErrorMessage('Error en la verificación de la autenticación.');
-        console.error(error);
-      }
-    };
-
-    if (authSessionId && udiFingerprint && state) {
-      handleVerifyAuthentication();
+    // Obtener el redirectUri de localStorage
+    const uri = localStorage.getItem('redirectUri');
+    if (uri) {
+      setRedirectUri(uri);
+    } else {
+      // Manejo de error si no hay redirectUri almacenado
+      console.error('No se encontró una URL de redirección.');
     }
-  }, [authSessionId, udiFingerprint, state, verifyAuthentication]);
+  }, []);
 
   useEffect(() => {
-    if (!isVerifying && redirectUri) {
+    if (redirectUri) {
       const timer = setInterval(() => {
         setSecondsLeft((prev) => prev - 1);
       }, 1000);
 
       const redirectTimeout = setTimeout(() => {
-        router.push(redirectUri);
+        router.push(redirectUri); // Redirigir después de 6 segundos
       }, 6000);
 
       return () => {
@@ -75,34 +59,29 @@ const Verify = () => {
         clearTimeout(redirectTimeout);
       };
     }
-  }, [isVerifying, redirectUri, router]);
+  }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
     if (redirectUri) {
-      router.push(redirectUri);
+      router.push(redirectUri);  // Redirigir inmediatamente cuando el usuario lo solicite
     }
   };
 
   return (
     <VerifyContainer>
       <h1>Verificando autenticación...</h1>
-      {isVerifying ? (
-        <p>Por favor espera, estamos procesando tu solicitud.</p>
-      ) : (
+      {redirectUri ? (
         <>
-          <p>¡Gracias por registrarte! Serás redirigido en {secondsLeft} segundos...</p>
+          <p>Serás redirigido en {secondsLeft} segundos...</p>
           <RedirectButton onClick={handleImmediateRedirect}>
             Redirigir ahora
           </RedirectButton>
         </>
+      ) : (
+        <p>Error al obtener la URL de redirección.</p>
       )}
-      {errorMessage && <p>{errorMessage}</p>}
     </VerifyContainer>
   );
 };
-
-export async function getServerSideProps() {
-  return { props: {} };
-}
 
 export default Verify;

@@ -208,7 +208,7 @@ const AuthForm = () => {
 
       {currentStep === 1 && (
         <FormContainer>
-          <div className="flex flex-col items-center mt-[80px] pantallapc:mt-[180px]">
+          <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
             <div>
               <div className="flex justify-center">
                 <Logo color="color" className="cursor-pointer" width={180} />
@@ -273,6 +273,20 @@ const AuthForm = () => {
                       />
                     </div>
                   )}
+                   <div>
+                    <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
+                      Al continuar, aceptas nuestros{" "}
+                      <a
+                        href="https://tucar.app/terminos-condiciones"
+                        className="underline"
+                      >
+                        términos y condiciones
+                      </a>
+                      , además de recibir llamadas, mensajes de WhatsApp o SMS,
+                      incluso por medios automatizados de TUCAR y sus filiales
+                      en el número proporcionado.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
