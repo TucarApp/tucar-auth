@@ -678,6 +678,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
   const [redirectUri, setRedirectUri] = useState(''); // Para almacenar el redirectUri
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     if (props.authMethods) {
@@ -1236,6 +1237,7 @@ export const AuthProvider = ({ children, ...props }) => {
         response,
         errorMessage,
         setErrorMessage,
+        isVerifying,
         isLoading,       // Estado para el loading
         setIsLoading,    // Setter para el loading
         redirectUri      // Guardamos el redirectUri para el componente Verify
