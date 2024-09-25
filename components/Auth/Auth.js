@@ -146,9 +146,19 @@ const Auth = () => {
       const redirectUri = response.data?.redirectUri;
   
       if (redirectUri) {
-        // Guarda el redirectUri en localStorage y redirige a /verify para mostrar la pantalla de verificación
-        localStorage.setItem('redirectUri', redirectUri);
-        router.push('/verify');  // Redirige a la pantalla de verificación
+        // Detectar si estamos en un dispositivo Android o en la web
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isAndroid = userAgent.includes("android");
+  
+        if (isAndroid) {
+          // En Android usamos Deep Link con window.location.href
+          console.log("Redirigiendo en Android con Deep Link:", redirectUri);
+          window.location.href = redirectUri;
+        } else {
+          // En la web (Next.js) usamos router.push para manejar la redirección interna
+          console.log("Redirigiendo en la web con Next.js:", redirectUri);
+          router.push(redirectUri);
+        }
       } else {
         console.error("No se recibió un redirectUri.");
         setErrorMessage("Error: No se recibió una URL de redirección.");
@@ -158,6 +168,7 @@ const Auth = () => {
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
+  
 
   return (
     <AuthProvider
@@ -240,7 +251,7 @@ export default Auth;
 //         params: {
 //           response_type: "code",
 //           client_id: "QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s",
-//           redirect_uri: "http://localhost:3000",
+//           redirect_uri: "driverapp://auth",
 //           scope: "driver",
 //           state: "random-state",
 //           tenancy: "development",
@@ -304,9 +315,7 @@ export default Auth;
 //   };
 
 //   const verifyAuthentication = async (authSessionId) => {
-//     if (isVerifying) return; // Si ya estamos verificando, no hacemos más solicitudes.
-//     setIsVerifying(true); // Marcamos que la verificación ha comenzado.
-  
+    
 //     try {
 //       const response = await axios.post("/api/v1/oauth/verify-authentication", {
 //         authSessionId,
@@ -321,6 +330,8 @@ export default Auth;
   
 //       console.log("Autenticación verificada:", response.data);
 //       const redirectUri = response.data?.redirectUri;
+
+//       console.log(redirectUri, 'ESTOOOOOOPOPOPOPOOPPO')
   
 //       if (redirectUri) {
 //         // Guarda el redirectUri en localStorage o usa otra forma para pasarlo
@@ -330,11 +341,9 @@ export default Auth;
 //         console.error("No se recibió un redirectUri.");
 //       }
 //     } catch (error) {
-//       console.error("Error en la verificación de la autenticación:", error);
+//       console.error("Error en la verificación de la autenticación:", error);ZZZZ
 //       setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
-//     } finally {
-//       setIsVerifying(false); // Restablecemos el estado cuando la verificación termina.
-//     }
+//     } 
 //   };
   
 

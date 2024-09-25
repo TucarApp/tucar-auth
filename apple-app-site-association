@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "arcoirisky.21@gmail.com.com.example.driverapp",
+        "paths": ["/auth/*", "/verify/*"]
+      }
+    ]
+  }
+}
