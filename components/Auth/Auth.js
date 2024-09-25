@@ -128,42 +128,36 @@ const Auth = () => {
     }
   };
 
-// Verificar autenticación con redirección dinámica
-const verifyAuthentication = async (authSessionId) => {
-  if (isVerifying) return; // Si ya estamos verificando, no hacemos más solicitudes.
-  setIsVerifying(true); // Marcamos que la verificación ha comenzado.
-
-  try {
-    const response = await axios.post('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/verify-authentication', {
-      authSessionId,
-      udiFingerprint,
-      state
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      withCredentials: true
-    });
-
-    console.log('Autenticación verificada:', response.data);
-    const redirectUri = response.data?.redirectUri;
-
-    if (redirectUri) {
-      // Guarda el redirectUri en localStorage y redirige a /verify para mostrar la pantalla de verificación
-      localStorage.setItem('redirectUri', redirectUri);
-      router.push('/verify');  // Redirige a la pantalla de verificación
-    } else {
-      console.error("No se recibió un redirectUri.");
-      setErrorMessage("Error: No se recibió una URL de redirección.");
+  // Verificar autenticación con redirección dinámica
+  const verifyAuthentication = async (authSessionId) => {
+    try {
+      const response = await axios.post('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/verify-authentication', {
+        authSessionId,
+        udiFingerprint,
+        state
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+  
+      console.log('Autenticación verificada:', response.data);
+      const redirectUri = response.data?.redirectUri;
+  
+      if (redirectUri) {
+        // Guarda el redirectUri en localStorage y redirige a /verify para mostrar la pantalla de verificación
+        localStorage.setItem('redirectUri', redirectUri);
+        router.push('/verify');  // Redirige a la pantalla de verificación
+      } else {
+        console.error("No se recibió un redirectUri.");
+        setErrorMessage("Error: No se recibió una URL de redirección.");
+      }
+    } catch (error) {
+      console.error('Error en la verificación de la autenticación:', error);
+      setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
-  } catch (error) {
-    console.error('Error en la verificación de la autenticación:', error);
-    setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
-  } finally {
-    setIsVerifying(false); // Restablecemos el estado cuando la verificación termina.
-  }
-};
-
+  };
 
   return (
     <AuthProvider
@@ -228,7 +222,6 @@ export default Auth;
 //   const [state, setState] = useState("random-state");
 //   const [isSubmitting, setIsSubmitting] = useState(false);
 //   const [errorMessage, setErrorMessage] = useState("");
-//   const [isVerifying, setIsVerifying] = useState(false); // Aquí definimos isVerifying
 
 //   useEffect(() => {
 //     const storedAuthSessionId = localStorage.getItem("authSessionId");
@@ -382,7 +375,6 @@ export default Auth;
 // };
 
 // export default Auth;
-
 
 
 
