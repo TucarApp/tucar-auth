@@ -5,7 +5,7 @@ import AuthButton from "./AuthButton";
 import UberButton from "./UberButton";
 import Logo from "../LogoTucar/LogoTucar";
 import { useAuthContext } from "./AuthProvider";
-import VerificatonInput from "./VerificationInput";
+import VerificationCodeInput from "./VerificationCodeInput"; // Cambiado a VerificationCodeInput
 import { GoogleLogin } from "@react-oauth/google";
 
 // Contenedor para el formulario
@@ -77,10 +77,6 @@ const AuthForm = () => {
     setErrorMessage,
   } = useAuthContext();
 
-  const [code1, setCode1] = useState("");
-  const [code2, setCode2] = useState("");
-  const [code3, setCode3] = useState("");
-  const [code4, setCode4] = useState("");
   const [inputError, setInputError] = useState(false);
   const [passwordWarning, setPasswordWarning] = useState(""); // Advertencia de contraseña
 
@@ -91,42 +87,18 @@ const AuthForm = () => {
     }
   }, [emailOrPhone]);
 
-  // Limpiar el error cuando el usuario comience a escribir el código de verificación
-  useEffect(() => {
-    if (code1 || code2 || code3 || code4) {
-      setInputError(false);
-      setErrorMessage(""); // Limpiar el mensaje de error cuando el código se introduce correctamente
-    }
-  }, [code1, code2, code3, code4]);
-
   // Autocompletar el prefijo de teléfono al cargar el componente
   useEffect(() => {
     setPhonePrefix(setPhone);
   }, [setPhone]);
 
-  useEffect(() => {
-    const completeCode = `${code1}${code2}${code3}${code4}`;
+  const handleVerificationSubmit = (completeCode) => {
     setVerificationCode(completeCode);
 
-    console.log(completeCode, "completeCode");
-
-    // Si los 4 campos están completos, hacer el submit automáticamente
-    if (completeCode.length === 4) {
-      setTimeout(() => {
-        handleVerificationSubmit();
-      }, 1500); // Tiempo adicional para asegurarse de que se capturen los 4 inputs
-    }
-  }, [code1, code2, code3, code4, setVerificationCode]);
-
-  const handleInputChange = (setCode, nextInputId) => (e) => {
-    const value = e.target.value.replace(/\D/, ""); // Permitir solo números
-    setCode(value);
-
-    if (value && nextInputId) {
-      const nextInput = document.getElementById(nextInputId);
-      if (nextInput) {
-        nextInput.focus();
-      }
+    if (isGoogleFlow) {
+      submitAuthenticationGoogle();
+    } else {
+      submitAuthentication();
     }
   };
 
@@ -137,20 +109,6 @@ const AuthForm = () => {
       (match) => `${match.trim()} `
     );
     setPhone(formattedValue);
-  };
-
-  const handleVerificationSubmit = () => {
-    if (code1 && code2 && code3 && code4) {
-      setInputError(false);
-      setErrorMessage(""); // Limpiar el error al hacer submit
-      if (isGoogleFlow) {
-        submitAuthenticationGoogle();
-      } else {
-        submitAuthentication();
-      }
-    } else {
-      setInputError(true);
-    }
   };
 
   const handleSubmit = async () => {
@@ -370,52 +328,12 @@ const AuthForm = () => {
                 Ingresa el código que hemos enviado al número de teléfono
               </p>
             </div>
-            <div className="flex gap-x-[25px] lg:w-[350px]">
-              <VerificatonInput
-                id="input1"
-                type="text"
-                maxLength={1}
-                value={code1}
-                onChange={handleInputChange(setCode1, "input2")}
-                pattern="\d*"
-                className={`font-Poppins font-medium ${
-                  inputError ? "border-red-500" : ""
-                }`}
-              />
-              <VerificatonInput
-                id="input2"
-                type="text"
-                maxLength={1}
-                value={code2}
-                onChange={handleInputChange(setCode2, "input3")}
-                pattern="\d*"
-                className={`font-Poppins font-medium ${
-                  inputError ? "border-red-500" : ""
-                }`}
-              />
-              <VerificatonInput
-                id="input3"
-                type="text"
-                maxLength={1}
-                value={code3}
-                onChange={handleInputChange(setCode3, "input4")}
-                pattern="\d*"
-                className={`font-Poppins font-medium ${
-                  inputError ? "border-red-500" : ""
-                }`}
-              />
-              <VerificatonInput
-                id="input4"
-                type="text"
-                maxLength={1}
-                value={code4}
-                onChange={handleInputChange(setCode4, null)} // Null para el último campo
-                pattern="\d*"
-                className={`font-Poppins font-medium ${
-                  inputError ? "border-red-500" : ""
-                }`}
-              />
-            </div>
+
+            {/* Integramos el nuevo componente de VerificationCodeInput */}
+            <VerificationCodeInput
+              submitVerificationCode={handleVerificationSubmit}
+              isLoading={false} // Cambia este valor si tienes un estado de carga
+            />
 
             {inputError && (
               <div className="text-red-500 mt-2">
@@ -427,7 +345,7 @@ const AuthForm = () => {
               <div className="text-red-500 mt-2">{errorMessage}</div>
             )}
 
-            <AuthButton onClick={handleVerificationSubmit}>
+            <AuthButton onClick={() => handleVerificationSubmit()}>
               <p className="font-Poppins font-medium">Continuar</p>
             </AuthButton>
           </div>

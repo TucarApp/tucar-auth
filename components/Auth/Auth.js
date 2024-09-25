@@ -141,15 +141,17 @@ const Auth = () => {
         },
         withCredentials: true
       });
-
+  
       console.log('Autenticación verificada:', response.data);
       const redirectUri = response.data?.redirectUri;
-
+  
       if (redirectUri) {
-        // Redirigir al `redirectUri` recibido
-        router.push(redirectUri);
+        // Guarda el redirectUri en localStorage y redirige a /verify para mostrar la pantalla de verificación
+        localStorage.setItem('redirectUri', redirectUri);
+        router.push('/verify');  // Redirige a la pantalla de verificación
       } else {
-        router.push('/dashboard');
+        console.error("No se recibió un redirectUri.");
+        setErrorMessage("Error: No se recibió una URL de redirección.");
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
@@ -301,34 +303,34 @@ export default Auth;
 //     }
 //   };
 
-//   const verifyAuthentication = async (authSessionId) => {
-//     try {
-//       const response = await axios.post("/api/v1/oauth/verify-authentication", {
-//         authSessionId,
-//         udiFingerprint,
-//         state,
-//       },{
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         withCredentials: true,
-//       });
+  // const verifyAuthentication = async (authSessionId) => {
+  //   try {
+  //     const response = await axios.post("/api/v1/oauth/verify-authentication", {
+  //       authSessionId,
+  //       udiFingerprint,
+  //       state,
+  //     },{
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       withCredentials: true,
+  //     });
 
-//       console.log("Autenticación verificada:", response.data);
-//       const redirectUri = response.data?.redirectUri;
+  //     console.log("Autenticación verificada:", response.data);
+  //     const redirectUri = response.data?.redirectUri;
 
-//       if (redirectUri) {
-//         // Guarda el redirectUri en localStorage y redirige a /verify
-//         localStorage.setItem("redirectUri", redirectUri);
-//         router.push("/verify");
-//       } else {
-//         console.error("No se recibió un redirectUri.");
-//       }
-//     } catch (error) {
-//       console.error("Error en la verificación de la autenticación:", error);
-//       setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
-//     }
-//   };
+  //     if (redirectUri) {
+  //       // Guarda el redirectUri en localStorage y redirige a /verify
+  //       localStorage.setItem("redirectUri", redirectUri);
+  //       router.push("/verify");
+  //     } else {
+  //       console.error("No se recibió un redirectUri.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error en la verificación de la autenticación:", error);
+  //     setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
+  //   }
+  // };
 
 //   return (
 //     <AuthProvider

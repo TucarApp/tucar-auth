@@ -30,7 +30,7 @@ const RedirectButton = styled.button`
 
 const Verify = () => {
   const router = useRouter();
-  const [secondsLeft, setSecondsLeft] = useState(6);
+  const [secondsLeft, setSecondsLeft] = useState(4); // Timer de 4 segundos
   const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
@@ -51,8 +51,8 @@ const Verify = () => {
       }, 1000);
 
       const redirectTimeout = setTimeout(() => {
-        router.push(redirectUri); // Redirigir después de 6 segundos
-      }, 6000);
+        router.push(redirectUri); // Redirigir después de 4 segundos
+      }, 4000);
 
       return () => {
         clearInterval(timer);
