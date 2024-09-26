@@ -79,6 +79,8 @@ const Auth = () => {
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
 
+    console.log(params, 'esto son los paramS cAPTURADOSSSS')
+
     console.log('URL completa para autorización:', fullUrl);
 
     try {
