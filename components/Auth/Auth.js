@@ -15,7 +15,7 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState('random-state');
+  const [state, setState] = useState('random-state'); // Inicializa con un valor predeterminado
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -38,7 +38,12 @@ const Auth = () => {
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
-    const stateParam = searchParams.get('state');
+    const stateParam = searchParams.get('state'); // Capturar el valor de `state` desde la URL
+
+    // Actualiza el estado de `state` si está presente
+    if (stateParam) {
+      setState(stateParam);
+    }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
       console.log('Parámetros capturados desde la URL:', {
@@ -61,25 +66,25 @@ const Auth = () => {
 
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
-    const stateParam = searchParams.get('state') || 'random-state';
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
     const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
     const scope = searchParams.get('scope') || 'driver';
     const tenancy = searchParams.get('tenancy') || 'production';
 
+    // Usar el valor dinámico de `state`
     const params = {
       response_type: responseType,
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scope,
-      state: stateParam,
+      state: state, // Aquí usamos el estado `state` dinámico
       tenancy: tenancy
     };
 
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
 
-    console.log(params, 'esto son los paramS cAPTURADOSSSS')
+    console.log(params, 'estos son los parámetros capturados');
 
     console.log('URL completa para autorización:', fullUrl);
 
@@ -136,7 +141,7 @@ const Auth = () => {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state
+        state // Aquí también usas el estado `state` actualizado dinámicamente
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -214,6 +219,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 // import React, { useEffect, useState } from "react";
