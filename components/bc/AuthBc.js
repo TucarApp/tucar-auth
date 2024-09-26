@@ -62,7 +62,7 @@
 //   }, [searchParams]); // Asegurarse de que searchParams esté disponible
 
 //   const authorize = async () => {
-//     const baseUrl = 'https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize';
+//     const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
 
 //     // Capturar los parámetros de la URL o usar valores por defecto
 //     const responseType = searchParams.get('response_type') || 'code';
@@ -119,7 +119,7 @@
 
 //   const updateFingerprint = async (authSessionId) => {
 //     try {
-//       const response = await axios.patch('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/udi-fingerprint', {
+//       const response = await axios.patch('https://accounts.tucar.app/api/v1/oauth/udi-fingerprint', {
 //         authSessionId,
 //         udiFingerprint
 //       }, {
@@ -138,7 +138,7 @@
 
 //   const verifyAuthentication = async (authSessionId) => {
 //     try {
-//       const response = await axios.post('https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/verify-authentication', {
+//       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
 //         authSessionId,
 //         udiFingerprint,
 //         state
