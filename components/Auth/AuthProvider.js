@@ -42,7 +42,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [errorMessage, setErrorMessage] = useState(''); // Manejo de errores centralizado
   const [authSessionId, setAuthSessionId] = useState('');
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
-  const [state, setState] = useState('random-state'); // Cambia el valor según sea necesario
+  const [state, setState] = useState(''); // Cambia el valor según sea necesario
   const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
 
   useEffect(() => {
