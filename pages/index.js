@@ -6,9 +6,8 @@ const HomePage = () => {
     <div className='px-[15px] max-w-m'>
       <Meta />
       <div className='flex justify-center items-center'> 
-             <Auth />
+        <Auth />
       </div>
-
     </div>
   );
 };

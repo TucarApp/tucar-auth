@@ -51,7 +51,7 @@ const Auth = () => {
         client_id: clientId,
         redirect_uri: redirectUri,
         scope: scope,
-        state: stateParam,
+        state: stateParam, // Usar el valor capturado
       });
 
       authorize(); // Llamar a authorize solo si se capturan todos los parámetros
@@ -78,19 +78,18 @@ const Auth = () => {
       redirect_uri: redirectUri,
       scope: scope,
       state: state, // Aquí usamos el estado `state` dinámico
-      tenancy: tenancy
+      tenancy: tenancy,
     };
 
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
 
     console.log(params, 'estos son los parámetros capturados');
-
     console.log('URL completa para autorización:', fullUrl);
 
     try {
       const response = await axios.get(fullUrl, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       const data = response.data;
@@ -120,12 +119,12 @@ const Auth = () => {
     try {
       const response = await axios.patch('https://accounts.tucar.app/api/v1/oauth/udi-fingerprint', {
         authSessionId,
-        udiFingerprint
+        udiFingerprint,
       }, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        withCredentials: true
+        withCredentials: true,
       });
 
       console.log('Fingerprint actualizado:', response.data);
@@ -141,41 +140,40 @@ const Auth = () => {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state // Aquí también usas el estado `state` actualizado dinámicamente
+        state, // Aquí también usas el estado `state` actualizado dinámicamente
       }, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        withCredentials: true
+        withCredentials: true,
       });
-  
+
       console.log('Autenticación verificada:', response.data);
       const redirectUri = response.data?.redirectUri;
-  
+
       if (redirectUri) {
         // Detectar si estamos en un dispositivo Android o en la web
         const userAgent = window.navigator.userAgent.toLowerCase();
-        const isAndroid = userAgent.includes("android");
-  
+        const isAndroid = userAgent.includes('android');
+
         if (isAndroid) {
           // En Android usamos Deep Link con window.location.href
-          console.log("Redirigiendo en Android con Deep Link:", redirectUri);
+          console.log('Redirigiendo en Android con Deep Link:', redirectUri);
           window.location.href = redirectUri;
         } else {
           // En la web (Next.js) usamos router.push para manejar la redirección interna
-          console.log("Redirigiendo en la web con Next.js:", redirectUri);
+          console.log('Redirigiendo en la web con Next.js:', redirectUri);
           router.push(redirectUri);
         }
       } else {
-        console.error("No se recibió un redirectUri.");
-        setErrorMessage("Error: No se recibió una URL de redirección.");
+        console.error('No se recibió un redirectUri.');
+        setErrorMessage('Error: No se recibió una URL de redirección.');
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
-  
 
   return (
     <AuthProvider
@@ -202,14 +200,13 @@ const Auth = () => {
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
         {!authSessionId ? (
-         <div className='w-full h-screen flex justify-center items-center'>
-         <div className="flex flex-row gap-2">
-           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
-         </div>
-       </div>
-       
+          <div className="w-full h-screen flex justify-center items-center">
+            <div className="flex flex-row gap-2">
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+            </div>
+          </div>
         ) : (
           <AuthForm />
         )}
@@ -219,6 +216,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 
