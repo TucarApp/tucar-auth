@@ -28,23 +28,18 @@ const Auth = () => {
   }, [completed]);
 
   useEffect(() => {
-    console.log('currentStep actualizado:', currentStep);
-  }, [currentStep]);
-
-  // Capturar los parámetros de la URL y autorizar
-  useEffect(() => {
     // Capturar los parámetros solo si están presentes
     const responseType = searchParams.get('response_type');
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
     const stateParam = searchParams.get('state'); // Capturar el valor de `state` desde la URL
-
+  
     // Actualiza el estado de `state` si está presente
     if (stateParam) {
-      setState(stateParam);
+      setState(stateParam); // Asignar correctamente el valor de `state`
     }
-
+  
     if (responseType && clientId && redirectUri && scope && stateParam) {
       console.log('Parámetros capturados desde la URL:', {
         response_type: responseType,
@@ -53,66 +48,68 @@ const Auth = () => {
         scope: scope,
         state: stateParam, // Usar el valor capturado
       });
-
+  
       authorize(); // Llamar a authorize solo si se capturan todos los parámetros
     } else {
       console.log('Esperando los parámetros en la URL...');
     }
   }, [searchParams]);
+  
 
   // Función para la autorización inicial
   const authorize = async () => {
     const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
-
+  
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
     const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
     const scope = searchParams.get('scope') || 'driver';
     const tenancy = searchParams.get('tenancy') || 'production';
-
+  
     // Usar el valor dinámico de `state`
     const params = {
       response_type: responseType,
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scope,
-      state: state, // Aquí usamos el estado `state` dinámico
-      tenancy: tenancy,
+      state: state, // Aquí usamos el estado `state` dinámico que ya capturamos
+      tenancy: tenancy
     };
-
+  
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
-
+  
     console.log(params, 'estos son los parámetros capturados');
     console.log('URL completa para autorización:', fullUrl);
-
+  
     try {
       const response = await axios.get(fullUrl, {
         withCredentials: true,
       });
-
+  
       const data = response.data;
       console.log('Respuesta completa del servidor:', data);
-
+  
       if (data.authMethods && data.authMethods.length > 0) {
         setAuthMethods(data.authMethods);
       } else {
         console.error('authMethods no está presente en la respuesta o está vacío');
       }
-
+  
       setAuthSessionId(data.authSessionId);
       localStorage.setItem('authSessionId', data.authSessionId);
       setAuthFlow(data.authFlow);
       setCompleted(data.completed);
       setAuthData(data.authData);
-
+  
       // Actualizar fingerprint después de recibir authSessionId
       updateFingerprint(data.authSessionId);
     } catch (error) {
       console.error('Error en la autorización', error);
     }
   };
+  
 
   // Actualizar el fingerprint después de la autorización
   const updateFingerprint = async (authSessionId) => {
