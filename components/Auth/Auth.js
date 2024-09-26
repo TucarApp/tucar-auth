@@ -65,7 +65,7 @@ const Auth = () => {
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
     const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
     const scope = searchParams.get('scope') || 'driver';
-    const tenancy = 'production';
+    const tenancy = searchParams.get('tenancy') || 'production';
 
     const params = {
       response_type: responseType,
