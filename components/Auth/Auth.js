@@ -57,7 +57,7 @@ const Auth = () => {
 
   // Función para la autorización inicial
   const authorize = async () => {
-    const baseUrl = 'https://tucar-auth-13535404425.us-central1.run.app/api/v1/oauth/authorize';
+    const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
 
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
@@ -341,7 +341,7 @@ export default Auth;
 //         console.error("No se recibió un redirectUri.");
 //       }
 //     } catch (error) {
-//       console.error("Error en la verificación de la autenticación:", error);ZZZZ
+//       console.error("Error en la verificación de la autenticación:", error);
 //       setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
 //     } 
 //   };
