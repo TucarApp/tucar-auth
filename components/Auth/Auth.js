@@ -58,15 +58,15 @@ const Auth = () => {
   // Función para la autorización inicial
   const authorize = async () => {
     const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
-  
+
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
     const stateParam = searchParams.get('state') || 'random-state';
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
-    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000';
+    const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
     const scope = searchParams.get('scope') || 'driver';
-    const tenancy = 'production';
-  
+    const tenancy = searchParams.get('tenancy') || 'production';
+
     const params = {
       response_type: responseType,
       client_id: clientId,
@@ -75,37 +75,34 @@ const Auth = () => {
       state: stateParam,
       tenancy: tenancy
     };
-  
+
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
-  
-    console.log('Llamando a authorize con la URL completa:', fullUrl);
-  
+
+    console.log(params, 'esto son los paramS cAPTURADOSSSS')
+
+    console.log('URL completa para autorización:', fullUrl);
+
     try {
       const response = await axios.get(fullUrl, {
         withCredentials: true
       });
-  
+
       const data = response.data;
-  
-      // Verifica si hay métodos de autenticación en la respuesta
+      console.log('Respuesta completa del servidor:', data);
+
       if (data.authMethods && data.authMethods.length > 0) {
         setAuthMethods(data.authMethods);
-  
-        // Recorrer todos los authMethods y hacer console.log del methodType
-        data.authMethods.forEach((method, index) => {
-          console.log(`AuthMethod ${index + 1}:`, method.methodType);
-        });
       } else {
         console.error('authMethods no está presente en la respuesta o está vacío');
       }
-  
+
       setAuthSessionId(data.authSessionId);
       localStorage.setItem('authSessionId', data.authSessionId);
       setAuthFlow(data.authFlow);
       setCompleted(data.completed);
       setAuthData(data.authData);
-  
+
       // Actualizar fingerprint después de recibir authSessionId
       updateFingerprint(data.authSessionId);
     } catch (error) {
