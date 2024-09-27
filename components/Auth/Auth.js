@@ -15,15 +15,18 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState(localStorage.getItem('state') || ''); // Inicializamos desde localStorage o vacío
+  const [state, setState] = useState(''); // Inicializamos sin valor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // Verificar autenticación si existe authSessionId
   useEffect(() => {
-    const storedAuthSessionId = localStorage.getItem('authSessionId');
-    if (storedAuthSessionId && completed) {
-      verifyAuthentication(storedAuthSessionId);
+    // Verifica si estamos en el cliente antes de acceder a localStorage
+    if (typeof window !== 'undefined') {
+      const storedAuthSessionId = localStorage.getItem('authSessionId');
+      if (storedAuthSessionId && completed) {
+        verifyAuthentication(storedAuthSessionId);
+      }
     }
   }, [completed]);
 
@@ -40,8 +43,11 @@ const Auth = () => {
     const stateParam = searchParams.get('state'); // Capturar el valor de `state` desde la URL
 
     if (stateParam) {
-      setState(stateParam); // Actualizamos el valor de `state` desde la URL
-      localStorage.setItem('state', stateParam); // Guardamos el state en localStorage para persistencia
+      setState(stateParam); 
+      // Verifica si estamos en el cliente antes de acceder a localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('state', stateParam); // Guardamos el state en localStorage para persistencia
+      }
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
@@ -95,7 +101,10 @@ const Auth = () => {
       }
 
       setAuthSessionId(data.authSessionId);
-      localStorage.setItem('authSessionId', data.authSessionId);
+      // Verifica si estamos en el cliente antes de acceder a localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authSessionId', data.authSessionId);
+      }
       setAuthFlow(data.authFlow);
       setCompleted(data.completed);
       setAuthData(data.authData);
@@ -129,13 +138,17 @@ const Auth = () => {
 
   // Verificar autenticación con redirección dinámica
   const verifyAuthentication = async (authSessionId) => {
-    const storedState = localStorage.getItem('state'); // Obtenemos el state desde localStorage
+    let storedState = state;
+    // Verifica si estamos en el cliente antes de acceder a localStorage
+    if (typeof window !== 'undefined') {
+      storedState = localStorage.getItem('state'); // Obtenemos el state desde localStorage si existe
+    }
 
     try {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state: storedState // Usamos el `state` almacenado en localStorage
+        state: storedState // Usamos el `state` almacenado en localStorage si es necesario
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -203,7 +216,7 @@ const Auth = () => {
            <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
          </div>
        </div>
-
+       
         ) : (
           <AuthForm />
         )}
@@ -213,6 +226,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 
