@@ -15,7 +15,7 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState('random-state'); // Inicializamos sin valor
+  const [state, setState] = useState(localStorage.getItem('state') || ''); // Inicializamos desde localStorage o vacío
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -41,6 +41,7 @@ const Auth = () => {
 
     if (stateParam) {
       setState(stateParam); // Actualizamos el valor de `state` desde la URL
+      localStorage.setItem('state', stateParam); // Guardamos el state en localStorage para persistencia
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
@@ -77,7 +78,6 @@ const Auth = () => {
     const fullUrl = `${baseUrl}?${queryString}`;
 
     console.log(params, 'estos son los parámetros capturados');
-
     console.log('URL completa para autorización:', fullUrl);
 
     try {
@@ -129,26 +129,28 @@ const Auth = () => {
 
   // Verificar autenticación con redirección dinámica
   const verifyAuthentication = async (authSessionId) => {
+    const storedState = localStorage.getItem('state'); // Obtenemos el state desde localStorage
+
     try {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state // Aquí también usas el estado `state` actualizado dinámicamente
+        state: storedState // Usamos el `state` almacenado en localStorage
       }, {
         headers: {
           'Content-Type': 'application/json'
         },
         withCredentials: true
       });
-  
+
       console.log('Autenticación verificada:', response.data);
       const redirectUri = response.data?.redirectUri;
-  
+
       if (redirectUri) {
         // Detectar si estamos en un dispositivo Android o en la web
         const userAgent = window.navigator.userAgent.toLowerCase();
         const isAndroid = userAgent.includes("android");
-  
+
         if (isAndroid) {
           // En Android usamos Deep Link con window.location.href
           console.log("Redirigiendo en Android con Deep Link:", redirectUri);
@@ -201,7 +203,7 @@ const Auth = () => {
            <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
          </div>
        </div>
-       
+
         ) : (
           <AuthForm />
         )}
