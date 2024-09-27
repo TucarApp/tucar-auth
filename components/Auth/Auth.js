@@ -130,9 +130,6 @@ const Auth = () => {
   // Verificar autenticación con redirección dinámica
   const verifyAuthentication = async (authSessionId) => {
     try {
-      // Log para verificar si el estado está siendo enviado correctamente
-      console.log('Estado enviado a verify-authentication:', state);
-      
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
@@ -177,6 +174,7 @@ const Auth = () => {
       setCurrentStep={setCurrentStep}
       authSessionId={authSessionId}
       udiFingerprint={udiFingerprint}
+      state={state} // Aseguramos que se pase el estado `state`
       authMethods={authMethods}
       setAuthMethods={setAuthMethods}
       authFlow={authFlow}
@@ -213,6 +211,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 
