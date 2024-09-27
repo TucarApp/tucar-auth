@@ -15,7 +15,7 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState('random-state'); // Inicializa con un valor predeterminado
+  const [state, setState] = useState(''); // Inicializamos sin valor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -28,100 +28,96 @@ const Auth = () => {
   }, [completed]);
 
   useEffect(() => {
-    // Capturar los parámetros solo si están presentes
+    console.log('currentStep actualizado:', currentStep);
+  }, [currentStep]);
+
+  // Capturar los parámetros de la URL y autorizar solo cuando estén presentes
+  useEffect(() => {
     const responseType = searchParams.get('response_type');
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
     const stateParam = searchParams.get('state'); // Capturar el valor de `state` desde la URL
-  
-    // Actualiza el estado de `state` si está presente
+
     if (stateParam) {
-      setState(stateParam); // Asignar correctamente el valor de `state`
+      setState(stateParam); // Actualizamos el valor de `state` desde la URL
     }
-  
+
     if (responseType && clientId && redirectUri && scope && stateParam) {
       console.log('Parámetros capturados desde la URL:', {
         response_type: responseType,
         client_id: clientId,
         redirect_uri: redirectUri,
         scope: scope,
-        state: stateParam, // Usar el valor capturado
+        state: stateParam, // Usar `stateParam` en los logs
       });
-  
-      authorize(); // Llamar a authorize solo si se capturan todos los parámetros
+
+      authorize(responseType, clientId, redirectUri, scope, stateParam); // Llamamos a authorize con los parámetros
     } else {
       console.log('Esperando los parámetros en la URL...');
     }
   }, [searchParams]);
-  
 
   // Función para la autorización inicial
-  const authorize = async () => {
+  const authorize = async (responseType, clientId, redirectUri, scope, stateParam) => {
     const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
-  
-    // Capturar los parámetros de la URL o usar valores por defecto
-    const responseType = searchParams.get('response_type') || 'code';
-    const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
-    const redirectUri = searchParams.get('redirect_uri') || 'driverapp://auth';
-    const scope = searchParams.get('scope') || 'driver';
+
     const tenancy = searchParams.get('tenancy') || 'production';
-  
-    // Usar el valor dinámico de `state`
+
     const params = {
       response_type: responseType,
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scope,
-      state: state, // Aquí usamos el estado `state` dinámico que ya capturamos
+      state: stateParam, // Usamos el `stateParam` que capturamos dinámicamente
       tenancy: tenancy
     };
-  
+
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
-  
+
     console.log(params, 'estos son los parámetros capturados');
+
     console.log('URL completa para autorización:', fullUrl);
-  
+
     try {
       const response = await axios.get(fullUrl, {
-        withCredentials: true,
+        withCredentials: true
       });
-  
+
       const data = response.data;
       console.log('Respuesta completa del servidor:', data);
-  
+
       if (data.authMethods && data.authMethods.length > 0) {
         setAuthMethods(data.authMethods);
       } else {
         console.error('authMethods no está presente en la respuesta o está vacío');
       }
-  
+
       setAuthSessionId(data.authSessionId);
       localStorage.setItem('authSessionId', data.authSessionId);
       setAuthFlow(data.authFlow);
       setCompleted(data.completed);
       setAuthData(data.authData);
-  
+
       // Actualizar fingerprint después de recibir authSessionId
       updateFingerprint(data.authSessionId);
     } catch (error) {
       console.error('Error en la autorización', error);
     }
   };
-  
 
   // Actualizar el fingerprint después de la autorización
   const updateFingerprint = async (authSessionId) => {
     try {
       const response = await axios.patch('https://accounts.tucar.app/api/v1/oauth/udi-fingerprint', {
         authSessionId,
-        udiFingerprint,
+        udiFingerprint
       }, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        withCredentials: true,
+        withCredentials: true
       });
 
       console.log('Fingerprint actualizado:', response.data);
@@ -137,34 +133,34 @@ const Auth = () => {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state, // Aquí también usas el estado `state` actualizado dinámicamente
+        state // Aquí también usas el estado `state` actualizado dinámicamente
       }, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        withCredentials: true,
+        withCredentials: true
       });
-
+  
       console.log('Autenticación verificada:', response.data);
       const redirectUri = response.data?.redirectUri;
-
+  
       if (redirectUri) {
         // Detectar si estamos en un dispositivo Android o en la web
         const userAgent = window.navigator.userAgent.toLowerCase();
-        const isAndroid = userAgent.includes('android');
-
+        const isAndroid = userAgent.includes("android");
+  
         if (isAndroid) {
           // En Android usamos Deep Link con window.location.href
-          console.log('Redirigiendo en Android con Deep Link:', redirectUri);
+          console.log("Redirigiendo en Android con Deep Link:", redirectUri);
           window.location.href = redirectUri;
         } else {
           // En la web (Next.js) usamos router.push para manejar la redirección interna
-          console.log('Redirigiendo en la web con Next.js:', redirectUri);
+          console.log("Redirigiendo en la web con Next.js:", redirectUri);
           router.push(redirectUri);
         }
       } else {
-        console.error('No se recibió un redirectUri.');
-        setErrorMessage('Error: No se recibió una URL de redirección.');
+        console.error("No se recibió un redirectUri.");
+        setErrorMessage("Error: No se recibió una URL de redirección.");
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
@@ -197,13 +193,14 @@ const Auth = () => {
           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
         )}
         {!authSessionId ? (
-          <div className="w-full h-screen flex justify-center items-center">
-            <div className="flex flex-row gap-2">
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
-            </div>
-          </div>
+         <div className='w-full h-screen flex justify-center items-center'>
+         <div className="flex flex-row gap-2">
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
+           <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+         </div>
+       </div>
+       
         ) : (
           <AuthForm />
         )}
@@ -213,6 +210,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 
