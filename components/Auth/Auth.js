@@ -367,12 +367,19 @@ const Auth = () => {
     }
   };
 
+   // Verificar autenticación con redirección dinámica
   const verifyAuthentication = async (authSessionId) => {
+    let storedState = state;
+    // Verifica si estamos en el cliente antes de acceder a localStorage
+    if (typeof window !== 'undefined') {
+      storedState = localStorage.getItem('state'); // Obtenemos el state desde localStorage si existe
+    }
+
     try {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state
+        state: storedState // Usamos el `state` almacenado en localStorage si es necesario
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -381,8 +388,25 @@ const Auth = () => {
       });
 
       console.log('Autenticación verificada:', response.data);
-      if (typeof window !== 'undefined') {
-        router.push('/dashboard');
+      const redirectUri = response.data?.redirectUri;
+
+      if (redirectUri) {
+        // Detectar si estamos en un dispositivo Android o en la web
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isAndroid = userAgent.includes("android");
+
+        if (isAndroid) {
+          // En Android usamos Deep Link con window.location.href
+          console.log("Redirigiendo en Android con Deep Link:", redirectUri);
+          window.location.href = redirectUri;
+        } else {
+          // En la web (Next.js) usamos router.push para manejar la redirección interna
+          console.log("Redirigiendo en la web con Next.js:", redirectUri);
+          router.push(redirectUri);
+        }
+      } else {
+        console.error("No se recibió un redirectUri.");
+        setErrorMessage("Error: No se recibió una URL de redirección.");
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
