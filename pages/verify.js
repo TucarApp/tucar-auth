@@ -30,16 +30,14 @@ const RedirectButton = styled.button`
 
 const Verify = () => {
   const router = useRouter();
-  const [secondsLeft, setSecondsLeft] = useState(4); // Timer de 4 segundos
+  const [secondsLeft, setSecondsLeft] = useState(4); 
   const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
-    // Obtener el redirectUri de localStorage
     const uri = localStorage.getItem('redirectUri');
     if (uri) {
       setRedirectUri(uri);
     } else {
-      // Manejo de error si no hay redirectUri almacenado
       console.error('No se encontró una URL de redirección.');
     }
   }, []);
@@ -51,7 +49,7 @@ const Verify = () => {
       }, 1000);
 
       const redirectTimeout = setTimeout(() => {
-        router.push(redirectUri); // Redirigir después de 4 segundos
+        router.push(redirectUri); 
       }, 4000);
 
       return () => {
@@ -63,7 +61,7 @@ const Verify = () => {
 
   const handleImmediateRedirect = () => {
     if (redirectUri) {
-      router.push(redirectUri);  // Redirigir inmediatamente cuando el usuario lo solicite
+      router.push(redirectUri); 
     }
   };
 
