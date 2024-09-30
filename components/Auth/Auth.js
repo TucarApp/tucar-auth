@@ -648,6 +648,7 @@ const Auth = () => {
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
       verifyAuthentication={verifyAuthentication}
+      state={state}
     >
       <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
         {errorMessage && (
@@ -718,7 +719,7 @@ export default Auth;
 //         params: {
 //           response_type: "code",
 //           client_id: "QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s",
-//           redirect_uri: "driverapp://auth",
+//           redirect_uri: "http://localhost:3000",
 //           scope: "driver",
 //           state: "random-state",
 //           tenancy: "development",

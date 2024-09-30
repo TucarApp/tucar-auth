@@ -55,6 +55,12 @@ export const AuthProvider = ({ children, ...props }) => {
   }, [props.authMethods]);
 
   useEffect(() => {
+    if (props.state) {
+      setState(props.state); // Actualiza el state si cambia en Auth
+    }
+  }, [props.state]);
+
+  useEffect(() => {
     console.log('Valores en AuthProvider:', { authSessionId, udiFingerprint, state });
   }, [authSessionId, udiFingerprint, state]);
 
