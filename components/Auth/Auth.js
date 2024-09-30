@@ -605,19 +605,11 @@ const Auth = () => {
       const redirectUri = response.data?.redirectUri;
   
       if (typeof window !== 'undefined' && redirectUri) {
-        // Detectar si estamos en un dispositivo Android o en la web
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        const isAndroid = userAgent.includes("android");
+        // Guardamos el redirectUri en localStorage
+        localStorage.setItem("redirectUri", redirectUri);
   
-        if (isAndroid) {
-          // En Android usamos Deep Link con window.location.href
-          console.log("Redirigiendo en Android con Deep Link:", redirectUri);
-          window.location.href = redirectUri;
-        } else {
-          // En la web (Next.js) usamos router.push para manejar la redirección interna
-          console.log("Redirigiendo en la web con Next.js:", redirectUri);
-          router.push(redirectUri);
-        }
+        // Redirigir a la página de verificación (por ejemplo: /verify)
+        router.push("/verify");
       } else {
         console.error("No se recibió un redirectUri.");
         setErrorMessage("Error: No se recibió una URL de redirección.");
@@ -627,6 +619,7 @@ const Auth = () => {
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
+  
   
 
   return (
