@@ -464,7 +464,7 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState('random-state');
+  const [state, setState] = useState(''); // ← Inicializamos como vacío
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -487,13 +487,10 @@ const Auth = () => {
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
-    const stateParam = searchParams.get('state');
+    const stateParam = searchParams.get('state'); // ← Capturamos el `state`
 
-    // Aca vemos si los parámetros están presentes en la URL
-    if (!responseType || !clientId || !redirectUri || !scope || !stateParam) {
-      console.log('No hay suficientes parámetros en la URL, redirigiendo...');
-      // Redirigir a una página específica o mostrar un mensaje
-
+    if (stateParam) {
+      setState(stateParam); // ← Actualizamos el valor de `state` si existe
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
@@ -516,7 +513,7 @@ const Auth = () => {
 
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
-    const stateParam = searchParams.get('state') || 'random-state'; // Usar el estado desde la URL o uno por defecto
+    const stateParam = searchParams.get('state') || state; // Usar el estado capturado
     const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
     const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000';
     const scope = searchParams.get('scope') || 'driver';
@@ -528,7 +525,7 @@ const Auth = () => {
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scope,
-      state: stateParam,
+      state: stateParam, // ← Pasamos el estado dinámico aquí
       tenancy: tenancy
     };
 
@@ -537,7 +534,6 @@ const Auth = () => {
 
     console.log('URL completa para autorización:', fullUrl);
 
-    // Redirigir automáticamente a la URL construida
     window.history.pushState(null, '', `/?${queryString}`);
 
     try {
@@ -560,7 +556,6 @@ const Auth = () => {
       setCompleted(data.completed);
       setAuthData(data.authData);
 
-      // Actualizar fingerprint después de recibir authSessionId
       updateFingerprint(data.authSessionId);
     } catch (error) {
       console.error('Error en la autorización', error);
@@ -591,24 +586,19 @@ const Auth = () => {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state
+        state // ← Usamos el estado capturado de la URL o predeterminado
       }, {
         headers: {
           'Content-Type': 'application/json'
         },
         withCredentials: true
       });
-  
+
       console.log('Autenticación verificada:', response.data);
-  
-      // Obtenemos el redirectUri de la respuesta
       const redirectUri = response.data?.redirectUri;
-  
+
       if (typeof window !== 'undefined' && redirectUri) {
-        // Guardamos el redirectUri en localStorage
         localStorage.setItem("redirectUri", redirectUri);
-  
-        // Redirigir a la página de verificación (por ejemplo: /verify)
         router.push("/verify");
       } else {
         console.error("No se recibió un redirectUri.");
@@ -619,8 +609,6 @@ const Auth = () => {
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
-  
-  
 
   return (
     <AuthProvider
@@ -641,7 +629,7 @@ const Auth = () => {
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
       verifyAuthentication={verifyAuthentication}
-      state={state}
+      state={state} // ← Pasamos el estado como prop
     >
       <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
         {errorMessage && (

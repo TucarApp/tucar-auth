@@ -26,7 +26,7 @@ const PopupText = styled.p`
   margin: 10px 0;
 `;
 
-export const AuthProvider = ({ children, ...props }) => {
+export const AuthProvider = ({ children, state, ...props }) => {
   const router = useRouter(); // Usamos useRouter para la redirección
   const [currentStep, setCurrentStep] = useState(0);
   const [emailOrPhone, setEmailOrPhone] = useState('');
@@ -44,6 +44,9 @@ export const AuthProvider = ({ children, ...props }) => {
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
   const [state, setState] = useState('random-state');
   const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
+
+
+  console.log('State recibido en AuthProvider:', state);
 
   useEffect(() => {
     if (props.authMethods) {
