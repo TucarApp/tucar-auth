@@ -43,22 +43,22 @@ const Verify = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (redirectUri) {
-  //     const timer = setInterval(() => {
-  //       setSecondsLeft((prev) => prev - 1);
-  //     }, 1000);
+  useEffect(() => {
+    if (redirectUri) {
+      const timer = setInterval(() => {
+        setSecondsLeft((prev) => prev - 1);
+      }, 1000);
 
-  //     const redirectTimeout = setTimeout(() => {
-  //       router.push(redirectUri); 
-  //     }, 4000);
+      const redirectTimeout = setTimeout(() => {
+        router.push(redirectUri); 
+      }, 4000);
 
-  //     return () => {
-  //       clearInterval(timer);
-  //       clearTimeout(redirectTimeout);
-  //     };
-  //   }
-  // }, [redirectUri, router]);
+      return () => {
+        clearInterval(timer);
+        clearTimeout(redirectTimeout);
+      };
+    }
+  }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
     if (redirectUri) {
