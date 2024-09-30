@@ -55,14 +55,14 @@ function Meta({ children, title, ...customMeta }) {
         )}
 
         {/* Google Tag Manager */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPMW19RWJ9"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BF7HR647WQ"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-HPMW19RWJ9');
+              gtag('config', 'G-BF7HR647WQ');
             `,
           }}
         />
