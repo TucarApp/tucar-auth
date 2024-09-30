@@ -172,105 +172,111 @@ const AuthForm = () => {
 
       {currentStep === 1 && (
         <FormContainer>
-          <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
-            <div>
-              <div className="flex justify-center">
-                <Logo color="color" className="cursor-pointer" width={180} />
-              </div>
-              <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
-                ¡Bienvenido de vuelta!
-              </h1>
+        <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
+          <div>
+            <div className="flex justify-center">
+              <Logo color="color" className="cursor-pointer" width={180} />
             </div>
-            <div className="pantallapc:w-[345px] w-[355px]">
-              <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
-                Ingresa correo o número de teléfono
-              </p>
-              {tucarMethod && ( // Solo mostrar el campo si Tucar está disponible
-                <>
-                  <InputField
-                    type="text"
-                    value={emailOrPhone}
-                    onChange={(e) =>
-                      setEmailOrPhone(e.target.value.toLowerCase())
-                    } // Convertir a minúsculas
-                  />
-                  <div className="flex flex-col justify-center items-center">
-                    {(inputError || errorMessage) && (
-                      <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
-                        {inputError || errorMessage}
-                      </p>
-                    )}
-                    <AuthButton
-                      onClick={handleSubmit}
-                      className="font-semibold text-[16px] font-Poppins"
-                    >
-                      Continuar
-                    </AuthButton>
-                  </div>
-                </>
-              )}
-
-              {(googleMethod || uberMethod) && (
-                <div className="flex flex-col items-center justify-center w-full">
-                  <div className="flex items-center justify-center my-8 w-[61%]">
-                    <div className="flex-grow border-t-2 border-[#0057b8]"></div>
-                    <div className="mx-4">
-                      <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
-                    </div>
-                    <div className="flex-grow border-t-2 border-[#0057b8]"></div>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-y-[15px]">
-                    {uberMethod && (
-                      <UberButton onClick={handleUberLogin} className="w-full">
-                        <div className="flex justify-center items-center gap-x-2">
-                          <img
-                            src="uberlog.png"
-                            alt="Uber Logo"
-                            width={18}
-                            className="ml-[px]"
-                          />
-                          <span className="font-Poppins font-normal">Continuar con Uber</span>
-                        </div>
-                      </UberButton>
-                    )}
-
-                    {googleMethod && googleClientId && (
-                      <div className="flex justify-center w-full">
-                        <GoogleLogin
-                          onSuccess={handleGoogleSuccess}
-                          onError={handleGoogleFailure}
-                          useOneTap
-                          text="continue_with"
-                          shape="rectangular"
-                          width={350}
-                          size="large"
-                          logo_alignment="center"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-
-              <div>
-                <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
-                  Al continuar, aceptas nuestros{" "}
-                  <a
-                    href="https://tucar.app/terminos-condiciones"
-                    className="underline"
-                  >
-                    términos y condiciones
-                  </a>
-                  , además de recibir llamadas, mensajes de WhatsApp o SMS,
-                  incluso por medios automatizados de TUCAR y sus filiales
-                  en el número proporcionado.
+            <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
+              ¡Bienvenido de vuelta!
+            </h1>
+          </div>
+          <div className="pantallapc:w-[345px] w-[355px]">
+      
+            {/* Mostrar el campo de emailOrPhone solo si Tucar está disponible */}
+            {tucarMethod && (
+              <>
+                <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
+                  Ingresa correo o número de teléfono
                 </p>
+                <InputField
+                  type="text"
+                  value={emailOrPhone}
+                  onChange={(e) =>
+                    setEmailOrPhone(e.target.value.toLowerCase())
+                  } // Convertir a minúsculas
+                />
+                <div className="flex flex-col justify-center items-center">
+                  {(inputError || errorMessage) && (
+                    <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
+                      {inputError || errorMessage}
+                    </p>
+                  )}
+                  <AuthButton
+                    onClick={handleSubmit}
+                    className="font-semibold text-[16px] font-Poppins"
+                  >
+                    Continuar
+                  </AuthButton>
+                </div>
+              </>
+            )}
+      
+            {/* Mostrar solo Google o Uber */}
+            {(googleMethod || uberMethod) && (
+              <div className="flex flex-col items-center justify-center w-full">
+                <div className="flex items-center justify-center my-8 w-[61%]">
+                  <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+                  <div className="mx-4">
+                    <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
+                  </div>
+                  <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+                </div>
+      
+                <div className="flex flex-col items-center gap-y-[15px]">
+                  {uberMethod && (
+                    <UberButton onClick={handleUberLogin} className="w-full">
+                      <div className="flex justify-center items-center gap-x-2">
+                        <img
+                          src="uberlog.png"
+                          alt="Uber Logo"
+                          width={18}
+                          className="ml-[px]"
+                        />
+                        <span className="font-Poppins font-normal">
+                          Continuar con Uber
+                        </span>
+                      </div>
+                    </UberButton>
+                  )}
+      
+                  {googleMethod && googleClientId && (
+                    <div className="flex justify-center w-full">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleFailure}
+                        useOneTap
+                        text="continue_with"
+                        shape="rectangular"
+                        width={350}
+                        size="large"
+                        logo_alignment="center"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+      
+            {/* Texto sobre términos y condiciones */}
+            <div>
+              <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
+                Al continuar, aceptas nuestros{" "}
+                <a
+                  href="https://tucar.app/terminos-condiciones"
+                  className="underline"
+                >
+                  términos y condiciones
+                </a>
+                , además de recibir llamadas, mensajes de WhatsApp o SMS,
+                incluso por medios automatizados de TUCAR y sus filiales
+                en el número proporcionado.
+              </p>
             </div>
           </div>
-        </FormContainer>
+        </div>
+      </FormContainer>
+      
       )}
 
       {currentStep === 2 && (
