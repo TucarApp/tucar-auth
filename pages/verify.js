@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
+import Logo from '../components/LogoTucar/LogoTucar'
 
 const VerifyContainer = styled.div`
   display: flex;
@@ -16,7 +17,7 @@ const VerifyContainer = styled.div`
 const RedirectButton = styled.button`
   padding: 10px 20px;
   margin-top: 20px;
-  background-color: #007bff;
+  background-color: #0057b8;
   color: white;
   border: none;
   border-radius: 5px;
@@ -42,22 +43,22 @@ const Verify = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (redirectUri) {
-      const timer = setInterval(() => {
-        setSecondsLeft((prev) => prev - 1);
-      }, 1000);
+  // useEffect(() => {
+  //   if (redirectUri) {
+  //     const timer = setInterval(() => {
+  //       setSecondsLeft((prev) => prev - 1);
+  //     }, 1000);
 
-      const redirectTimeout = setTimeout(() => {
-        router.push(redirectUri); 
-      }, 4000);
+  //     const redirectTimeout = setTimeout(() => {
+  //       router.push(redirectUri); 
+  //     }, 4000);
 
-      return () => {
-        clearInterval(timer);
-        clearTimeout(redirectTimeout);
-      };
-    }
-  }, [redirectUri, router]);
+  //     return () => {
+  //       clearInterval(timer);
+  //       clearTimeout(redirectTimeout);
+  //     };
+  //   }
+  // }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
     if (redirectUri) {
@@ -66,7 +67,12 @@ const Verify = () => {
   };
 
   return (
+    <div className='text-[#5b5d71] font-Poppins font-normal'>
+      
     <VerifyContainer>
+      <div className='my-[15px]'>
+      <Logo color="color" className="cursor-pointer" width={180} />
+      </div>
       <h1>Verificando autenticación...</h1>
       {redirectUri ? (
         <>
@@ -79,7 +85,9 @@ const Verify = () => {
         <p>Error al obtener la URL de redirección.</p>
       )}
     </VerifyContainer>
+    </div>
   );
+
 };
 
 export default Verify;

@@ -42,7 +42,7 @@ export const AuthProvider = ({ children, ...props }) => {
   const [errorMessage, setErrorMessage] = useState(''); // Manejo de errores centralizado
   const [authSessionId, setAuthSessionId] = useState('');
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier'); // Cambia el valor según sea necesario
-  const [state, setState] = useState(props.state || 'random-state');
+  const [state, setState] = useState('random-state');
   const [showThankYouPopup, setShowThankYouPopup] = useState(false); // Estado para controlar el popup
 
   useEffect(() => {
@@ -54,12 +54,7 @@ export const AuthProvider = ({ children, ...props }) => {
     }
   }, [props.authMethods]);
 
-  useEffect(() => {
-    if (props.state) {
-      setState(props.state); // Actualiza el state si cambia en Auth
-    }
-  }, [props.state]);
-
+ 
   useEffect(() => {
     console.log('Valores en AuthProvider:', { authSessionId, udiFingerprint, state });
   }, [authSessionId, udiFingerprint, state]);
