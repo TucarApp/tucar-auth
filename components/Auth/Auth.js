@@ -464,7 +464,7 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState(''); // ← Inicializamos como vacío
+  const [state, setState] = useState(''); // Inicializamos como vacío
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -487,10 +487,10 @@ const Auth = () => {
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
-    const stateParam = searchParams.get('state'); // ← Capturamos el `state`
+    const stateParam = searchParams.get('state'); // Capturamos el `state`
 
     if (stateParam) {
-      setState(stateParam); // ← Actualizamos el valor de `state` si existe
+      setState(stateParam); // Actualizamos el valor de `state` si existe
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
@@ -525,7 +525,7 @@ const Auth = () => {
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scope,
-      state: stateParam, // ← Pasamos el estado dinámico aquí
+      state: stateParam, // Pasamos el estado dinámico aquí
       tenancy: tenancy
     };
 
@@ -586,7 +586,7 @@ const Auth = () => {
       const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
-        state // ← Usamos el estado capturado de la URL o predeterminado
+        state // Usamos el estado capturado de la URL o predeterminado
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -629,7 +629,7 @@ const Auth = () => {
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
       verifyAuthentication={verifyAuthentication}
-      state={state} // ← Pasamos el estado como prop
+      state={state} // Pasamos el estado como prop
     >
       <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
         {errorMessage && (
@@ -637,12 +637,12 @@ const Auth = () => {
         )}
         {!authSessionId ? (
           <div className='w-full h-screen flex justify-center items-center'>
-                  <div className="flex flex-row gap-2">
-                    <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-                    <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-                    <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
-                  </div>
-           </div>
+            <div className="flex flex-row gap-2">
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
+              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+            </div>
+          </div>
         ) : (
           <AuthForm />
         )}
@@ -652,6 +652,7 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
 
 
