@@ -20,9 +20,13 @@ function Meta({ children, title, ...customMeta }) {
     ...customMeta,
   };
 
+  
+
   return (
     <>
       <Head>
+    
+
         <title>{meta.title}</title>
         <meta name="robots" content="follow, index" />
         <meta content={meta.description} name="description" />
@@ -49,6 +53,19 @@ function Meta({ children, title, ...customMeta }) {
         {meta.data && (
           <meta property="article:published_time" content={meta.date} />
         )}
+
+        {/* Google Tag Manager */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPMW19RWJ9"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-HPMW19RWJ9');
+            `,
+          }}
+        />
       </Head>
     </>
   );
