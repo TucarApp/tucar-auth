@@ -211,7 +211,7 @@ const AuthForm = () => {
               )}
 
               {(googleMethod || uberMethod) && (
-                <>
+                <div className="flex flex-col items-center justify-center w-full">
                   <div className="flex items-center justify-center my-8 w-[61%]">
                     <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                     <div className="mx-4">
@@ -219,23 +219,24 @@ const AuthForm = () => {
                     </div>
                     <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                   </div>
-                  <div className="flex flex-col gap-y-[15px]">
+
+                  <div className="flex flex-col items-center gap-y-[15px]">
                     {uberMethod && (
-                      <UberButton onClick={handleUberLogin}>
-                        <img
-                          src="uberlog.png"
-                          alt="Uber Logo"
-                          width={18}
-                          className="ml-[px]"
-                        />
-                        <span className="font-Poppins font-normal">
-                          Continuar con Uber
-                        </span>
+                      <UberButton onClick={handleUberLogin} className="w-full">
+                        <div className="flex justify-center items-center gap-x-2">
+                          <img
+                            src="uberlog.png"
+                            alt="Uber Logo"
+                            width={18}
+                            className="ml-[px]"
+                          />
+                          <span className="font-Poppins font-normal">Continuar con Uber</span>
+                        </div>
                       </UberButton>
                     )}
 
                     {googleMethod && googleClientId && (
-                      <div className="flex justify-center">
+                      <div className="flex justify-center w-full">
                         <GoogleLogin
                           onSuccess={handleGoogleSuccess}
                           onError={handleGoogleFailure}
@@ -249,8 +250,9 @@ const AuthForm = () => {
                       </div>
                     )}
                   </div>
-                </>
+                </div>
               )}
+
 
               <div>
                 <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
