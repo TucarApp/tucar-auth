@@ -1,49 +1,95 @@
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
+import Logo from '../components/LogoTucar/LogoTucar'
+import AuthButton from '@/components/Auth/AuthButton';
+
+const VerifyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f0f4f8;
+  color: #5b5d71;
+  font-family: 'Poppins', sans-serif;
+`;
+
+const RedirectButton = styled.button`
+  padding: 10px 20px;
+  margin-top: 20px;
+  background-color: #0057b8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
 
 const Verify = () => {
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState(6); // Inicializamos el contador en 6 segundos
+  const [secondsLeft, setSecondsLeft] = useState(4);
+  const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
-    // Iniciamos el intervalo para contar los segundos
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000); // Cada segundo
+    const uri = localStorage.getItem('redirectUri');
+    if (uri) {
+      setRedirectUri(uri);
+    } else {
+      console.error('No se encontró una URL de redirección.');
+    }
+  }, []);
 
-    // Redirige al dashboard después de que el contador llegue a 0
-    const timer = setTimeout(() => {
-      router.push('/dashboard');
-    }, 6000); // 6 segundos
+  useEffect(() => {
+    if (redirectUri) {
+      const timer = setInterval(() => {
+        setSecondsLeft((prev) => prev - 1);
+      }, 1000);
 
-    // Limpiar el intervalo y el timeout al desmontar el componente
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
-  }, [router]);
+      const redirectTimeout = setTimeout(() => {
+        router.push(redirectUri); 
+      }, 4000);
 
-  // Función para saltar el timeout y redirigir de inmediato
-  const skipTimeout = () => {
-    router.push('/dashboard');
+      return () => {
+        clearInterval(timer);
+        clearTimeout(redirectTimeout);
+      };
+    }
+  }, [redirectUri, router]);
+
+  const handleImmediateRedirect = () => {
+    if (redirectUri) {
+      router.push(redirectUri);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-black">
-      <h1 className="text-2xl font-bold">¡Gracias por registrarte!</h1>
-      <p>Estamos verificando tu autenticación...</p>
-      <p>Esta ventana se cerrará en {timeLeft} segundos</p>
+    <div className='text-[#5b5d71] text-[15px] font-Poppins font-normal flex justify-center items-center w-full'>
 
-      {/* Botón para saltar el timeout */}
-      <button
-        onClick={skipTimeout}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Saltar y continuar ahora
-      </button>
+      <VerifyContainer>
+        <div className='my-[15px]'>
+          <Logo color="color" className="cursor-pointer" width={180} />
+        </div>
+        <h1>Verificando autenticación...</h1>
+        {redirectUri ? (
+          <>
+            <p>Serás redirigido en {secondsLeft} segundos...</p>
+            <AuthButton className='mb-[-px]'  onClick={handleImmediateRedirect}>
+              Redirigir ahora
+            </AuthButton>
+          </>
+        ) : (
+          <p>Error al obtener la URL de redirección.</p>
+        )}
+      </VerifyContainer>
     </div>
   );
+
 };
 
 export default Verify;
