@@ -31,7 +31,7 @@ const Auth = () => {
  
 
   useEffect(() => {
-    // Capturar los parámetros solo si están presentes
+   
     const responseType = searchParams.get('response_type');
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
