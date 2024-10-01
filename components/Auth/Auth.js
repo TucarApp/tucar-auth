@@ -47,7 +47,7 @@ const Auth = () => {
 
       authorize(); // Llamar a authorize solo si se capturan todos los parámetros
     } else {
-      console.log('Esperando los parámetros en la URL...');
+      
     }
   }, [searchParams]); // Asegurarse de que searchParams esté disponible
 
