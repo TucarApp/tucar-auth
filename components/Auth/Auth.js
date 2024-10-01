@@ -28,9 +28,7 @@ const Auth = () => {
     }
   }, [completed]);
 
-  useEffect(() => {
-    console.log('currentStep actualizado:', currentStep);
-  }, [currentStep]);
+ 
 
   useEffect(() => {
     // Capturar los parámetros solo si están presentes
@@ -45,13 +43,7 @@ const Auth = () => {
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
-      console.log('Parámetros capturados desde la URL:', {
-        response_type: responseType,
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        scope: scope,
-        state: stateParam,
-      });
+     
 
       authorize(); // Llamar a authorize solo si se capturan todos los parámetros
     } else {
@@ -83,7 +75,7 @@ const Auth = () => {
     const queryString = new URLSearchParams(params).toString();
     const fullUrl = `${baseUrl}?${queryString}`;
 
-    console.log('URL completa para autorización:', fullUrl);
+   
 
     window.history.pushState(null, '', `/?${queryString}`);
 
@@ -93,7 +85,7 @@ const Auth = () => {
       });
 
       const data = response.data;
-      console.log('Respuesta completa del servidor:', data);
+      
 
       if (data.authMethods && data.authMethods.length > 0) {
         setAuthMethods(data.authMethods);
@@ -125,7 +117,7 @@ const Auth = () => {
         withCredentials: true
       });
 
-      console.log('Fingerprint actualizado:', response.data);
+     
       setCurrentStep(1);
     } catch (error) {
       console.error('Error en la actualización del fingerprint', error);
@@ -145,7 +137,7 @@ const Auth = () => {
         withCredentials: true
       });
 
-      console.log('Autenticación verificada:', response.data);
+    
       const redirectUri = response.data?.redirectUri;
 
       if (typeof window !== 'undefined' && redirectUri) {

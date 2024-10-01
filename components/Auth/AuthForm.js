@@ -152,7 +152,7 @@ const AuthForm = () => {
         await submitAuthentication();
       }
     } catch (error) {
-      console.log("Error completo:", error.response?.data);
+     
       setInputError("Error en la autenticación. Por favor, inténtalo de nuevo.");
     }
   };
