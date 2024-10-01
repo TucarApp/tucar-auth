@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import Logo from '../components/LogoTucar/LogoTucar'
+import AuthButton from '@/components/Auth/AuthButton';
 
 const VerifyContainer = styled.div`
   display: flex;
@@ -9,8 +10,9 @@ const VerifyContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100vw;
   background-color: #f0f4f8;
-  color: #333;
+  color: #5b5d71;
   font-family: 'Poppins', sans-serif;
 `;
 
@@ -31,7 +33,7 @@ const RedirectButton = styled.button`
 
 const Verify = () => {
   const router = useRouter();
-  const [secondsLeft, setSecondsLeft] = useState(4); 
+  const [secondsLeft, setSecondsLeft] = useState(4);
   const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
@@ -62,29 +64,29 @@ const Verify = () => {
 
   const handleImmediateRedirect = () => {
     if (redirectUri) {
-      router.push(redirectUri); 
+      router.push(redirectUri);
     }
   };
 
   return (
-    <div className='text-[#5b5d71] font-Poppins font-normal'>
-      
-    <VerifyContainer>
-      <div className='my-[15px]'>
-      <Logo color="color" className="cursor-pointer" width={180} />
-      </div>
-      <h1>Verificando autenticación...</h1>
-      {redirectUri ? (
-        <>
-          <p>Serás redirigido en {secondsLeft} segundos...</p>
-          <RedirectButton onClick={handleImmediateRedirect}>
-            Redirigir ahora
-          </RedirectButton>
-        </>
-      ) : (
-        <p>Error al obtener la URL de redirección.</p>
-      )}
-    </VerifyContainer>
+    <div className='text-[#5b5d71] text-[15px] font-Poppins font-normal flex justify-center items-center w-full'>
+
+      <VerifyContainer>
+        <div className='my-[15px]'>
+          <Logo color="color" className="cursor-pointer" width={180} />
+        </div>
+        <h1>Verificando autenticación...</h1>
+        {redirectUri ? (
+          <>
+            <p>Serás redirigido en {secondsLeft} segundos...</p>
+            <AuthButton className='mb-[-px]'  onClick={handleImmediateRedirect}>
+              Redirigir ahora
+            </AuthButton>
+          </>
+        ) : (
+          <p>Error al obtener la URL de redirección.</p>
+        )}
+      </VerifyContainer>
     </div>
   );
 
