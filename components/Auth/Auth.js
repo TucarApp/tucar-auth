@@ -52,8 +52,10 @@ const Auth = () => {
   }, [searchParams]); // Asegurarse de que searchParams esté disponible
 
   const authorize = async () => {
-    const baseUrl = 'https://accounts.tucar.app/api/v1/oauth/authorize';
-
+    const isAppEnv = window.location.hostname.includes('.app');
+    const baseUrl = isAppEnv 
+      ? 'https://accounts.tucar.app/api/v1/oauth/authorize' 
+      : 'https://accounts.tucar.dev/api/v1/oauth/authorize';
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
     const stateParam = searchParams.get('state') || state; // Usar el estado capturado
