@@ -7,7 +7,7 @@ function Meta({ children, title, ...customMeta }) {
   const router = useRouter();
   const cdnUrl = "https://storage.googleapis.com/tucar-dev-bucket/public";
 
- 
+
 
   const meta = {
     title: title ? `${title} | Tucar` : "Tucar",
@@ -20,12 +20,12 @@ function Meta({ children, title, ...customMeta }) {
     ...customMeta,
   };
 
-  
+
 
   return (
     <>
       <Head>
-    
+
 
         <title>{meta.title}</title>
         <meta name="robots" content="follow, index" />
@@ -55,17 +55,39 @@ function Meta({ children, title, ...customMeta }) {
         )}
 
         {/* Google Tag Manager */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BF7HR647WQ"></script>
-        <script
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=G-BF7HR647WQ`}
+        />
+
+        {/* Script para inicializar gtag */}
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-BF7HR647WQ');
-            `,
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-BF7HR647WQ', {
+              page_path: window.location.pathname,
+            });
+          `,
           }}
         />
+        {/* Hotjar Tracking Code */}
+        <Script strategy="lazyOnload">
+          {`
+          (function(h,o,t,j,a,r){
+              h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+              h._hjSettings={hjid:5155505,hjsv:6};
+              a=o.getElementsByTagName('head')[0];
+              r=o.createElement('script');r.async=1;
+              r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+              a.appendChild(r);
+          })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+        `}
+        </Script>
       </Head>
     </>
   );
