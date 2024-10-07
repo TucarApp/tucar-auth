@@ -398,7 +398,7 @@ const AuthForm = () => {
                 <p className="font-Poppins font-medium">Continuar</p>
               </AuthButton>
             </div>
-          </div>
+          </div> 
         </div>
       )}
 
