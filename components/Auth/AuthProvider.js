@@ -173,6 +173,8 @@ export const AuthProvider = ({ children, state, ...props }) => {
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
       setErrorMessage('Error en la verificación de la autenticación');
+
+      
     }
   };
   
