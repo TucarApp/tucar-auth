@@ -138,13 +138,18 @@ const Auth = () => {
         },
         withCredentials: true
       });
-
-    
+  
       const redirectUri = response.data?.redirectUri;
-
-      if (typeof window !== 'undefined' && redirectUri) {
+  
+      // Redirigir en función del flujo de autenticación
+      if (typeof window !== 'undefined') {
         localStorage.setItem("redirectUri", redirectUri);
-        router.push("/verify");
+        
+        if (authFlow === 'sign_up') {
+          router.push("/verify-up"); // Si es registro
+        } else if (authFlow === 'sign_in') {
+          router.push("/verify-in"); // Si es inicio de sesión
+        }
       } else {
         console.error("No se recibió un redirectUri.");
         setErrorMessage("Error: No se recibió una URL de redirección.");
@@ -154,6 +159,7 @@ const Auth = () => {
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
+  
 
   return (
     <AuthProvider
