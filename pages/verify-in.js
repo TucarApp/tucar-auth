@@ -19,24 +19,36 @@ const VerifyContainer = styled.div`
 const VerifyIn = () => {
   const router = useRouter();
   const [secondsLeft, setSecondsLeft] = useState(4);
+  const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
-    }, 1000);
+    const uri = localStorage.getItem('redirectUri');
+    if (uri) {
+      setRedirectUri(uri);
+    } else {
+      console.error('No se encontró una URL de redirección.');
+    }
+  }, []);
 
-    const redirectTimeout = setTimeout(() => {
-      router.push('/dashboard');  // Aquí rediriges a la página que quieras después de sign_in
-    }, 4000);
+  useEffect(() => {
+    if (redirectUri) {
+      const timer = setInterval(() => {
+        setSecondsLeft((prev) => prev - 1);
+      }, 1000);
 
-    return () => {
-      clearInterval(timer);
-      clearTimeout(redirectTimeout);
-    };
-  }, [router]);
+      const redirectTimeout = setTimeout(() => {
+        router.push(redirectUri);  // Aquí rediriges a la URL guardada en localStorage
+      }, 4000);
+
+      return () => {
+        clearInterval(timer);
+        clearTimeout(redirectTimeout);
+      };
+    }
+  }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
-    router.push('/dashboard');  // Redirigir inmediatamente
+    router.push(redirectUri);  // Redirigir inmediatamente
   };
 
   return (
@@ -45,10 +57,16 @@ const VerifyIn = () => {
         <Logo color="color" className="cursor-pointer" width={180} />
       </div>
       <h1>Verificación completa (Inicio de sesión)</h1>
-      <p>Serás redirigido en {secondsLeft} segundos...</p>
-      <AuthButton onClick={handleImmediateRedirect}>
-        Redirigir ahora
-      </AuthButton>
+      {redirectUri ? (
+        <>
+          <p>Serás redirigido en {secondsLeft} segundos...</p>
+          <AuthButton onClick={handleImmediateRedirect}>
+            Redirigir ahora
+          </AuthButton>
+        </>
+      ) : (
+        <p>Error al obtener la URL de redirección.</p>
+      )}
     </VerifyContainer>
   );
 };
