@@ -5,7 +5,7 @@ import AuthButton from "./AuthButton";
 import UberButton from "./UberButton";
 import Logo from "../LogoTucar/LogoTucar";
 import { useAuthContext } from "./AuthProvider";
-
+import VerificationCodeInput from "./VerificationCodeInput";
 import { GoogleLogin } from "@react-oauth/google";
 
 // Contenedor para el formulario

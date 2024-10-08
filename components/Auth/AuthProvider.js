@@ -178,10 +178,9 @@ export const AuthProvider = ({ children, state, ...props }) => {
     }
   };
   
-
   const submitAuthentication = async (isFallback = false) => {
     let authenticationActions = [];
-  
+
     // Fallback para regresar al paso anterior
     if (isFallback) {
       if (currentStep > 1) {
@@ -189,25 +188,152 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
       return;
     }
-  
+
     // Validación de campos en el paso 1
     if (currentStep === 1) {
       if (!emailOrPhone) {
         setErrorMessage('Por favor, ingresa tu correo electrónico o número de teléfono');
         return;
       }
-  
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'emailOrPhone',
         value: emailOrPhone
       });
     }
-  
+
     // Validación de campos en el paso 2 (Registro)
     else if (currentStep === 2) {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Por favor, completa todos los campos.');
+        return;
+      }
+
+      authenticationActions.push(
+        {
+          submitAction: 'resolve',
+          stepType: 'firstname',
+          value: firstname
+        },
+        {
+          submitAction: 'resolve',
+          stepType: 'lastname',
+          value: lastname
+        },
+        {
+          submitAction: 'resolve',
+          stepType: 'email',
+          value: email
+        },
+        {
+          submitAction: 'resolve',
+          stepType: 'phone',
+          value: phone
+        }
+      );
+    }
+
+    // Validación de campos en el paso 3 (Código de verificación)
+    else if (currentStep === 3) {
+      if (!verificationCode) {
+        setErrorMessage('Por favor, ingresa el código de verificación.');
+        return;
+      }
+
+      authenticationActions.push({
+        submitAction: 'resolve',
+        stepType: 'verificationCode',
+        value: verificationCode
+      });
+    }
+
+    // Validación de campos en el paso 4 (Contraseña)
+    else if (currentStep === 4) {
+      if (!password) {
+        setErrorMessage('Por favor, ingresa tu contraseña.');
+        return;
+      }
+
+      authenticationActions.push({
+        submitAction: 'resolve',
+        stepType: 'password',
+        value: password
+      });
+    }
+
+    try {
+      const response = await axios.post('/api/v1/oauth/submit-authentication', {
+        authSessionId: props.authSessionId,
+        udiFingerprint: props.udiFingerprint,
+        methodType: 'EmailOrPhone',
+        authenticationActions
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+
+      // Guardar el authFlow en localStorage
+      const { authFlow } = response.data;
+      console.log(authFlow, 'thiiis');
+      localStorage.setItem('authFlow', authFlow); // Guardamos authFlow para usarlo después en la redirección
+
+      setResponse(response.data);
+
+      const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
+
+      if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Google')) {
+        setCurrentStep(6);
+      } else if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
+        setCurrentStep(5);
+      } else {
+        const nextStepIndex = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
+        if (nextStepIndex !== undefined) {
+          setCurrentStep(nextStepIndex);
+        } else {
+          // Aquí redireccionamos según el authFlow
+          if (authFlow === 'sign_up') {
+            router.push('/verify-up'); // Redirigir a la página de verificación de registro
+          } else if (authFlow === 'sign_in') {
+            router.push('/verify-in'); // Redirigir a la página de verificación de inicio de sesión
+          } else {
+            await verifyAuthentication(response.data.authSessionId); // Verificación en caso de que no haya más pasos
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('Error en la autenticación:', error.response ? error.response.data : error);
+      const serverErrors = error.response?.data?.detail?.errors;
+
+      if (serverErrors?.includes('phone')) {
+        setErrorMessage('Por favor completa el campo de número de teléfono');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Invalid code") {
+        setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
+      } else {
+        setErrorMessage(serverErrors || 'Error en la autenticación');
+      }
+    }
+  };
+
+  
+  
+
+  const submitAuthenticationGoogle = async () => {
+    let authenticationActions = [];
+  
+    // Paso de registro (sign_up)
+    if (currentStep === 2 && props.authFlow === 'sign_up') {
+      if (!firstname || !lastname || !email || !phone) {
+        setErrorMessage('Todos los campos son obligatorios');
         return;
       }
   
@@ -233,10 +359,9 @@ export const AuthProvider = ({ children, state, ...props }) => {
           value: phone
         }
       );
-    }
-  
-    // Validación de campos en el paso 3 (Código de verificación)
-    else if (currentStep === 3) {
+    } 
+    // Paso de inicio de sesión (sign_in) o verificación de código (cualquier flujo)
+    else if (props.authFlow === 'sign_in' || currentStep === 3) {
       if (!verificationCode) {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
@@ -249,25 +374,11 @@ export const AuthProvider = ({ children, state, ...props }) => {
       });
     }
   
-    // Validación de campos en el paso 4 (Contraseña)
-    else if (currentStep === 4) {
-      if (!password) {
-        setErrorMessage('Por favor, ingresa tu contraseña.');
-        return;
-      }
-  
-      authenticationActions.push({
-        submitAction: 'resolve',
-        stepType: 'password',
-        value: password
-      });
-    }
-  
     try {
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
         authSessionId: props.authSessionId,
         udiFingerprint: props.udiFingerprint,
-        methodType: 'EmailOrPhone',
+        methodType: 'Google',
         authenticationActions
       }, {
         headers: {
@@ -276,28 +387,34 @@ export const AuthProvider = ({ children, state, ...props }) => {
         withCredentials: true
       });
   
+      // Guardar el authFlow en localStorage
+      const { authFlow } = response.data;
+      console.log(authFlow, 'Google flow');
+      localStorage.setItem('authFlow', authFlow);
+  
       setResponse(response.data);
   
-      const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
+      const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
   
-      if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Google')) {
-        setCurrentStep(6);
-      } else if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
-        setCurrentStep(5);
+      if (nextStep !== undefined) {
+        setCurrentStep(nextStep);
       } else {
-        const nextStepIndex = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
-        if (nextStepIndex !== undefined) {
-          setCurrentStep(nextStepIndex);
+        // Aquí redireccionamos según el authFlow
+        if (authFlow === 'sign_up') {
+          router.push('/verify-up'); // Redirigir a la página de verificación de registro
+        } else if (authFlow === 'sign_in') {
+          router.push('/verify-in'); // Redirigir a la página de verificación de inicio de sesión
         } else {
+          // Verificación en caso de que no haya más pasos
           await verifyAuthentication(response.data.authSessionId);
         }
       }
   
     } catch (error) {
-      console.error('Error en la autenticación:', error.response ? error.response.data : error);
+      console.error('Error en la autenticación con Google:', error.response ? error.response.data : error);
       const serverErrors = error.response?.data?.detail?.errors;
   
-      if (serverErrors.includes('phone')) {
+      if (serverErrors?.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -313,89 +430,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
     }
   };
   
-
-  const submitAuthenticationGoogle = async () => {
-    let authenticationActions = [];
-
-    if (currentStep === 2 && props.authFlow === 'sign_up') {
-      if (!firstname || !lastname || !email || !phone) {
-        setErrorMessage('Todos los campos son obligatorios');
-        return;
-      }
-
-      authenticationActions.push(
-        {
-          submitAction: 'resolve',
-          stepType: 'firstname',
-          value: firstname
-        },
-        {
-          submitAction: 'resolve',
-          stepType: 'lastname',
-          value: lastname
-        },
-        {
-          submitAction: 'resolve',
-          stepType: 'email',
-          value: email
-        },
-        {
-          submitAction: 'resolve',
-          stepType: 'phone',
-          value: phone
-        }
-      );
-    } else if (props.authFlow === 'sign_in' || currentStep === 3) {
-      if (!verificationCode) {
-        setErrorMessage('Por favor, ingresa el código de verificación.');
-        return;
-      }
-
-      authenticationActions.push({
-        submitAction: 'resolve',
-        stepType: 'verificationCode',
-        value: verificationCode
-      });
-    }
-
-    try {
-      const response = await axios.post('/api/v1/oauth/submit-authentication', {
-        authSessionId: props.authSessionId,
-        udiFingerprint: props.udiFingerprint,
-        methodType: 'Google',
-        authenticationActions
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-
-      setResponse(response.data);
-
-      const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
-
-      if (nextStep !== undefined) {
-        setCurrentStep(nextStep);
-      } else {
-        // Verificamos al completar el flujo
-        await verifyAuthentication(response.data.authSessionId);
-      }
-    } catch (error) {
-      const serverErrors = error.response?.data?.detail?.errors;
-      if (serverErrors.includes('phone')) {
-        setErrorMessage('Por favor completa el campo de número de teléfono');
-      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
-        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
-        reloadPage();
-      } else if (serverErrors === "Internal server error") {
-        setErrorMessage('Ups, ocurrió un error. Recargando...');
-        reloadPage();
-      } else {
-        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
-      }
-    }
-  };
+  
 
   const handleGoogleSuccess = async (response) => {
     const { credential } = response;
