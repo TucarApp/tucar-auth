@@ -56,6 +56,7 @@ const Auth = () => {
     const baseUrl = isAppEnv 
       ? 'https://accounts.tucar.app/api/v1/oauth/authorize' 
       : 'https://accounts.tucar.dev/api/v1/oauth/authorize';
+
     // Capturar los parámetros de la URL o usar valores por defecto
     const responseType = searchParams.get('response_type') || 'code';
     const stateParam = searchParams.get('state') || state; // Usar el estado capturado
@@ -138,18 +139,13 @@ const Auth = () => {
         },
         withCredentials: true
       });
-  
+
+    
       const redirectUri = response.data?.redirectUri;
-  
-      // Redirigir en función del flujo de autenticación
-      if (typeof window !== 'undefined') {
+
+      if (typeof window !== 'undefined' && redirectUri) {
         localStorage.setItem("redirectUri", redirectUri);
-        
-        if (authFlow === 'sign_up') {
-          router.push("/verify-up"); // Si es registro
-        } else if (authFlow === 'sign_in') {
-          router.push("/verify-in"); // Si es inicio de sesión
-        }
+        router.push("/verify");
       } else {
         console.error("No se recibió un redirectUri.");
         setErrorMessage("Error: No se recibió una URL de redirección.");
@@ -159,7 +155,6 @@ const Auth = () => {
       setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
     }
   };
-  
 
   return (
     <AuthProvider
@@ -282,7 +277,7 @@ export default Auth;
 //       setCompleted(data.completed);
 //       setAuthData(data.authData);
 
-//       Actualizar fingerprint después de recibir authSessionId
+//       // // Actualizar fingerprint después de recibir authSessionId
 //       updateFingerprint(data.authSessionId);
 //     } catch (error) {
 //       console.error("Error en la autorización", error);
@@ -329,7 +324,7 @@ export default Auth;
 //       const redirectUri = response.data?.redirectUri;
 
 //       if (redirectUri) {
-//         Redirigir al `redirectUri` en lugar de /dashboard
+//        // // Redirigir al `redirectUri` en lugar de /dashboard
 //         router.push(redirectUri);
 //       } else {
 //         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");
@@ -360,6 +355,7 @@ export default Auth;
 //       errorMessage={errorMessage}
 //       setErrorMessage={setErrorMessage}
 //       verifyAuthentication={verifyAuthentication}
+//       state={state}
 //     >
 //       <div className="max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]">
 //         {errorMessage && (
