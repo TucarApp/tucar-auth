@@ -19,24 +19,38 @@ const VerifyContainer = styled.div`
 const VerifyUp = () => {
   const router = useRouter();
   const [secondsLeft, setSecondsLeft] = useState(4);
+  const [redirectUri, setRedirectUri] = useState('');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
-    }, 1000);
+    const uri = localStorage.getItem('redirectUri');
+    if (uri) {
+      setRedirectUri(uri);
+    } else {
+      console.error('No se encontró una URL de redirección.');
+    }
+  }, []);
 
-    const redirectTimeout = setTimeout(() => {
-      router.push('/dashboard');  // Aquí rediriges a la página que quieras después de sign_up
-    }, 4000);
+  useEffect(() => {
+    if (redirectUri) {
+      const timer = setInterval(() => {
+        setSecondsLeft((prev) => prev - 1);
+      }, 1000);
 
-    return () => {
-      clearInterval(timer);
-      clearTimeout(redirectTimeout);
-    };
-  }, [router]);
+      const redirectTimeout = setTimeout(() => {
+        router.push(redirectUri);  // Redirigir al redirectUri
+      }, 4000);
+
+      return () => {
+        clearInterval(timer);
+        clearTimeout(redirectTimeout);
+      };
+    }
+  }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
-    router.push('/dashboard');  // Redirigir inmediatamente
+    if (redirectUri) {
+      router.push(redirectUri);  // Redirigir inmediatamente
+    }
   };
 
   return (

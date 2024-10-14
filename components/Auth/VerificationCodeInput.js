@@ -34,7 +34,7 @@ const VerificatonInput = styled.input`
 `;
 
 const VerificationInput = ({ submitVerificationCode, isLoading }) => {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(['', '', '', '']);
   const inputRefs = [
     useRef(null),
     useRef(null),
@@ -47,41 +47,58 @@ const VerificationInput = ({ submitVerificationCode, isLoading }) => {
       ref.current.value = '';
     });
     inputRefs[0].current.focus();
-    setCode('');
+    setCode(['', '', '', '']);
   };
 
   useEffect(() => {
-    if (code.length === 4) {
-      submitVerificationCode(code);
+    if (code.every(char => char !== '')) {
+      submitVerificationCode(code.join(''));
     }
   }, [code, submitVerificationCode]);
 
   const handleInput = (e, index) => {
     const input = e.target;
     const nextInput = inputRefs[index + 1];
-    const previousInput = inputRefs[index - 1];
-
     const newCode = [...code];
     newCode[index] = input.value;
 
-    setCode(newCode.join(''));
+    setCode(newCode);
 
     if (input.value && nextInput) {
       nextInput.current.focus();
     }
+  };
 
-    if (input.value === '' && previousInput) {
-      previousInput.current.focus();
+  const handleBackspace = (e, index) => {
+    if (e.key === 'Backspace') {
+      const previousInput = inputRefs[index - 1];
+      const newCode = [...code];
+      
+      if (code[index] !== '') {
+        newCode[index] = '';
+        setCode(newCode);
+      } else if (previousInput) {
+        previousInput.current.focus();
+        newCode[index - 1] = '';
+        setCode(newCode);
+      }
     }
   };
 
   const handlePaste = (e) => {
     const pastedCode = e.clipboardData.getData('text');
     if (pastedCode.length === 4) {
-      setCode(pastedCode);
+      setCode(pastedCode.split(''));
       inputRefs.forEach((inputRef, index) => {
         inputRef.current.value = pastedCode.charAt(index);
       });
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    const charCode = e.which ? e.which : e.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      e.preventDefault();
     }
   };
 
@@ -94,8 +111,11 @@ const VerificationInput = ({ submitVerificationCode, isLoading }) => {
           maxLength={1}
           className="verification-input"
           onChange={(e) => handleInput(e, index)}
+          onKeyDown={(e) => handleBackspace(e, index)}  // Detectar la tecla Backspace
           onPaste={handlePaste}
+          onKeyPress={handleKeyPress}
           disabled={isLoading}
+          type='text'  // Cambiado de 'number' a 'text'
         />
       ))}
     </div>
@@ -103,3 +123,5 @@ const VerificationInput = ({ submitVerificationCode, isLoading }) => {
 };
 
 export default VerificationInput;
+
+

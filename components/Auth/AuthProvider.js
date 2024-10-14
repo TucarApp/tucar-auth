@@ -166,7 +166,8 @@ export const AuthProvider = ({ children, state, ...props }) => {
       // Aquí obtenemos el redirectUri y redirigimos a él
       const { redirectUri } = response.data;
       if (redirectUri) {
-        router.push(redirectUri); // Redirigimos a la URL obtenida
+        // router.push(redirectUri); // Redirigimos a la URL obtenida
+        router.push('/verify-in'); // Redirigimos a la URL obtenida
       } else {
         setErrorMessage('No se encontró una URL de redirección.');
       }
