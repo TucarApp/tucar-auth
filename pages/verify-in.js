@@ -37,7 +37,7 @@ const VerifyIn = () => {
       }, 1000);
 
       const redirectTimeout = setTimeout(() => {
-        router.push(redirectUri);  // Aquí rediriges a la URL guardada en localStorage
+        router.push(redirectUri);  // Redirigir al redirectUri
       }, 4000);
 
       return () => {
@@ -48,7 +48,9 @@ const VerifyIn = () => {
   }, [redirectUri, router]);
 
   const handleImmediateRedirect = () => {
-    router.push(redirectUri);  // Redirigir inmediatamente
+    if (redirectUri) {
+      router.push(redirectUri);  // Redirigir inmediatamente
+    }
   };
 
   return (
@@ -57,16 +59,10 @@ const VerifyIn = () => {
         <Logo color="color" className="cursor-pointer" width={180} />
       </div>
       <h1>Verificación completa (Inicio de sesión)</h1>
-      {redirectUri ? (
-        <>
-          <p>Serás redirigido en {secondsLeft} segundos...</p>
-          <AuthButton onClick={handleImmediateRedirect}>
-            Redirigir ahora
-          </AuthButton>
-        </>
-      ) : (
-        <p>Error al obtener la URL de redirección.</p>
-      )}
+      <p>Serás redirigido en {secondsLeft} segundos...</p>
+      <AuthButton onClick={handleImmediateRedirect}>
+        Redirigir ahora
+      </AuthButton>
     </VerifyContainer>
   );
 };

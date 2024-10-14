@@ -166,20 +166,22 @@ export const AuthProvider = ({ children, state, ...props }) => {
       // Aquí obtenemos el redirectUri y redirigimos a él
       const { redirectUri } = response.data;
       if (redirectUri) {
-        router.push(redirectUri); // Redirigimos a la URL obtenida
+        // router.push(redirectUri); // Redirigimos a la URL obtenida
+        router.push('/verify-in'); // Redirigimos a la URL obtenida
       } else {
         setErrorMessage('No se encontró una URL de redirección.');
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
       setErrorMessage('Error en la verificación de la autenticación');
+
+      
     }
   };
   
-
   const submitAuthentication = async (isFallback = false) => {
     let authenticationActions = [];
-  
+
     // Fallback para regresar al paso anterior
     if (isFallback) {
       if (currentStep > 1) {
@@ -187,28 +189,28 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
       return;
     }
-  
+
     // Validación de campos en el paso 1
     if (currentStep === 1) {
       if (!emailOrPhone) {
         setErrorMessage('Por favor, ingresa tu correo electrónico o número de teléfono');
         return;
       }
-  
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'emailOrPhone',
         value: emailOrPhone
       });
     }
-  
+
     // Validación de campos en el paso 2 (Registro)
     else if (currentStep === 2) {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Por favor, completa todos los campos.');
         return;
       }
-  
+
       authenticationActions.push(
         {
           submitAction: 'resolve',
@@ -232,35 +234,35 @@ export const AuthProvider = ({ children, state, ...props }) => {
         }
       );
     }
-  
+
     // Validación de campos en el paso 3 (Código de verificación)
     else if (currentStep === 3) {
       if (!verificationCode) {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
       }
-  
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
         value: verificationCode
       });
     }
-  
+
     // Validación de campos en el paso 4 (Contraseña)
     else if (currentStep === 4) {
       if (!password) {
         setErrorMessage('Por favor, ingresa tu contraseña.');
         return;
       }
-  
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'password',
         value: password
       });
     }
-  
+
     try {
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
         authSessionId: props.authSessionId,
@@ -273,11 +275,16 @@ export const AuthProvider = ({ children, state, ...props }) => {
         },
         withCredentials: true
       });
-  
+
+      // Guardar el authFlow en localStorage
+      const { authFlow } = response.data;
+      console.log(authFlow, 'thiiis');
+      localStorage.setItem('authFlow', authFlow); // Guardamos authFlow para usarlo después en la redirección
+
       setResponse(response.data);
-  
+
       const availableAuthMethods = response.data.authMethods.map(method => method.methodType);
-  
+
       if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Google')) {
         setCurrentStep(6);
       } else if (availableAuthMethods.length === 1 && availableAuthMethods.includes('Uber')) {
@@ -287,15 +294,22 @@ export const AuthProvider = ({ children, state, ...props }) => {
         if (nextStepIndex !== undefined) {
           setCurrentStep(nextStepIndex);
         } else {
-          await verifyAuthentication(response.data.authSessionId);
+          // Aquí redireccionamos según el authFlow
+          if (authFlow === 'sign_up') {
+            router.push('/verify-up'); // Redirigir a la página de verificación de registro
+          } else if (authFlow === 'sign_in') {
+            router.push('/verify-in'); // Redirigir a la página de verificación de inicio de sesión
+          } else {
+            await verifyAuthentication(response.data.authSessionId); // Verificación en caso de que no haya más pasos
+          }
         }
       }
-  
+
     } catch (error) {
       console.error('Error en la autenticación:', error.response ? error.response.data : error);
       const serverErrors = error.response?.data?.detail?.errors;
-  
-      if (serverErrors.includes('phone')) {
+
+      if (serverErrors?.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -312,16 +326,18 @@ export const AuthProvider = ({ children, state, ...props }) => {
   };
 
   
+  
 
   const submitAuthenticationGoogle = async () => {
     let authenticationActions = [];
-
+  
+    // Paso de registro (sign_up)
     if (currentStep === 2 && props.authFlow === 'sign_up') {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Todos los campos son obligatorios');
         return;
       }
-
+  
       authenticationActions.push(
         {
           submitAction: 'resolve',
@@ -344,19 +360,21 @@ export const AuthProvider = ({ children, state, ...props }) => {
           value: phone
         }
       );
-    } else if (props.authFlow === 'sign_in' || currentStep === 3) {
+    } 
+    // Paso de inicio de sesión (sign_in) o verificación de código (cualquier flujo)
+    else if (props.authFlow === 'sign_in' || currentStep === 3) {
       if (!verificationCode) {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
       }
-
+  
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
         value: verificationCode
       });
     }
-
+  
     try {
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
         authSessionId: props.authSessionId,
@@ -369,20 +387,35 @@ export const AuthProvider = ({ children, state, ...props }) => {
         },
         withCredentials: true
       });
-
+  
+      // Guardar el authFlow en localStorage
+      const { authFlow } = response.data;
+      console.log(authFlow, 'Google flow');
+      localStorage.setItem('authFlow', authFlow);
+  
       setResponse(response.data);
-
+  
       const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
-
+  
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
-        // Verificamos al completar el flujo
-        await verifyAuthentication(response.data.authSessionId);
+        // Aquí redireccionamos según el authFlow
+        if (authFlow === 'sign_up') {
+          router.push('/verify-up'); // Redirigir a la página de verificación de registro
+        } else if (authFlow === 'sign_in') {
+          router.push('/verify-in'); // Redirigir a la página de verificación de inicio de sesión
+        } else {
+          // Verificación en caso de que no haya más pasos
+          await verifyAuthentication(response.data.authSessionId);
+        }
       }
+  
     } catch (error) {
+      console.error('Error en la autenticación con Google:', error.response ? error.response.data : error);
       const serverErrors = error.response?.data?.detail?.errors;
-      if (serverErrors.includes('phone')) {
+  
+      if (serverErrors?.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -390,11 +423,16 @@ export const AuthProvider = ({ children, state, ...props }) => {
       } else if (serverErrors === "Internal server error") {
         setErrorMessage('Ups, ocurrió un error. Recargando...');
         reloadPage();
+      } else if (serverErrors === "Invalid code") {
+        setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
       } else {
-        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+        setErrorMessage(serverErrors || 'Error en la autenticación');
       }
     }
   };
+
+  
+  
 
   const handleGoogleSuccess = async (response) => {
     const { credential } = response;

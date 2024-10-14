@@ -5,7 +5,7 @@ import AuthButton from "./AuthButton";
 import UberButton from "./UberButton";
 import Logo from "../LogoTucar/LogoTucar";
 import { useAuthContext } from "./AuthProvider";
-import VerificationCodeInput from "./VerificationCodeInput"; // Cambiado a VerificationCodeInput
+import VerificationCodeInput from "./VerificationCodeInput";
 import { GoogleLogin } from "@react-oauth/google";
 
 // Contenedor para el formulario
@@ -291,7 +291,7 @@ const AuthForm = () => {
       {currentStep === 2 && (
         <div className="">
 
-          <div className=" w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
+          <div className=" w-full h-full flex justify-center items-center  pantallapc:mt-[110px]">
             <div className="w-[355px]">
               <Buttonback className="flex justify" onClick={handleBackButtonClick}>
                 <img src="circular.png" alt="Logo" className="ml-[-20px]" width={70} />
@@ -359,7 +359,7 @@ const AuthForm = () => {
       )}
 
       {currentStep === 3 && (
-        <div className="mt-[80px] pantallapc:mt-[110px]">
+        <div className=" pantallapc:mt-[110px]">
           <div className="flex justify-start">
             <Buttonback onClick={handleBackButtonClick}>
               <img src="circular.png" alt="Logo" className="ml-[-20px]" width={100} />
@@ -410,7 +410,7 @@ const AuthForm = () => {
             </Buttonback>
           </div>
 
-          <div className="w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
+          <div className="w-full h-full flex justify-center items-center pantallapc:mt-[110px]">
             <div className="w-[350px]">
               <div className="flex justify-start">
                 <p className="text-[28px] text-center font-Poppins font-semibold text-[#0057b8]">
