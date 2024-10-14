@@ -121,6 +121,7 @@ export const AuthProvider = ({ children, ...props }) => {
   };
 
   // Nueva función específica para Google
+  //this
   const submitAuthenticationGoogle = async () => {
     let authenticationActions = [];
 
