@@ -187,6 +187,7 @@ const AuthForm = () => {
                 <Logo color="color" className="cursor-pointer" width={180} />
               </div>
               <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
+                Ni lo que reza
                 ¡Bienvenido de vuelta!
               </h1>
             </div>
