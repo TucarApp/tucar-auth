@@ -949,10 +949,10 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
     } catch (error) {
       const serverErrors = error.response?.data?.detail?.errors;
-      
-      if (serverErrors.includes("There's a problem with your account. Please contact support")) {
+    
+      if (serverErrors && serverErrors.includes("There's a problem with your account. Please contact support")) {
         setErrorMessage("Hay un problema con tu cuenta. Por favor, contacta a soporte.");
-      } else if (serverErrors.includes('phone')) {
+      } else if (serverErrors && serverErrors.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -961,9 +961,10 @@ export const AuthProvider = ({ children, state, ...props }) => {
         setErrorMessage('Ups, ocurrió un error. Recargando...');
         reloadPage();
       } else {
-        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+        setErrorMessage(serverErrors || 'Error en la autenticación');
       }
     }
+    
   };
   
 
