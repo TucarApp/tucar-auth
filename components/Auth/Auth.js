@@ -20,6 +20,8 @@ const Auth = () => {
 
   const searchParams = useSearchParams(); // Captura los parámetros de la URL
 
+  //Marcelo
+
   useEffect(() => {
     const storedAuthSessionId = localStorage.getItem('authSessionId');
     if (storedAuthSessionId && completed) {
