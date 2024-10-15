@@ -898,11 +898,13 @@ export const AuthProvider = ({ children, state, ...props }) => {
 
   const submitAuthenticationGoogle = async () => {
     let authenticationActions = [];
+  
     if (currentStep === 2 && props.authFlow === 'sign_up') {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Todos los campos son obligatorios');
         return;
       }
+  
       authenticationActions.push(
         { submitAction: 'resolve', stepType: 'firstname', value: firstname },
         { submitAction: 'resolve', stepType: 'lastname', value: lastname },
@@ -914,13 +916,14 @@ export const AuthProvider = ({ children, state, ...props }) => {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
       }
+  
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
         value: verificationCode
       });
     }
-
+  
     try {
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
         authSessionId: props.authSessionId,
@@ -933,19 +936,23 @@ export const AuthProvider = ({ children, state, ...props }) => {
         },
         withCredentials: true
       });
-
+  
       setResponse(response.data);
-
+  
       const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
-
+  
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
+        // Verificamos al completar el flujo
         await verifyAuthentication(response.data.authSessionId);
       }
     } catch (error) {
       const serverErrors = error.response?.data?.detail?.errors;
-      if (serverErrors.includes('phone')) {
+      
+      if (serverErrors.includes("There's a problem with your account. Please contact support")) {
+        setErrorMessage("Hay un problema con tu cuenta. Por favor, contacta a soporte.");
+      } else if (serverErrors.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -958,6 +965,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
     }
   };
+  
 
   const handleGoogleSuccess = async (response) => {
     const { credential } = response;
