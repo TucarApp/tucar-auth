@@ -877,8 +877,10 @@ export const AuthProvider = ({ children, state, ...props }) => {
     } catch (error) {
       console.error('Error en la autenticación:', error.response ? error.response.data : error);
       const serverErrors = error.response?.data?.detail?.errors;
-
-      if (serverErrors.includes('phone')) {
+    
+      if (serverErrors.includes("There's a problem with your account. Please contact support")) {
+        setErrorMessage('Hay un problema con tu cuenta. Por favor, contacta a soporte.');
+      } else if (serverErrors.includes('phone')) {
         setErrorMessage('Por favor completa el campo de número de teléfono');
       } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
         setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
@@ -888,12 +890,11 @@ export const AuthProvider = ({ children, state, ...props }) => {
         reloadPage();
       } else if (serverErrors === "Invalid code") {
         setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
-      } else if (serverErrors === "There's a problem with your account. Please contact support") {
-        setErrorMessage('Hay un problema con tu cuenta. Por favor, contacta a soporte.');
       } else {
         setErrorMessage(serverErrors || 'Error en la autenticación');
       }
     }
+    
   };
 
   const submitAuthenticationGoogle = async () => {
@@ -1021,17 +1022,22 @@ export const AuthProvider = ({ children, state, ...props }) => {
       props.setIsSubmitting(false);
     } catch (error) {
       console.error('Error en la autenticación con Google:', error);
-      const errorMessage = error.response?.data?.errors || 'Error en la autenticación con Google';
-      if (errorMessage.includes('User does not have Google account')) {
+      const serverErrors = error.response?.data?.detail?.errors;
+    
+      if (serverErrors && serverErrors.includes("There's a problem with your account. Please contact support")) {
+        setErrorMessage("Hay un problema con tu cuenta. Por favor, contacta a soporte.");
+      } else if (serverErrors && serverErrors.includes('User does not have Google account')) {
         setErrorMessage('No tienes cuenta de Google');
-      }
-      if (error.response?.data?.detail?.errors === "JWT session expired") {
-        setErrorMessage('La sesión ha expirado. Recargando...');
+      } else if (serverErrors === "JWT session expired" || serverErrors === "Invalid JWT session") {
+        setErrorMessage('La sesión ha expirado o es inválida. Recargando...');
+        reloadPage();
+      } else if (serverErrors === "Internal server error") {
+        setErrorMessage('Ups, ocurrió un error. Recargando...');
         reloadPage();
       } else {
-        setErrorMessage(error.response?.data?.errors || 'Error en la autenticación');
+        setErrorMessage(serverErrors || 'Error en la autenticación');
       }
-
+    
       props.setIsSubmitting(false);
     }
   };

@@ -238,7 +238,7 @@ const AuthForm = () => {
                     <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                   </div>
                   {(inputError || errorMessage) && (
-                      <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
+                      <p className="text-red-500 text-sm my-3 font-Poppins font-light">
                         {inputError || errorMessage}
                       </p>
                     )}
