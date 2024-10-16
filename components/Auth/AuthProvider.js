@@ -796,12 +796,37 @@ export const AuthProvider = ({ children, state, ...props }) => {
 
   const submitAuthentication = async (isFallback = false) => {
     let authenticationActions = [];
+
     if (isFallback) {
-      if (currentStep > 1) {
-        setCurrentStep(currentStep - 1);
+      authenticationActions.push({
+        submitAction: 'fallback',
+        stepType: 'emailOrPhone', // O el stepType del paso actual
+        value: emailOrPhone // O el valor correspondiente al paso actual
+      });
+
+      try {
+        const response = await axios.post('/api/v1/oauth/submit-authentication', {
+          authSessionId: props.authSessionId,
+          udiFingerprint: props.udiFingerprint,
+          methodType: 'EmailOrPhone',
+          authenticationActions
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        });
+
+        setResponse(response.data);
+        setCurrentStep(1); // Retrocedemos al paso 1 en la UI después del fallback
+      } catch (error) {
+        console.error('Error en el fallback de autenticación:', error.response ? error.response.data : error);
+        setErrorMessage('Error en el fallback de autenticación.');
       }
       return;
     }
+
+    // Lógica normal para avanzar pasos
     if (currentStep === 1) {
       if (!emailOrPhone) {
         setErrorMessage('Por favor, ingresa tu correo electrónico o número de teléfono');
@@ -899,13 +924,13 @@ export const AuthProvider = ({ children, state, ...props }) => {
 
   const submitAuthenticationGoogle = async () => {
     let authenticationActions = [];
-  
+
     if (currentStep === 2 && props.authFlow === 'sign_up') {
       if (!firstname || !lastname || !email || !phone) {
         setErrorMessage('Todos los campos son obligatorios');
         return;
       }
-  
+
       authenticationActions.push(
         { submitAction: 'resolve', stepType: 'firstname', value: firstname },
         { submitAction: 'resolve', stepType: 'lastname', value: lastname },
@@ -917,14 +942,14 @@ export const AuthProvider = ({ children, state, ...props }) => {
         setErrorMessage('Por favor, ingresa el código de verificación.');
         return;
       }
-  
+
       authenticationActions.push({
         submitAction: 'resolve',
         stepType: 'verificationCode',
         value: verificationCode
       });
     }
-  
+
     try {
       const response = await axios.post('/api/v1/oauth/submit-authentication', {
         authSessionId: props.authSessionId,
@@ -937,20 +962,19 @@ export const AuthProvider = ({ children, state, ...props }) => {
         },
         withCredentials: true
       });
-  
+
       setResponse(response.data);
-  
+
       const nextStep = determineNextStep(response.data.authMethods, currentStep, response.data.authFlow);
-  
+
       if (nextStep !== undefined) {
         setCurrentStep(nextStep);
       } else {
-        // Verificamos al completar el flujo
         await verifyAuthentication(response.data.authSessionId);
       }
     } catch (error) {
       const serverErrors = error.response?.data?.detail?.errors;
-    
+
       if (serverErrors && serverErrors.includes("There's a problem with your account. Please contact support")) {
         setErrorMessage("Hay un problema con tu cuenta. Por favor, contacta a soporte.");
       } else if (serverErrors && serverErrors.includes('phone')) {
@@ -965,9 +989,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
         setErrorMessage(serverErrors || 'Error en la autenticación');
       }
     }
-    
   };
-  
 
   const handleGoogleSuccess = async (response) => {
     const { credential } = response;
@@ -1023,7 +1045,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
     } catch (error) {
       console.error('Error en la autenticación con Google:', error);
       const serverErrors = error.response?.data?.detail?.errors;
-    
+
       if (serverErrors && serverErrors.includes("There's a problem with your account. Please contact support")) {
         setErrorMessage("Hay un problema con tu cuenta. Por favor, contacta a soporte.");
       } else if (serverErrors && serverErrors.includes('User does not have Google account')) {
@@ -1037,7 +1059,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
       } else {
         setErrorMessage(serverErrors || 'Error en la autenticación');
       }
-    
+
       props.setIsSubmitting(false);
     }
   };
@@ -1205,3 +1227,5 @@ export const useAuthContext = () => {
 };
 
 export default AuthProvider;
+
+
