@@ -146,7 +146,7 @@ const Auth = () => {
 
       if (typeof window !== 'undefined' && redirectUri) {
         localStorage.setItem("redirectUri", redirectUri);
-        router.push(redirectUri);
+        router.push('/verify');
       } else {
         console.error("No se recibió un redirectUri.");
         setErrorMessage("Error: No se recibió una URL de redirección.");
