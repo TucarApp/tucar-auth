@@ -111,7 +111,7 @@ const Auth = () => {
 
   const updateFingerprint = async (authSessionId) => {
     try {
-      const response = await axios.patch('https://accounts.tucar.app/api/v1/oauth/udi-fingerprint', {
+      const response = await axios.patch('https://accounts.tucar.dev/api/v1/oauth/udi-fingerprint', {
         authSessionId,
         udiFingerprint
       }, {
@@ -130,7 +130,7 @@ const Auth = () => {
 
   const verifyAuthentication = async (authSessionId) => {
     try {
-      const response = await axios.post('https://accounts.tucar.app/api/v1/oauth/verify-authentication', {
+      const response = await axios.post('https://accounts.tucar.dev/api/v1/oauth/verify-authentication', {
         authSessionId,
         udiFingerprint,
         state // Usamos el estado capturado de la URL o predeterminado
