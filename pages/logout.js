@@ -1,19 +1,25 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Cookies from 'js-cookie'; 
 
 const Logout = () => {
   const router = useRouter();
 
   useEffect(() => {
-   
-    const pastDate = new Date(1970, 0, 1);
+    // Llamar a la API de logout para eliminar la cookie
+    const logoutUser = async () => {
+      try {
+        await fetch('/api/logout', {
+          method: 'POST', // Puede ser POST o GET según tu preferencia
+        });
 
-   
-    Cookies.set('sid', '', { expires: pastDate });
+        // Redirigir al home después de eliminar la cookie
+        router.push('/');
+      } catch (error) {
+        console.error('Error durante el logout:', error);
+      }
+    };
 
-   
-    router.push('/');
+    logoutUser();
   }, [router]);
 
   return (
