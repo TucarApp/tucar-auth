@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 const Logout = () => {
   const router = useRouter();
   const { redirect_uri } = router.query; // Capturamos el redirect_uri de los query params
+  console.log(redirect_uri, 'this is the redirect_uri')
 
   useEffect(() => {
     const logoutUser = async () => {
@@ -23,6 +24,7 @@ const Logout = () => {
           // Redirigir al home si no existe redirect_uri
           router.push('/');
         }
+        console.log(redirect_uri, 'dentro del async')
       } catch (error) {
         console.error('Error durante el logout:', error);
       }
