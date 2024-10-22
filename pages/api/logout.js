@@ -2,13 +2,9 @@ export default function handler(req, res) {
     // Capturamos el redirect_uri del query params
     const redirectUri = req.query.redirect_uri;
   
-    // Determinamos el dominio actual (dev o app)
-    const host = req.headers.host;
-    const domain = host.includes('.dev') ? '.tucar.dev' : '.tucar.app';
-  
     // Establecer el dominio correcto y los atributos necesarios para eliminar la cookie
     res.setHeader('Set-Cookie', [
-      `sid=; Path=/; Domain=${domain}; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict`,
+      'sid=; Path=/; Domain=.tucar.dev; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict',
     ]);
   
     // Si tenemos redirectUri, hacemos un redireccionamiento
@@ -19,4 +15,5 @@ export default function handler(req, res) {
       res.status(200).json({ message: 'Sesión cerrada y cookie eliminada' });
     }
   }
+  
   
