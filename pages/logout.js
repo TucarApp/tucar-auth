@@ -9,7 +9,7 @@ const Logout = () => {
     const logoutUser = async () => {
       try {
         await fetch('/api/logout', {
-          method: 'POST', // Puede ser POST o GET según tu preferencia
+          method: 'POST',
         });
 
         // Redirigir al home después de eliminar la cookie
