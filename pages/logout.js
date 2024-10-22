@@ -3,31 +3,24 @@ import { useRouter } from 'next/router';
 
 const Logout = () => {
   const router = useRouter();
-  const { redirect_uri } = router.query; // Capturamos el redirect_uri de los query params
 
   useEffect(() => {
+    // Llamar a la API de logout para eliminar la cookie
     const logoutUser = async () => {
       try {
-        // Si existe redirect_uri, lo pasamos como parámetro a la API de logout
-        const apiUrl = redirect_uri
-          ? `/api/logout?redirect_uri=${encodeURIComponent(redirect_uri)}`
-          : '/api/logout';
-
-        await fetch(apiUrl, {
+        await fetch('/api/logout', {
           method: 'POST',
         });
 
-        // Redirigir al home si no existe redirect_uri
-        if (!redirect_uri) {
-          router.push('/');
-        }
+        // Redirigir al home después de eliminar la cookie
+        router.push('https://tucar.app');
       } catch (error) {
         console.error('Error durante el logout:', error);
-      }
+      } 
     };
 
     logoutUser();
-  }, [router, redirect_uri]);
+  }, [router]);
 
   return (
     <div className="flex justify-center items-center h-screen">
