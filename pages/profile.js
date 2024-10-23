@@ -2,7 +2,7 @@ import { ChevronRightIcon } from '@heroicons/react/solid'; // Asegúrate de inst
 import { useState } from 'react';
 import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
-import InputField from '@/components/InputField';
+import InputField from '@/components/Auth/InputField';
 const Cuenta = () => {
     const [selectedSection, setSelectedSection] = useState('Account Info');
     const [isEditing, setIsEditing] = useState(false);
