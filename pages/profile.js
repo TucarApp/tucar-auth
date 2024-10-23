@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { ChevronRightIcon } from '@heroicons/react/solid'; // Asegúrate de instalar este paquete si aún no lo tienes
+import { useState } from 'react';
 import TucarLogo from '../components/LogoTucar/LogoTucar';
-import InputField from '@/components/Auth/InputField';
 import AuthButton from '@/components/Auth/AuthButton';
 
 const Cuenta = () => {
-    const [selectedSection, setSelectedSection] = useState('Account Info'); // Para cambiar entre secciones
-    const [isEditing, setIsEditing] = useState(false); // Estado para manejar la edición
+    const [selectedSection, setSelectedSection] = useState('Account Info');
+    const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState('Marcelo Miranda');
     const [phone, setPhone] = useState('+56 9 88973679');
     const [email, setEmail] = useState('ticomiranda4@gmail.com');
@@ -15,10 +15,9 @@ const Cuenta = () => {
         setSelectedSection(section);
     };
 
-    // Función para guardar los cambios y salir del modo de edición
+    // Función para guardar los cambios
     const handleSave = () => {
         setIsEditing(false);
-        // Aquí puedes agregar la lógica para enviar los datos al backend si es necesario
     };
 
     return (
@@ -81,7 +80,7 @@ const Cuenta = () => {
                                 )}
                             </div>
                             <div className="mb-5">
-                                <p className="text-gray-700">Numero de telefono</p>
+                                <p className="text-gray-700">Número de teléfono</p>
                                 {isEditing ? (
                                     <InputField
                                         type="text"
@@ -130,10 +129,15 @@ const Cuenta = () => {
                     {selectedSection === 'Security' && (
                         <div className="text-[#333333]">
                             <h2 className="text-2xl font-bold mb-5">Ajustes de Seguridad</h2>
-                            <p>Contraseña</p>
-                            <div className="mt-5">
-                                <p className="font-medium">-----</p>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="font-medium text-lg mb-1">Contraseña</p>
+                                    <p className='font-medium'>********</p>
+                                   
+                                </div>
+                                <ChevronRightIcon className="w-5 h-5 text-gray-400" />
                             </div>
+                            <hr className="my-4" />
                         </div>
                     )}
 
