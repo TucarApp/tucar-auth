@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 
 const Logout = () => {
   const router = useRouter();
-  const { redirect_uri } = router.query; // Capturamos el redirect_uri de los query params
-  console.log(redirect_uri, 'this is the redirect_uri')
+  const searchParams = useSearchParams(); // Obtenemos los parámetros de la URL
+  const redirect_uri = searchParams.get('redirect_uri'); // Capturamos el redirect_uri de los query params
 
   useEffect(() => {
     const logoutUser = async () => {
       try {
-        // Si existe redirect_uri, lo pasamos como parámetro a la API de logout
+        // Construimos la URL de la API de logout con o sin redirect_uri
         const apiUrl = redirect_uri
           ? `/api/logout?redirect_uri=${encodeURIComponent(redirect_uri)}`
           : '/api/logout';
@@ -19,17 +20,24 @@ const Logout = () => {
           method: 'GET',
         });
 
-        // Verificamos si la solicitud fue exitosa
-        if (response.ok && !redirect_uri) {
-          // Redirigir al home si no existe redirect_uri
-          router.push('/');
+        // Si la solicitud fue exitosa y no tenemos redirect_uri, redirigimos al home
+        if (response.ok) {
+          if (redirect_uri) {
+            // Si tenemos redirect_uri, hacemos la redirección
+            router.push(redirect_uri);
+          } else {
+            // Si no, redirigimos al home
+            router.push('/');
+          }
+        } else {
+          console.error('Error en la solicitud de logout');
         }
-        console.log(redirect_uri, 'dentro del async')
       } catch (error) {
         console.error('Error durante el logout:', error);
       }
     };
 
+    // Ejecutamos el logout
     logoutUser();
   }, [router, redirect_uri]);
 
