@@ -5,6 +5,7 @@ import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline'; // Íconos de mo
 import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
 import InputField from '@/components/Auth/InputField';
+import Logo from '../components/LogoTucar/LogoTucar';
 
 const Cuenta = () => {
     const [selectedSection, setSelectedSection] = useState('Account Info');
@@ -42,7 +43,8 @@ const Cuenta = () => {
             <div className="flex">
                 {/* Menú lateral para desktop y menú mobile cuando está abierto */}
                 <div className={`fixed lg:static top-0 left-0 w-3/4 max-w-xs bg-white h-full z-20 transition-transform transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:w-1/6 lg:h-screen lg:block`}>
-                    <ul className="text-[#333333] mt-16 lg:mt-5 p-5">
+                <TucarLogo className='h-[60px] py-2 pl-5' />
+                    <ul className="text-[#333333] mt-12 lg:mt-5 p-5">
                         <li
                             className={`cursor-pointer mb-4 ${selectedSection === 'Account Info' ? 'font-bold' : ''}`}
                             onClick={() => handleSectionChange('Account Info')}
@@ -156,7 +158,7 @@ const Cuenta = () => {
                                         <EyeIcon className="h-5 w-5 text-gray-500" />
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500">Último cambio: 15 de abril de 2024</p>
+                              
                             </div>
 
                             <AuthButton
