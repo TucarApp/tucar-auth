@@ -5,11 +5,11 @@ const nextConfig = {
     return [
       {
         //Prod
-        // source: '/api/:path*',
-        // destination: 'https://account-service-13535404425.us-central1.run.app/api/:path*',
-        //Dev
         source: '/api/:path*',
-        destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path*',
+        destination: 'https://account-service-13535404425.us-central1.run.app/api/:path*',
+        //Dev
+        // source: '/api/:path*',
+        // destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path*',
       },
     ];
   },
