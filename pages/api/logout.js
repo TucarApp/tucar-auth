@@ -5,7 +5,7 @@ export default function handler(req, res) {
   
     
       res.setHeader('Set-Cookie', [
-        'sid=; Path=/; Domain=.tucar.app; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict',
+        'sid=; Path=/; Domain=.tucar.dev; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict',
       ]);
   
  
