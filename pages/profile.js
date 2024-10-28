@@ -5,10 +5,7 @@ import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline'; // Íconos de mo
 import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
 import InputField from '@/components/Auth/InputField';
-<<<<<<< HEAD
-=======
 import Logo from '../components/LogoTucar/LogoTucar';
->>>>>>> staging
 
 const Cuenta = () => {
     const [selectedSection, setSelectedSection] = useState('Account Info');
