@@ -116,7 +116,7 @@ const Auth = () => {
         udiFingerprint
       }, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'devlication/json'
         },
         withCredentials: true
       });

@@ -31,7 +31,7 @@ const authorize = async ({
         );
 
         const data = response.data;
-        console.log('Respuesta completa del servidor:', data);
+      
 
         if (data.authMethods && data.authMethods.length > 0) {
             setAuthMethods(data.authMethods);
