@@ -98,7 +98,7 @@ const AuthForm = () => {
 
     if (remainingSteps.length > 0) {
       // Solo avanzar al siguiente paso si hay pasos pendientes
-      console.log('Pasos pendientes:', remainingSteps);
+  
     } else {
       // Si no hay pasos pendientes, se puede proceder con el verify
       console.log('Todos los pasos completos. Verificando...');
