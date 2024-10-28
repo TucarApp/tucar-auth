@@ -1,6 +1,7 @@
 export default function handler(req, res) {
     if (req.method === 'GET') {
       // Capturamos el redirect_uri del query params
+      //this
       const { redirect_uri } = req.query;
   
       // Establecer el dominio correcto y los atributos necesarios para eliminar la cookie
