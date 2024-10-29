@@ -13,11 +13,10 @@ const Cuenta = () => {
     const [name, setName] = useState('Marcelo Miranda');
     const [phone, setPhone] = useState('+56 9 88973679');
     const [email, setEmail] = useState('ticomiranda4@gmail.com');
-    const [isPasswordEditing, setIsPasswordEditing] = useState(false); 
-    const [password, setPassword] = useState('********');
+    const [isPasswordEditing, setIsPasswordEditing] = useState(false);
+    const [password, setPassword] = useState('password123');
     const [showPassword, setShowPassword] = useState(false); // Controla si la contraseña se muestra o no
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el estado del menú hamburguesa
-
+    const [isMenuOpen, setIsMenuOpen] = useState(false); 
     // Función para cambiar entre secciones
     const handleSectionChange = (section) => {
         setSelectedSection(section);
@@ -44,9 +43,9 @@ const Cuenta = () => {
             <div className="flex">
                 {/* Menú lateral para desktop y menú mobile cuando está abierto */}
                 <div className={`fixed lg:static top-0 left-0 w-3/4 max-w-xs bg-[white] h-full z-20 transition-transform transform   ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:w-1/6 lg:h-screen lg:block`}>
-                <div className='border-b-[1px] bg-[#0057b8] h-[65px] lg:hidden flex justify-start items-center'>
-                <TucarLogo color='white' className='h-12 pl-5 lg:hidden' />
-                </div>
+                    <div className='border-b-[1px] bg-[#0057b8] h-[65px] lg:hidden flex justify-start items-center'>
+                        <TucarLogo color='white' className='h-12 pl-5 lg:hidden' />
+                    </div>
                     <ul className="text-[#333333] mt-6 lg:mt-5 p-5">
                         <li
                             className={`cursor-pointer mb-4 ${selectedSection === 'Account Info' ? 'font-bold' : ''}`}
@@ -142,35 +141,38 @@ const Cuenta = () => {
 
                     {/* Sección de Security */}
                     {selectedSection === 'Security' && (
-                        <div className="text-[#333333]">
-                            <h2 className="text-2xl font-bold mb-5">Ajustes de Seguridad</h2>
-                            <div className="relative">
-                                <InputField
-                                    type={showPassword ? 'text' : 'password'}
-                                    className="border border-gray-300 rounded p-2 w-full"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                                <div
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                                    onClick={togglePasswordVisibility}
-                                >
-                                    {showPassword ? (
-                                        <EyeOffIcon className="h-5 w-5 text-gray-500" />
-                                    ) : (
-                                        <EyeIcon className="h-5 w-5 text-gray-500" />
-                                    )}
-                                </div>
-                              
-                            </div>
+                      <div className="text-[#333333]">
+                      <h2 className="text-2xl font-bold mb-5">Ajustes de Seguridad</h2>
+                      <div className="relative w-full max-w-sm flex items-center rounded p-2">
+                          <InputField
+                              type={showPassword ? 'text' : 'password'}
+                              className="w-full outline-none" // Hacemos el input flexible dentro del contenedor
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              style={{ paddingRight: "2rem" }} // Espacio para el ícono
+                          />
+                          <div
+                              className="absolute right-5 pt-[13px] cursor-pointer" // Posición fija del ícono
+                              onClick={togglePasswordVisibility}
+                          >
+                              {showPassword ? (
+                                  <EyeOffIcon className="h-5 w-5 text-gray-500" />
+                              ) : (
+                                  <EyeIcon className="h-5 w-5 text-gray-500" />
+                              )}
+                          </div>
+                      </div>
+                  
+                      <AuthButton
+                          onClick={() => setIsPasswordEditing(false)}
+                          className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                      >
+                          Guardar Contraseña
+                      </AuthButton>
+                  </div>
+                  
 
-                            <AuthButton
-                                onClick={() => setIsPasswordEditing(false)}
-                                className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
-                            >
-                                Guardar Contraseña
-                            </AuthButton>
-                        </div>
+
                     )}
 
                     {/* Sección de Privacy & Data */}
