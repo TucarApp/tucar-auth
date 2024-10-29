@@ -44,7 +44,7 @@ const Cuenta = () => {
             <div className="flex">
                 {/* Menú lateral para desktop y menú mobile cuando está abierto */}
                 <div className={`fixed lg:static top-0 left-0 w-3/4 max-w-xs bg-[white] h-full z-20 transition-transform transform   ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:w-1/6 lg:h-screen lg:block`}>
-                <div className='border-b-[1px] bg-[#0057b8] h-[65px] flex justify-start items-center'>
+                <div className='border-b-[1px] bg-[#0057b8] h-[65px] lg:hidden flex justify-start items-center'>
                 <TucarLogo color='white' className='h-12 pl-5 lg:hidden' />
                 </div>
                     <ul className="text-[#333333] mt-6 lg:mt-5 p-5">
