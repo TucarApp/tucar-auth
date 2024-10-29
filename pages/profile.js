@@ -30,7 +30,7 @@ const Cuenta = () => {
     };
 
     return (
-        <div>
+        <div className='font-Poppins'>
             {/* Barra superior */}
             <div className="w-full bg-[#0057b8] h-16 flex items-center justify-between px-4 lg:px-6">
                 <TucarLogo color="white" className="h-12" />
@@ -72,11 +72,11 @@ const Cuenta = () => {
                     {selectedSection === 'Account Info' && (
                         <div className="mx-auto">
                             <h2 className="text-2xl font-bold mb-5">Información de la cuenta</h2>
-                            <h3 className="text-lg font-semibold mb-3">Mi perfil</h3>
+                          
 
                             {/* Campo de Nombre */}
                             <div className="mb-5 border-b border-gray-300 pb-3">
-                                <p className="text-gray-700">Nombre</p>
+                                <p className="text-gray-700 font-bold">Nombre</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingName ? (
                                         <>
@@ -108,7 +108,7 @@ const Cuenta = () => {
 
                             {/* Campo de Teléfono */}
                             <div className="mb-5 border-b border-gray-300 pb-3">
-                                <p className="text-gray-700">Número de teléfono</p>
+                                <p className="text-gray-700 font-bold">Número de teléfono</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingPhone ? (
                                         <>
@@ -140,7 +140,7 @@ const Cuenta = () => {
 
                             {/* Campo de Email */}
                             <div className="mb-5 border-b border-gray-300 pb-3">
-                                <p className="text-gray-700">Email</p>
+                                <p className="text-gray-700 font-bold">Email</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingEmail ? (
                                         <>
