@@ -11,16 +11,16 @@ import { GoogleLogin } from "@react-oauth/google";
 // Contenedor para el formulario
 const FormContainer = styled.div`
   width: 100%;
-  max-width: 100%; /* Ancho completo en móviles */
-  padding: 0 20px; /* Un padding lateral en móviles */
+  max-width: 100%;
+  padding: 0 20px;
 
   @media (min-width: 768px) {
-    max-width: 600px; /* Ajuste para tabletas */
-    margin: 0 auto; /* Centrar en pantallas más grandes */
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   @media (min-width: 1440px) {
-    max-width: 60%; /* O cualquier valor deseado para pantallas grandes */
+    max-width: 60%;
   }
 `;
 
@@ -29,10 +29,9 @@ const Buttonback = styled.div`
   justify-content: start;
 `;
 
-// Función para obtener el código de país usando una API de geolocalización
 const getCountryCode = async () => {
   try {
-    const response = await fetch("https://ipapi.co/json/"); // Servicio para obtener la ubicación
+    const response = await fetch("https://ipapi.co/json/");
     const data = await response.json();
     return data.country_code;
   } catch (error) {
@@ -41,15 +40,14 @@ const getCountryCode = async () => {
   }
 };
 
-// Función para establecer el prefijo telefónico según el país
 const setPhonePrefix = async (setPhone) => {
   const countryCode = await getCountryCode();
   let prefix = "";
 
   if (countryCode === "CR") {
-    prefix = "+506 "; // Prefijo de Costa Rica
+    prefix = "+506 ";
   } else if (countryCode === "CL") {
-    prefix = "+56 "; // Prefijo de Chile
+    prefix = "+56 ";
   }
 
   setPhone(prefix);
@@ -80,24 +78,22 @@ const AuthForm = () => {
     isGoogleFlow,
     errorMessage,
     setErrorMessage,
-    authMethods, // Recibir authMethods para mostrar los botones según los métodos disponibles
+    authMethods,
   } = useAuthContext();
 
   const [inputError, setInputError] = useState(false);
-  const [passwordWarning, setPasswordWarning] = useState(""); // Advertencia de contraseña
+  const [passwordWarning, setPasswordWarning] = useState("");
 
   const handleBackButtonClick = () => {
-    submitAuthentication(true);  // Pasamos true para activar el fallback
+    submitAuthentication(true);
   };
 
-  // Limpiar el error cuando el usuario comience a escribir en email o teléfono
   useEffect(() => {
     if (emailOrPhone) {
-      setInputError(""); // Limpiar el error si hay cambios en el input
+      setInputError("");
     }
   }, [emailOrPhone]);
 
-  // Autocompletar el prefijo de teléfono al cargar el componente
   useEffect(() => {
     setPhonePrefix(setPhone);
   }, [setPhone]);
@@ -123,9 +119,9 @@ const AuthForm = () => {
 
   const handleSubmit = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?\d{10,15}$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$/;
 
-    // Validación de contraseña con mensaje de advertencia
     if (currentStep === 4) {
       if (!passwordRegex.test(password)) {
         setPasswordWarning(
@@ -133,11 +129,10 @@ const AuthForm = () => {
         );
         return;
       } else {
-        setPasswordWarning(""); // Limpiar la advertencia si la validación es correcta
+        setPasswordWarning("");
       }
     }
 
-    // Si el flujo es de Google, omitir la validación de emailOrPhone
     if (!isGoogleFlow) {
       if (!emailOrPhone) {
         setInputError(
@@ -146,12 +141,14 @@ const AuthForm = () => {
         return;
       }
 
-      if (!emailRegex.test(emailOrPhone)) {
-        setInputError("Por favor, ingresa un correo electrónico válido.");
+      if (!emailRegex.test(emailOrPhone) && !phoneRegex.test(emailOrPhone)) {
+        setInputError(
+          "Por favor, ingresa un correo electrónico válido o un número de teléfono válido."
+        );
         return;
       }
 
-      setInputError(""); // Limpiar el error si la validación es correcta
+      setInputError("");
     }
 
     try {
@@ -171,7 +168,6 @@ const AuthForm = () => {
     }
   };
 
-  // Verificamos qué métodos de autenticación están disponibles en authMethods
   const googleMethod = authMethods?.find((method) => method.name === "Google");
   const tucarMethod = authMethods?.find((method) => method.name === "Tucar");
   const uberMethod = authMethods?.find((method) => method.name === "Uber");
@@ -196,8 +192,6 @@ const AuthForm = () => {
               </h1>
             </div>
             <div className="pantallapc:w-[345px] w-[355px]">
-
-              {/* Mostrar el campo de emailOrPhone solo si Tucar está disponible */}
               {tucarMethod && (
                 <>
                   <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
@@ -208,7 +202,7 @@ const AuthForm = () => {
                     value={emailOrPhone}
                     onChange={(e) =>
                       setEmailOrPhone(e.target.value.toLowerCase())
-                    } // Convertir a minúsculas
+                    }
                   />
                   <div className="flex flex-col justify-center items-center">
                     {(inputError || errorMessage) && (
@@ -225,8 +219,6 @@ const AuthForm = () => {
                   </div>
                 </>
               )}
-
-              {/* Mostrar solo Google o Uber */}
               {(googleMethod || uberMethod) && (
                 <div className="flex flex-col items-center justify-center w-full">
                   <div className="flex items-center justify-center my-8 w-[61%]">
@@ -234,7 +226,6 @@ const AuthForm = () => {
                     <div className="mx-4">
                       <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
                     </div>
-                   
                     <div className="flex-grow border-t-2 border-[#0057b8]"></div>
                   </div>
                   {(inputError || errorMessage) && (
@@ -276,8 +267,6 @@ const AuthForm = () => {
                   </div>
                 </div>
               )}
-
-              {/* Texto sobre términos y condiciones */}
               <div>
                 <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
                   Al continuar, aceptas nuestros{" "}
@@ -303,7 +292,6 @@ const AuthForm = () => {
             <Buttonback className="flex justify" onClick={handleBackButtonClick}>
               <img src="circular.png" alt="Logo" className="ml-[-20px]" width={70} />
             </Buttonback>
-            <p className="text-[#5b5d71] flex justify-start"></p>
             <div className="flex justify-start">
               <p className="text-[28px] font-semibold text-[#0057b8]">¡Hola!</p>
             </div>
@@ -339,7 +327,7 @@ const AuthForm = () => {
               <InputField
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value.toLowerCase())} // Convertir a minúsculas
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
               />
             </div>
             <div className="mt-5">
@@ -384,10 +372,9 @@ const AuthForm = () => {
                 </p>
               </div>
 
-              {/* Integramos el nuevo componente de VerificationCodeInput */}
               <VerificationCodeInput
                 submitVerificationCode={handleVerificationSubmit}
-                isLoading={false} // Cambia este valor si tienes un estado de carga
+                isLoading={false}
               />
 
               {inputError && (
@@ -432,7 +419,7 @@ const AuthForm = () => {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setErrorMessage(""); // Limpiar el mensaje de error cuando el usuario escribe
+                    setErrorMessage("");
                   }}
                 />
                 {errorMessage && (
