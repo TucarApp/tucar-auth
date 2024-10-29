@@ -75,7 +75,7 @@ const Cuenta = () => {
                             <h3 className="text-lg font-semibold mb-3">Mi perfil</h3>
 
                             {/* Campo de Nombre */}
-                            <div className="mb-5">
+                            <div className="mb-5 border-b border-gray-300 pb-3">
                                 <p className="text-gray-700">Nombre</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingName ? (
@@ -107,7 +107,7 @@ const Cuenta = () => {
                             </div>
 
                             {/* Campo de Teléfono */}
-                            <div className="mb-5">
+                            <div className="mb-5 border-b border-gray-300 pb-3">
                                 <p className="text-gray-700">Número de teléfono</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingPhone ? (
@@ -139,7 +139,7 @@ const Cuenta = () => {
                             </div>
 
                             {/* Campo de Email */}
-                            <div className="mb-5">
+                            <div className="mb-5 border-b border-gray-300 pb-3">
                                 <p className="text-gray-700">Email</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingEmail ? (
@@ -176,7 +176,7 @@ const Cuenta = () => {
                     {selectedSection === 'Security' && (
                         <div className="text-[#333333]">
                             <h2 className="text-2xl font-bold mb-5">Ajustes de Seguridad</h2>
-                            <div className="mb-5">
+                            <div className="mb-5 border-b border-gray-300 pb-3">
                                 <p className="text-gray-700">Contraseña</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingPassword ? (
@@ -209,6 +209,21 @@ const Cuenta = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    )}
+                       {/* Sección de Privacy & Data */}
+                       {selectedSection === 'Privacy & Data' && (
+                        <div className="text-[#333333] border-b border-gray-300 pb-3">
+                            <h2 className="text-2xl font-bold mb-5">Política de privacidad</h2>
+                            <a
+                                href="https://tucar.app/politica-de-privacidad"
+                                target="_blank"
+                                className="underline "
+                            >
+                                <p className="font-medium text-[#0057b8]">
+                                    Política de privacidad
+                                </p>
+                            </a>
                         </div>
                     )}
                 </div>
