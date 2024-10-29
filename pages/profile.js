@@ -10,9 +10,9 @@ const Cuenta = () => {
     const [isEditingPhone, setIsEditingPhone] = useState(false);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
-    const [name, setName] = useState('Marcelo Miranda');
+    const [name, setName] = useState('Carletto Ancelotti');
     const [phone, setPhone] = useState('+56 9 88973679');
-    const [email, setEmail] = useState('ticomiranda4@gmail.com');
+    const [email, setEmail] = useState('cancelotti@realmadrid.es');
     const [password, setPassword] = useState('password123');
     const [showPassword, setShowPassword] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
