@@ -33,8 +33,8 @@ const Cuenta = () => {
     return (
         <div>
             {/* Barra superior */}
-            <div className="w-full bg-[#0057b8] h-12 flex items-center justify-between px-4 lg:px-6">
-                <TucarLogo color="white" className="h-8" />
+            <div className="w-full bg-[#0057b8] h-16 flex items-center justify-between px-4 lg:px-6">
+                <TucarLogo color="white" className="h-12" />
                 {/* Botón de menú hamburguesa para mobile */}
                 <button className="text-white lg:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                     {isMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -43,9 +43,11 @@ const Cuenta = () => {
 
             <div className="flex">
                 {/* Menú lateral para desktop y menú mobile cuando está abierto */}
-                <div className={`fixed lg:static top-0 left-0 w-3/4 max-w-xs bg-white h-full z-20 transition-transform transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:w-1/6 lg:h-screen lg:block`}>
-                <TucarLogo className='h-[60px] py-2 pl-5' />
-                    <ul className="text-[#333333] mt-12 lg:mt-5 p-5">
+                <div className={`fixed lg:static top-0 left-0 w-3/4 max-w-xs bg-[white] h-full z-20 transition-transform transform   ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:w-1/6 lg:h-screen lg:block`}>
+                <div className='border-b-[1px] bg-[#0057b8] h-[65px] flex justify-start items-center'>
+                <TucarLogo color='white' className='h-12 pl-5 lg:hidden' />
+                </div>
+                    <ul className="text-[#333333] mt-6 lg:mt-5 p-5">
                         <li
                             className={`cursor-pointer mb-4 ${selectedSection === 'Account Info' ? 'font-bold' : ''}`}
                             onClick={() => handleSectionChange('Account Info')}
