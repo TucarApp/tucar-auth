@@ -177,7 +177,7 @@ const Cuenta = () => {
                         <div className="text-[#333333]">
                             <h2 className="text-2xl font-bold mb-5">Ajustes de Seguridad</h2>
                             <div className="mb-5 border-b border-gray-300 pb-3">
-                                <p className="text-gray-700">Contraseña</p>
+                                <p className="text-gray-700 font-bold">Contraseña</p>
                                 <div className="flex items-center gap-2">
                                     {isEditingPassword ? (
                                         <>
