@@ -499,23 +499,29 @@ const Cuenta = () => {
                         <div>
                             <div className="text-[#333333] border-b border-gray-300 pb-3">
                                 <h2 className="text-2xl font-bold mb-5">Política de privacidad</h2>
-
                                 {allowedApplications.map((app, index) => (
-                                    <div key={index} className="mb-5 ">
-                                        <a
-                                            href={app.privacyPolicy}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline-none"
-                                        >
-                                            <p className="font-medium text-[#0057b8]">{app.name}</p>
+                                    <div key={index} className="mb-4">
+                                        <p className="font-medium">{app.name}</p>
+                                        <p className="text-gray-700">{app.description}</p>
+                                       
+                                      <ul className='list-disc mx-5'>
+                                        <li>  <a href={app.privacyPolicy} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
+                                            Política de Privacidad
                                         </a>
-
+                                        
+                                      </li>
+                                      <li>
+                                      <a href={app.termsOfService} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
+                                            Términos de Servicio
+  </a>
+                                      </li>
+                                      </ul>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
+
 
 
                 </div>
