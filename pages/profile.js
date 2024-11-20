@@ -4,24 +4,28 @@ import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
 import InputField from '@/components/Auth/InputField';
 
+
+
 // Importamos los mocks
 import { fetchUserData } from '../utils/mocks/mockUsersApi';
 import { updateCredentials } from '../utils/mocks/mockCredentialsApi';
 import { verifyUser } from '../utils/mocks/mockVerifyApi';
 import { changePassword } from '../utils/mocks/mockChangePasswordApi';
 import { confirmChangePassword } from '../utils/mocks/mockConfirmChangePasswordApi';
+import { useRouter } from 'next/router';
+
+// Dentro del componente
+
 
 const Cuenta = () => {
     const [selectedSection, setSelectedSection] = useState('Account Info');
-    const [isEditingName, setIsEditingName] = useState(false);
+    const router = useRouter();
+
     const [isEditingPhone, setIsEditingPhone] = useState(false);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [isChangeConfirmed, setIsChangeConfirmed] = useState(false);
 
     const [allowedApplications, setAllowedApplications] = useState([]);
-
-
-
     const [name, setName] = useState('');
     const [lastname, setLastname] = useState('');
     const [phone, setPhone] = useState('');
@@ -31,23 +35,30 @@ const Cuenta = () => {
     const [userIdentifier, setUserIdentifier] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
     const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
-
-
     const [userData, setUserData] = useState(null);
     const [changePasswordStatus, setChangePasswordStatus] = useState(null);
     const [confirmPasswordStatus, setConfirmPasswordStatus] = useState(null);
-
     const [verifiedStatus, setVerifiedStatus] = useState({ email: false, phone: false });
+    const [authentications, setAuthentications] = useState([]); // Nuevo estado para autenticaciones
 
-    const token = "AC.PPQ-EFdGHwly7r2-3bHoau1KjnZKW4NtIMV3ekH73ZvFiGZXCdI_kheUvFxC2pWAfrxbeAgIzgSyGy4cM5qy-sH1T2IifPW6FVF5-3fJVbyi_eSaGS-s9OnAtGXik3irnc_9nIFWAlTdFKyHcr52FyyjcNNRVAkTp3rGlA.VKZSmojF4i9gAIzz0tnKQtR7fNre0Ixo3VfUe-BIWc6wlrRyktle4kJgTHByCFe59-7qV46TAMCw0SIc2tKkEEOFOGrrDy4RLyln7JrxO0J_nuU5iLRxLdyT2jT5l67gF1rIYjt3xrifV4c3gbtnIUWS_ttyL76IRoiOm8mfaodw11qcfDFmLNvjWByXQa3AyisEtIkSzj3ymjJ79fca2zAhlGNo5-FzetHRcKS36iFdsW9tS--Ov1p3mfyN78xKS6yIh-IZRAL9Mn6yyBcy4sBSxnt6Ghm9fXc-xQpOXB4YjAIMPKcvDQj2TVw3A1hjAB71ce2JhHqaCH-Lmo-8aQ";
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [isEditingLastname, setIsEditingLastname] = useState(false);
+
+    const [userId, setUserId] = useState(null); // Estado para almacenar el userId
+
+    const [phoneError, setPhoneError] = useState('');
+    const [emailError, setEmailError] = useState(''); // Define emailError y su setter setEmailError
+    const [blockStatus, setBlockStatus] = useState(''); // Estado para almacenar el mensaje de bloqueo
 
 
 
+
+
+    const token = "AC.ktAmk6vZ5cvxSCLOURFUH4GG_PGnGPojKjDlbpWEY9mW1CPaksGzs4S234s0uSuJXQsTb_kmo1x8XOPmcaNHQNokAEU_S5zklOy-lR4r7HdHtpbTEugZyQODem0SiesoZ7GbEsisPY8Ye0lOsP0LdDegk5GLTartTHflBw.YKxm8hDoQaeJPRP4RgIJzKZNBbFWdp048NR0XB9OVZ7TBmBwR-mm5vASFnfBs2fpCdCU1pYV_ciMMAm4Px1fmrtFDTPZNafp5hllouxOlo_43RvNpM7dg3zQfFA5O2hcvx6Lh_dib_AfAJ6BZTr5EgVprfQoedAZOCP3M6Ox5LWKDMfPtKdCQwxlTei3-RRu6Rf-LZxBqzU95rVRjSO4Iy6_lGiUKZ81XgORDuH1b5SWZ7AyMpKL65h5XZtv6TUcu0CNiV0Y7x_C-Tl6f-2qGnqnTOCF2iBsaoFqtnukxLOIEUk7tKj_lNlXsYSgY0j9iT8vFBo_N2Cn8AwuiJZBsw"
 
 
 
@@ -71,13 +82,36 @@ const Cuenta = () => {
 
             // Fetch user credentials using the default email
             await fetchUserCredentials("email", "ticomiranda4@gmail.com");
+
+            // Obtener el userId usando el token
+            await fetchUserId();
         };
         loadData();
     }, []);
 
-    // Function to fetch user credentials with token
-    const [authentications, setAuthentications] = useState([]); // Nuevo estado para autenticaciones
+    // Función para obtener el userId usando el endpoint de /api/v1/resources/token-metadata
+    const fetchUserId = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/resources/token-metadata?token=${token}`, {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Token Metadata Response:", data); // Consola la respuesta para ver el userId
+                setUserId(data.user_id); // Almacena el userId en el estado
+            } else {
+                console.error("Error fetching token metadata:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
 
+    // Function to fetch user credentials with token
     const fetchUserCredentials = async (credentialType, value) => {
         try {
             const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/?credential_type=${credentialType}&value=${value}`, {
@@ -89,7 +123,7 @@ const Cuenta = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log("User Credentials:", data);
+                console.log("User Credentials Response:", data);
 
                 // Update the states with fetched data
                 setName(data.firstname || '');
@@ -98,9 +132,8 @@ const Cuenta = () => {
                 setPhoneCode(data.code || '');
                 setEmail(data.email || '');
                 setVerifiedStatus(data.verifiedElements || { email: false, phone: false });
-                setAuthentications(data.authentications || []); // Almacena las autenticaciones permitidas
-                setAllowedApplications(data.allowed_applications || []); // Almacena las aplicaciones permitidas
-            } else {
+                setAuthentications(data.authentications || []);
+                setAllowedApplications(data.allowed_applications || []);
                 console.error("Error fetching user credentials:", response.statusText);
             }
         } catch (error) {
@@ -116,20 +149,14 @@ const Cuenta = () => {
     };
 
     const cancelEdit2 = () => {
-        setIsEditingPassword(false); // Vuelve al estado inicial sin edición
-        setIsCodeSent(false); // Resetea el estado de envío de código
-        setIsChangeConfirmed(false); // Resetea el estado de confirmación de cambio
-        setCurrentPassword(''); // Limpia el valor del campo de contraseña actual
-        setNewPassword(''); // Limpia el valor del campo de nueva contraseña
-        setVerificationCode(''); // Limpia el valor del código de verificación
-        setChangePasswordStatus(null); // Resetea el mensaje de estado
+        setIsEditingPassword(false);
+        setIsCodeSent(false);
+        setIsChangeConfirmed(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setVerificationCode('');
+        setChangePasswordStatus(null);
         setConfirmPasswordStatus(null);
-    };
-
-
-    const handleSendVerificationCode = () => {
-        setIsCodeSent(true);
-        setChangePasswordStatus("Código de verificación enviado. Revisa tu correo o teléfono.");
     };
 
 
@@ -139,27 +166,12 @@ const Cuenta = () => {
         setChangePasswordStatus(null);
     };
 
-
     const cancelEdit = (field) => {
         if (field === 'name') setIsEditingName(false);
         if (field === 'phone') setIsEditingPhone(false);
         if (field === 'email') setIsEditingEmail(false);
         if (field === 'password') setIsEditingPassword(false);
         setVerificationCode('');
-    };
-
-
-
-    const handleConfirmVerificationCode = async (field) => {
-        if (field === 'phone') {
-            setIsEditingPhone(false);
-            setVerifiedStatus((prevStatus) => ({ ...prevStatus, phone: true }));
-        }
-        if (field === 'email') {
-            setIsEditingEmail(false);
-            setVerifiedStatus((prevStatus) => ({ ...prevStatus, email: true }));
-        }
-        setIsCodeSent(false);
     };
 
 
@@ -188,6 +200,211 @@ const Cuenta = () => {
             setConfirmPasswordStatus("Error al confirmar el cambio de contraseña. Inténtalo de nuevo.");
         }
     };
+
+    // Función para actualizar el nombre o apellido
+    const updateUserCredential = async (type, value) => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/credentials`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    credential: {
+                        type: type,
+                        value: value
+                    },
+                    userId: userId
+                })
+            });
+            if (response.ok) {
+                console.log(`${type} actualizado correctamente`);
+                // Aquí puedes actualizar el estado local si es necesario, por ejemplo:
+                if (type === "firstname") {
+                    setIsEditingName(false);
+                } else if (type === "lastname") {
+                    setIsEditingLastname(false);
+                }
+            } else {
+                console.error("Error al actualizar el credential:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+
+
+    const handleSendVerificationCode = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/credentials`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    credential: {
+                        type: "phone",
+                        value: phone
+                    },
+                    userId: userId
+                })
+            });
+
+            if (response.ok) {
+                console.log("Número de teléfono actualizado correctamente.");
+                setIsCodeSent(true);
+                setPhoneError(''); // Limpiar error previo
+                setChangePasswordStatus("Código de verificación enviado. Revisa tu teléfono.");
+            } else {
+                const errorData = await response.json();
+                console.log("Error Data:", errorData); // Verificar la estructura de errorData
+
+                if (errorData.detail && errorData.detail.errors === "Phone already in use") {
+                    setPhoneError("Número de teléfono ya está en uso.");
+                } else {
+                    setPhoneError(errorData.detail?.message || "Error al enviar el código de verificación");
+                }
+                console.error("Error al actualizar el número de teléfono:", errorData);
+            }
+        } catch (error) {
+            setPhoneError("Error de conexión. Inténtalo nuevamente.");
+            console.error("Error:", error);
+        }
+    };
+
+
+    const handleConfirmVerificationCode = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/verify`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    credential: {
+                        type: "phone",
+                        value: verificationCode
+                    },
+                    userId: userId,
+
+                })
+            });
+            if (response.ok) {
+                console.log("Número de teléfono verificado correctamente");
+                setVerifiedStatus((prevStatus) => ({ ...prevStatus, phone: true }));
+                setIsEditingPhone(false);
+                setIsCodeSent(false);
+            } else {
+                console.error("Error al verificar el número de teléfono:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    const handleSendVerificationCodeForEmail = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/credentials`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    credential: {
+                        type: "email",
+                        value: email
+                    },
+                    userId: userId
+                })
+            });
+
+            if (response.ok) {
+                console.log("Correo electrónico actualizado correctamente.");
+                setIsCodeSent(true);
+                setEmailError(''); // Limpiar error previo
+                setChangePasswordStatus("Código de verificación enviado. Revisa tu correo electrónico.");
+            } else {
+                const errorData = await response.json();
+                console.log("Error Data:", errorData); // Verificar la estructura de errorData
+
+                if (errorData.detail && errorData.detail.errors === "Email already in use") {
+                    setEmailError("El correo electrónico ya está en uso.");
+                } else if (errorData.detail && errorData.detail.errors === "Can't change your email if have a Google or Uber account linked") {
+                    setEmailError("No se puede cambiar el correo electrónico si tienes una cuenta vinculada de Google o Uber.");
+                } else {
+                    setEmailError("Error al enviar el código de verificación.");
+                }
+                console.error("Error al actualizar el correo electrónico:", errorData);
+            }
+        } catch (error) {
+            setEmailError("Error de conexión. Inténtalo nuevamente.");
+            console.error("Error:", error);
+        }
+    };
+
+
+    const handleConfirmVerificationCodeForEmail = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/verify`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    credential: {
+                        type: "email",
+                        value: verificationCode // Enviar el código de verificación
+                    },
+                    userId: userId
+                })
+            });
+            if (response.ok) {
+                console.log("Correo electrónico verificado correctamente");
+                setVerifiedStatus((prevStatus) => ({ ...prevStatus, email: true }));
+                setIsEditingEmail(false);
+                setIsCodeSent(false);
+            } else {
+                console.error("Error al verificar el correo electrónico:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    const handleBlockAccount = async () => {
+        try {
+            const response = await fetch(`https://account-service-twvszsnmba-uc.a.run.app/api/v1/users/block`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    userId: userId
+                })
+            });
+
+            if (response.ok) {
+                setBlockStatus("Cuenta bloqueada correctamente.");
+            } else {
+                const errorData = await response.json();
+                setBlockStatus("Error al bloquear la cuenta: " + (errorData.detail?.errors || response.statusText));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            setBlockStatus("Error de conexión. Inténtalo nuevamente.");
+        }
+    };
+
+
+
+
 
     return (
         <div className='font-Poppins'>
@@ -235,44 +452,72 @@ const Cuenta = () => {
                                 <p className="text-gray-700 font-bold">Nombre</p>
                                 <div className="flex justify-between items-center">
                                     {isEditingName ? (
-                                        <>
-                                            <div className='flex flex-col w-full'>
-                                                <InputField
-                                                    type="text"
-                                                    className="border border-gray-300 rounded p-2 w-full"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    placeholder='Nombre'
-                                                />
-                                                <InputField
-                                                    type="text"
-                                                    className="border border-gray-300 rounded p-2 w-full mt-2"
-                                                    value={lastname}
-                                                    onChange={(e) => setLastname(e.target.value)}
-                                                    placeholder='Apellido'
-                                                />
-                                                <div className="flex gap-2 mt-2 w-full max-w-[348px]">
-                                                    <AuthButton className="flex-1" onClick={() => cancelEdit('name')} variant="secondary">
-                                                        Cancelar
-                                                    </AuthButton>
-                                                    <AuthButton className="flex-1" onClick={() => setIsEditingName(false)}>
-                                                        Continuar
-                                                    </AuthButton>
-                                                </div>
+                                        <div className="flex flex-col w-full">
+                                            <InputField
+                                                type="text"
+                                                className="border border-gray-300 rounded p-2 w-full"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                placeholder="Nombre"
+                                            />
+                                            <div className="flex gap-2 mt-2 w-full max-w-[348px]">
+                                                <AuthButton className="flex-1" onClick={() => cancelEdit('name')} variant="secondary">
+                                                    Cancelar
+                                                </AuthButton>
+                                                <AuthButton
+                                                    className="flex-1"
+                                                    onClick={() => updateUserCredential('firstname', name)}
+                                                >
+                                                    Continuar
+                                                </AuthButton>
                                             </div>
-                                        </>
+                                        </div>
                                     ) : (
-                                        <>
-                                            <p className="text-[16px]">{`${name} ${lastname}`}</p>
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={() => setIsEditingName(true)} className="text-blue-500">
-                                                    <PencilIcon className="h-5 w-5" />
-                                                </button>
-                                            </div>
-                                        </>
+                                        <div className="flex justify-between w-full">
+                                            <p className="text-[16px]">{name}</p>
+                                            <button onClick={() => setIsEditingName(true)} className="text-blue-500">
+                                                <PencilIcon className="h-5 w-5" />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
+
+                                <p className="text-gray-700 font-bold mt-5">Apellido</p>
+                                <div className="flex justify-between items-center">
+                                    {isEditingLastname ? (
+                                        <div className="flex flex-col w-full">
+                                            <InputField
+                                                type="text"
+                                                className="border border-gray-300 rounded p-2 w-full"
+                                                value={lastname}
+                                                onChange={(e) => setLastname(e.target.value)}
+                                                placeholder="Apellido"
+                                            />
+                                            <div className="flex gap-2 mt-2 w-full max-w-[348px]">
+                                                <AuthButton className="flex-1" onClick={() => cancelEdit('lastname')} variant="secondary">
+                                                    Cancelar
+                                                </AuthButton>
+                                                <AuthButton
+                                                    className="flex-1"
+                                                    onClick={() => updateUserCredential('lastname', lastname)}
+                                                >
+                                                    Continuar
+                                                </AuthButton>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-between w-full">
+                                            <p className="text-[16px]">{lastname}</p>
+                                            <button onClick={() => setIsEditingLastname(true)} className="text-blue-500">
+                                                <PencilIcon className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+
                             </div>
+
 
 
 
@@ -299,7 +544,7 @@ const Cuenta = () => {
                                                     />
                                                     <div className="flex gap-2 mt-2">
                                                         <AuthButton onClick={() => cancelEdit('phone')} variant="secondary">Cancelar</AuthButton>
-                                                        <AuthButton onClick={() => handleConfirmVerificationCode('phone')}>Confirmar cambio</AuthButton>
+                                                        <AuthButton onClick={handleConfirmVerificationCode}>Confirmar cambio</AuthButton>
                                                     </div>
                                                 </>
                                             ) : (
@@ -308,11 +553,12 @@ const Cuenta = () => {
                                                     <AuthButton onClick={handleSendVerificationCode}>Enviar Código</AuthButton>
                                                 </div>
                                             )}
+                                            {phoneError && <p className="text-red-500 text-sm mt-1 text-center font-Poppins font-light">{phoneError}</p>}
                                         </div>
                                     ) : (
                                         <>
                                             <p className="text-[16px]">{`${phoneCode} ${phone}`}</p>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1">
                                                 {verifiedStatus.phone ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-green-500" title="Verificado" />
                                                 ) : (
@@ -326,10 +572,6 @@ const Cuenta = () => {
                                     )}
                                 </div>
                             </div>
-
-
-
-
 
 
 
@@ -358,139 +600,93 @@ const Cuenta = () => {
                                                     />
                                                     <div className="flex gap-2 mt-2">
                                                         <AuthButton onClick={() => cancelEdit('email')} variant="secondary">Cancelar</AuthButton>
-                                                        <AuthButton onClick={() => handleConfirmVerificationCode('email')}>Confirmar cambio </AuthButton>
+                                                        <AuthButton onClick={handleConfirmVerificationCodeForEmail}>Confirmar cambio</AuthButton>
                                                     </div>
                                                 </>
                                             ) : (
                                                 <div className="flex gap-2 mt-2">
                                                     <AuthButton onClick={() => cancelEdit('email')} variant="secondary">Cancelar</AuthButton>
-                                                    <AuthButton onClick={handleSendVerificationCode}>Enviar Código</AuthButton>
+                                                    <AuthButton onClick={handleSendVerificationCodeForEmail}>Enviar Código</AuthButton>
                                                 </div>
                                             )}
+                                            {emailError && <p className="text-red-500 text-sm mt-1 font-Poppins font-light text-center">{emailError}</p>}
                                         </div>
                                     ) : (
-                                        <>
-                                            <p className="text-[16px]">{email}</p>
-                                            <div className="flex items-center gap-2">
-                                                {verifiedStatus.email ? (
-                                                    <CheckCircleIcon className="h-5 w-5 text-green-500" title="Verificado" />
-                                                ) : (
-                                                    <ExclamationCircleIcon className="h-5 w-5 text-red-500" title="Falta verificar" />
-                                                )}
-                                                <button onClick={() => setIsEditingEmail(true)} className="text-blue-500">
-                                                    <PencilIcon className="h-5 w-5" />
-                                                </button>
-                                            </div>
-                                        </>
+                                        <div className="flex items-center gap-1 w-full">
+                                            <p className="text-[16px] flex-1">{email}</p>
+                                            {verifiedStatus.email ? (
+                                                <CheckCircleIcon className="h-5 w-5 text-green-500" title="Verificado" />
+                                            ) : (
+                                                <ExclamationCircleIcon className="h-5 w-5 text-red-500" title="Falta verificar" />
+                                            )}
+                                            <button onClick={() => setIsEditingEmail(true)} className="text-blue-500">
+                                                <PencilIcon className="h-5 w-5" />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
 
-
+                            <div className='flex justify-end'>
+                                <button
+                                    onClick={() => {
+                                        const isConfirmed = window.confirm("¿Estás seguro de que deseas bloquear la cuenta?");
+                                        if (isConfirmed) {
+                                            handleBlockAccount();
+                                        }
+                                    }}
+                                    className="bg-red-600 hover:bg-red-700 mt-5 font-Poppins text-white font-medium py-2 px-4 rounded shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-left"
+                                >
+                                    Bloquear Cuenta
+                                </button>
+                            </div>
 
                         </div>
                     )}
 
                     {selectedSection === 'Security' && (
-                        <div>
-                            <div className="text-[#333333] mb-5 border-b border-gray-300 pb-3">
-                                <h2 className="text-2xl font-bold mb-5">Cambiar Contraseña</h2>
-
-                                {!isEditingPassword ? (
-                                    // Etapa inicial: Contraseña oculta y botón de edición
-                                    <div className="flex justify-between items-center mb-5">
-                                        <p className="text-[16px]">●●●●●●●●</p>
-                                        <button onClick={() => setIsEditingPassword(true)} className="text-blue-500">
-                                            <PencilIcon className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    // Etapa de edición y confirmación
-                                    <>
-                                        {!isCodeSent && !isChangeConfirmed ? (
-                                            <>
-                                                <div className="mb-5">
-                                                    <InputField
-                                                        type="password"
-                                                        className="border border-gray-300 rounded p-2 w-full"
-                                                        placeholder="Nueva contraseña"
-                                                        value={currentPassword}
-                                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="mb-5">
-                                                    <InputField
-                                                        type="password"
-                                                        className="border border-gray-300 rounded p-2 w-full"
-                                                        placeholder="Confirmar contraseña"
-                                                        value={newPassword}
-                                                        onChange={(e) => setNewPassword(e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="flex gap-2 mt-2 w-full max-w-[348px]">
-                                                    <AuthButton className="flex-1" onClick={cancelEdit2} variant="secondary">
-                                                        Cancelar
-                                                    </AuthButton>
-                                                    <AuthButton className="flex-1" onClick={handleSendVerificationCode}>
-                                                        Continuar
-                                                    </AuthButton>
-                                                </div>
-                                            </>
-                                        ) : isCodeSent && !isChangeConfirmed ? (
-                                            // Etapa de código de verificación únicamente
-                                            <>
-                                                <div className="mb-5">
-                                                    <InputField
-                                                        type="text"
-                                                        className="border border-gray-300 rounded p-2 w-full"
-                                                        placeholder="Código de verificación"
-                                                        value={verificationCode}
-                                                        onChange={(e) => setVerificationCode(e.target.value)}
-                                                    />
-                                                </div>
-
-                                                {changePasswordStatus && <p className="mt-2 text-sm text-gray-600">{changePasswordStatus}</p>}
-
-                                                <div className="flex gap-2 mt-2 w-full max-w-[348px]">
-                                                    <AuthButton className="flex-1" onClick={cancelEdit2} variant="secondary">
-                                                        Cancelar
-                                                    </AuthButton>
-                                                    <AuthButton className="flex-1" onClick={() => handleConfirmChangePassword().then(() => setIsChangeConfirmed(true))}>
-                                                        Confirmar cambio
-                                                    </AuthButton>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            // Etapa final: Mostrar botón "Volver" después de confirmar el cambio
-                                            <>
-                                                <p className="mt-2 text-sm text-gray-600">Contraseña cambiada con éxito.</p>
-                                                <div className="flex gap-2 mt-2 w-full max-w-[348px]">
-                                                    <AuthButton className="flex-1" onClick={cancelEdit2}>
-                                                        Volver
-                                                    </AuthButton>
-                                                </div>
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Cuentas vinculadas */}
-                            <div className="mb-5 border-b border-gray-300 pb-3">
-                                <p className="text-gray-700 font-bold">Cuentas vinculadas</p>
-                                <div>
-                                    {authentications.map((auth, index) => (
-                                        auth.allowed && (
-                                            <div key={index} className="flex justify-between items-center">
-                                                <p className="text-[16px] my-2">{auth.methodType}</p>
-                                            </div>
-                                        )
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                    
+                       
+                    
+                           <div>
+                               <div className="text-[#333333] mb-5 border-b border-gray-300 pb-3">
+                                   <h2 className="text-2xl font-bold mb-5">Cambiar Contraseña</h2>
+                       
+                                   {!isEditingPassword ? (
+                                       // Etapa inicial: Contraseña oculta y botón de edición
+                                       <div className="flex justify-between items-center mb-5">
+                                           <p className="text-[16px]">●●●●●●●●</p>
+                                           <button 
+                                               onClick={() => router.push('/change-password')} 
+                                               className="text-blue-500"
+                                           >
+                                               <PencilIcon className="h-5 w-5" />
+                                           </button>
+                                       </div>
+                                   ) : (
+                                       // Resto del código de edición de contraseña
+                                       <>
+                                           {/* Código de edición de contraseña aquí */}
+                                       </>
+                                   )}
+                               </div>
+                       
+                               {/* Cuentas vinculadas */}
+                               <div className="mb-5 border-b border-gray-300 pb-3">
+                                   <p className="text-gray-700 font-bold">Cuentas vinculadas</p>
+                                   <div>
+                                       {authentications.map((auth, index) => (
+                                           auth.allowed && (
+                                               <div key={index} className="flex justify-between items-center">
+                                                   <p className="text-[16px] my-2">{auth.methodType}</p>
+                                               </div>
+                                           )
+                                       ))}
+                                   </div>
+                               </div>
+                           </div>
+                       
+                       
                     )}
 
 
@@ -503,19 +699,19 @@ const Cuenta = () => {
                                     <div key={index} className="mb-4">
                                         <p className="font-medium">{app.name}</p>
                                         <p className="text-gray-700">{app.description}</p>
-                                       
-                                      <ul className='list-disc mx-5'>
-                                        <li>  <a href={app.privacyPolicy} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
-                                            Política de Privacidad
-                                        </a>
-                                        
-                                      </li>
-                                      <li>
-                                      <a href={app.termsOfService} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
-                                            Términos de Servicio
-  </a>
-                                      </li>
-                                      </ul>
+
+                                        <ul className='list-disc mx-5 my-3 flex flex-col gap-y-[5px]'>
+                                            <li>  <a href={app.privacyPolicy} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
+                                                Política de Privacidad
+                                            </a>
+
+                                            </li>
+                                            <li>
+                                                <a href={app.termsOfService} target="_blank" rel="noopener noreferrer" className="underline text-[#0057b8]">
+                                                    Términos de Servicio
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </div>
                                 ))}
                             </div>

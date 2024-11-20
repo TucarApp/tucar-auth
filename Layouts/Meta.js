@@ -25,8 +25,6 @@ function Meta({ children, title, ...customMeta }) {
   return (
     <>
       <Head>
-    
-
         <title>{meta.title}</title>
         <meta name="robots" content="follow, index" />
         <meta content={meta.description} name="description" />
