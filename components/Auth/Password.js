@@ -7,25 +7,6 @@ import styled from 'styled-components';
 
 
 
-const AuthButton = styled.button`
-  width: 100%; 
-  max-width: 348px; 
-  height: 42px;
-  display: flex; 
-  padding: 0; 
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  border-radius: 10px;
-  border: 1px solid var(--boton-2, #E3EDF7);
-  background: var(--boton-2, #E3EDF7);
-
-
-  box-shadow: -6px -6px 20px 0px #FFF, 4px 4px 20px 0px rgba(111, 140, 176, 0.41);
-  margin-top: 20px; 
-  color: #5B5D71;
-  font-size: 15px;
-`;
 
 
 
@@ -150,23 +131,23 @@ const SimplePasswordChange = () => {
 
 
                         <div className="flex gap-2 mt-6">
-                            <AuthButton className="flex-1" onClick={handleCancel}>
+                            <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleCancel}>
                                 Cancelar
-                            </AuthButton>
+                            </button>
                             {isCodeSent ? (
-                                <AuthButton className="flex-1" onClick={handleConfirmChangePassword}>
+                                <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleConfirmChangePassword}>
                                     Confirmar cambio
-                                </AuthButton>
+                                </button>
                             ) : (
-                                <AuthButton className="flex-1" onClick={handleChangePassword}>
+                                <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleChangePassword}>
                                     Continuar
-                                </AuthButton>
+                                </button>
                             )}
                         </div>
                     </div>
-                    <AuthButton className="flex-1"  onClick={() => router.push('/profile')}>
+                    <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]"  onClick={() => router.push('/profile')}>
                         Regresar al perfil
-                    </AuthButton>
+                    </button>
                 </div>
             </div>
         </div>
