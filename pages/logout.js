@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+cimport { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 
 const Logout = () => {
