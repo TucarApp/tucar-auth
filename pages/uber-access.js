@@ -1,22 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-export default function UberAccess() {
+const UberAccess = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const code = searchParams.get('code');
-
-    console.log('Código recibido de Uber:', code);
+    const code = searchParams.get("code");
 
     if (code) {
-      // Guardar el código en localStorage
-      localStorage.setItem('uberCode', code);
-
-      // Cerrar automáticamente la ventana emergente
-      window.close();
+      localStorage.setItem("uberCode", code);
+      window.close(); // Cerrar la ventana emergente
     } else {
-      console.error('No se recibió el código de Uber en los parámetros.');
+      console.error("No se recibió el código de Uber.");
     }
   }, []);
 
   return <p>Procesando flujo de Uber...</p>;
-}
+};
+
+export default UberAccess;

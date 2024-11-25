@@ -278,7 +278,7 @@ export default Auth;
 //       setCompleted(data.completed);
 //       setAuthData(data.authData);
 
-//       // // Actualizar fingerprint después de recibir authSessionId
+//       // Actualizar fingerprint después de recibir authSessionId
 //       updateFingerprint(data.authSessionId);
 //     } catch (error) {
 //       console.error("Error en la autorización", error);
@@ -325,7 +325,7 @@ export default Auth;
 //       const redirectUri = response.data?.redirectUri;
 
 //       if (redirectUri) {
-//        // // Redirigir al `redirectUri` en lugar de /dashboard
+//        // Redirigir al `redirectUri` en lugar de /dashboard
 //         router.push(redirectUri);
 //       } else {
 //         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");
