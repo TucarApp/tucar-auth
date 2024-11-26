@@ -429,7 +429,7 @@ const AuthForm = () => {
                   <div className="text-red-500 mt-2">{passwordWarning}</div>
                 )}
                 <AuthButton onClick={handleSubmit}>
-                  <p className="font-Poppins font-medium">Registrarse</p>
+                  <p className="font-Poppins font-medium">Continuar</p>
                 </AuthButton>
               </div>
             </div>
