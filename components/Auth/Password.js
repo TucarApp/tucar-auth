@@ -145,9 +145,11 @@ const SimplePasswordChange = () => {
                             )}
                         </div>
                     </div>
-                    <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]"  onClick={() => router.push('/profile')}>
+                    <a href='https://profile.tucar.dev'>
+                    <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" >
                         Regresar al perfil
                     </button>
+                    </a>
                 </div>
             </div>
         </div>

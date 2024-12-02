@@ -772,16 +772,21 @@ export const AuthProvider = ({ children, state, ...props }) => {
 
   const verifyAuthentication = async (authSessionId) => {
     try {
-      const response = await axios.post('/api/v1/oauth/verify-authentication', {
-        authSessionId,
-        udiFingerprint,
-        state
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        '/api/v1/oauth/verify-authentication',
+        {
+          authSessionId,
+          udiFingerprint,
+          state,
         },
-        withCredentials: true,
-      });
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
+  
       const { redirectUri } = response.data;
       if (redirectUri) {
         router.push(redirectUri);
@@ -790,9 +795,16 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
     } catch (error) {
       console.error('Error en la verificación de la autenticación:', error);
-      setErrorMessage('Error en la verificación de la autenticación');
+      const serverErrors = error.response?.data?.detail?.errors;
+
+      if (error.response && error.response.data && error.response?.data?.detail?.errors === "User is not active") {
+        setErrorMessage('Este usuario ha sido eliminado.');
+      } else {
+        setErrorMessage('Error en la verificación de la autenticación');
+      }
     }
   };
+  
 
   const submitAuthentication = async (isFallback = false) => {
     let authenticationActions = [];
@@ -915,6 +927,8 @@ export const AuthProvider = ({ children, state, ...props }) => {
         reloadPage();
       } else if (serverErrors === "Invalid code") {
         setErrorMessage('Código inválido. Por favor, ingrésalo nuevamente.');
+      } else if (serverErrors === "User is not active") {
+        setErrorMessage('Este usuario ha sido eliminado.');
       } else {
         setErrorMessage(serverErrors || 'Error en la autenticación');
       }

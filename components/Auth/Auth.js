@@ -14,11 +14,11 @@ const Auth = () => {
   const [authMethods, setAuthMethods] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState(''); // Inicializamos como vacío
+  const [state, setState] = useState(''); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const searchParams = useSearchParams(); // Captura los parámetros de la URL
+  const searchParams = useSearchParams(); 
 
   
 
@@ -37,20 +37,20 @@ const Auth = () => {
     const clientId = searchParams.get('client_id');
     const redirectUri = searchParams.get('redirect_uri');
     const scope = searchParams.get('scope');
-    const stateParam = searchParams.get('state'); // Capturamos el `state`
+    const stateParam = searchParams.get('state'); 
 
     if (stateParam) {
-      setState(stateParam); // Actualizamos el valor de `state` si existe
+      setState(stateParam); 
     }
 
     if (responseType && clientId && redirectUri && scope && stateParam) {
      
 
-      authorize(); // Llamar a authorize solo si se capturan todos los parámetros
+      authorize(); 
     } else {
       
     }
-  }, [searchParams]); // Asegurarse de que searchParams esté disponible
+  }, [searchParams]); 
 
   const authorize = async () => {
     const isAppEnv = window.location.hostname.includes('.app');
