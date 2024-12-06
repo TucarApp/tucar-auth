@@ -148,7 +148,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
           withCredentials: true,
         }
       );
-
+  
       const { redirectUri } = response.data;
       if (redirectUri) {
         router.push(redirectUri);
@@ -166,13 +166,10 @@ export const AuthProvider = ({ children, state, ...props }) => {
       }
     }
   };
-
+  
 
   const submitAuthentication = async (isFallback = false) => {
     let authenticationActions = [];
-
-    console.log("Current Step:", currentStep);
-    console.log("Authentication Actions:", authenticationActions);
 
     if (isFallback) {
       authenticationActions.push({
@@ -185,7 +182,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
         const response = await axios.post('/api/v1/oauth/submit-authentication', {
           authSessionId: props.authSessionId,
           udiFingerprint: props.udiFingerprint,
-          methodType: isGoogleFlow ? 'Google' : 'Uber', // Ajusta según el flujo
+          methodType: 'EmailOrPhone',
           authenticationActions
         }, {
           headers: {
@@ -193,7 +190,6 @@ export const AuthProvider = ({ children, state, ...props }) => {
           },
           withCredentials: true
         });
-
 
         setResponse(response.data);
         setCurrentStep(1); // Retrocedemos al paso 1 en la UI después del fallback
@@ -236,7 +232,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
         stepType: 'verificationCode',
         value: verificationCode
       });
-    } else if (currentStep === 3) {
+    } else if (currentStep === 4) {
       if (!password) {
         setErrorMessage('Por favor, ingresa tu contraseña.');
         return;
@@ -280,7 +276,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
     } catch (error) {
       console.error('Error en la autenticación:', error.response ? error.response.data : error);
       const serverErrors = error.response?.data?.detail?.errors;
-
+    
       if (serverErrors.includes("There's a problem with your account. Please contact support")) {
         setErrorMessage('Hay un problema con tu cuenta. Por favor, contacta a soporte.');
       } else if (serverErrors.includes('phone')) {
@@ -299,8 +295,11 @@ export const AuthProvider = ({ children, state, ...props }) => {
         setErrorMessage(serverErrors || 'Error en la autenticación');
       }
     }
-
+    
   };
+
+
+  
 
   const submitAuthenticationGoogle = async () => {
     let authenticationActions = [];
@@ -449,6 +448,9 @@ export const AuthProvider = ({ children, state, ...props }) => {
     setErrorMessage('No se pudo completar la autenticación con Google');
   };
 
+ 
+  
+
   const handleUberLogin = () => {
     const uberMethod = props.authMethods.find(method => method.methodType === 'Uber');
     if (uberMethod) {
@@ -487,20 +489,20 @@ export const AuthProvider = ({ children, state, ...props }) => {
 
   const handleNextStepAfterEmailOrPhone = async (response) => {
     const activeMethod = response.authMethods.find((method) => method.inUse);
-
+  
     if (!activeMethod) {
       console.error("No se encontró un método de autenticación en uso.");
       return;
     }
-
+  
     // Encuentra el siguiente paso incompleto
     const nextStep = activeMethod.steps.find((step) => !step.completed);
-
+  
     if (!nextStep) {
       console.error("No hay más pasos pendientes en el flujo.");
       return;
     }
-
+  
     // Avanza al siguiente paso basado en stepType
     if (nextStep.stepType.includes("verificationCode")) {
       setCurrentStep(3); // Cambia al paso de verificación
@@ -510,13 +512,13 @@ export const AuthProvider = ({ children, state, ...props }) => {
       console.error("Tipo de paso desconocido:", nextStep.stepType);
     }
   };
-
+  
   const completeEmailOrPhoneStep = async (email) => {
     if (!email) {
       console.error("No se proporcionó un correo electrónico para completar el paso.");
       return;
     }
-
+  
     try {
       const authenticationActions = [
         {
@@ -525,7 +527,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
           value: email,
         },
       ];
-
+  
       const response = await axios.post(
         "/api/v1/oauth/submit-authentication",
         {
@@ -541,9 +543,9 @@ export const AuthProvider = ({ children, state, ...props }) => {
           withCredentials: true,
         }
       );
-
+  
       console.log("Paso emailOrPhone completado:", response.data);
-
+  
       // Detectar el siguiente paso automáticamente
       await handleNextStepAfterEmailOrPhone(response.data);
     } catch (error) {
@@ -554,17 +556,18 @@ export const AuthProvider = ({ children, state, ...props }) => {
       setErrorMessage("No se pudo completar el paso emailOrPhone automáticamente.");
     }
   };
+  
 
   const handleUberCallback = async (code) => {
     props.setIsSubmitting(true);
     const storedAuthSessionId = localStorage.getItem("authSessionId");
-
+  
     if (!storedAuthSessionId) {
       console.error("authSessionId no está definido");
       props.setIsSubmitting(false);
       return;
     }
-
+  
     try {
       const authenticationActions = [
         {
@@ -573,7 +576,7 @@ export const AuthProvider = ({ children, state, ...props }) => {
           value: code, // Código recibido de Uber
         },
       ];
-
+  
       const response = await axios.post(
         "/api/v1/oauth/submit-authentication",
         {
@@ -589,35 +592,35 @@ export const AuthProvider = ({ children, state, ...props }) => {
           withCredentials: true,
         }
       );
-
+  
       console.log("Respuesta de Uber:", response.data);
-
+  
       // Verifica si el flujo está completo
       if (response.data.completed) {
         // Realiza la verificación final
         await verifyAuthentication(response.data.authSessionId);
         return;
       }
-
+  
       // Si el flujo no está completo, maneja el siguiente paso
       const nextStep = determineNextStep(
         response.data.authMethods,
         1, // Paso inicial tras completar el social step
         response.data.authFlow
       );
-
+  
       if (nextStep !== undefined) {
         setCurrentStep(nextStep); // Avanza al siguiente paso en la UI
       } else {
         console.error("No se determinó el siguiente paso.");
       }
-
+  
       // Completa automáticamente el paso emailOrPhone si aplica
       const { email } = response.data.authData;
       if (email) {
         await completeEmailOrPhoneStep(email);
       }
-
+  
     } catch (error) {
       console.error("Error en la autenticación con Uber:", error);
       setErrorMessage("Error en la autenticación con Uber.");
@@ -625,6 +628,9 @@ export const AuthProvider = ({ children, state, ...props }) => {
       props.setIsSubmitting(false);
     }
   };
+  
+  
+  
 
   const getCurrentStepType = () => {
     const authMethod = props.authMethods.find(method => method.inUse);
