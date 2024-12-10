@@ -1,12 +1,27 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
-import InputField from "./InputField";
-import AuthButton from "./AuthButton";
-import UberButton from "./UberButton";
-import Logo from "../LogoTucar/LogoTucar";
-import { useAuthContext } from "./AuthProvider";
-import VerificationCodeInput from "./VerificationCodeInput";
-import { GoogleLogin } from "@react-oauth/google";
+
+import Email from './steps/Email';
+import EmailOrPhone from './steps/EmailOrPhone';
+import Firstname from './steps/Firstname';
+import Lastname from './steps/Lastname';
+import Password from './steps/Password';
+import Phone from './steps/Phone';
+import SocialGoogle from './steps/SocialGoogle';
+import SocialUber from './steps/SocialUber';
+import VerificationCode from './steps/VerificationCode';
+import AuthButton from './AuthButton';
+import Fallback from "./Fallback";
+import {
+  useGlobalAuthParams,
+  useGlobalAuthMethods,
+  useGlobalRequestPayload,
+  useGlobalAuthFlow,
+  useGlobalAuthenticationError,
+  useGlobalDispatch,
+} from '../context/context';
+import AuthDatasource from '../../datasources/auth';
+import { submitAuthentication } from '../../helpers/hooks';
 
 // Contenedor para el formulario
 const FormContainer = styled.div`
@@ -24,472 +39,202 @@ const FormContainer = styled.div`
   }
 `;
 
-const Buttonback = styled.div`
-  display: flex;
-  justify-content: start;
-`;
-
-const getCountryCode = async () => {
-  try {
-    const response = await fetch("https://ipapi.co/json/");
-    const data = await response.json();
-    return data.country_code;
-  } catch (error) {
-    console.error("Error obteniendo la geolocalización:", error);
-    return null;
+function filterAuthMethods(authMethods) {
+  const methodsToRender = {
+    principalAuthMethod: null,
+    secondaryAuthMethods: []
   }
-};
-
-const setPhonePrefix = async (setPhone) => {
-  const countryCode = await getCountryCode();
-  let prefix = "";
-
-  if (countryCode === "CR") {
-    prefix = "+506 ";
-  } else if (countryCode === "CL") {
-    prefix = "+56 ";
+  
+  const inUseAuthMethod = authMethods.filter(authMethod => authMethod.inUse);
+  if (inUseAuthMethod.length === 0) {
+    if (authMethods.length > 0) {
+      methodsToRender.principalAuthMethod = authMethods[0];
+    }
+  } else {
+    methodsToRender.principalAuthMethod = inUseAuthMethod[0];
+    return methodsToRender;
   }
 
-  setPhone(prefix);
-};
+  if (methodsToRender.principalAuthMethod === null) return methodsToRender;
+  methodsToRender.secondaryAuthMethods = authMethods.filter(
+    authMethod => !authMethod.inUse && methodsToRender.principalAuthMethod.methodType !== authMethod.methodType
+  );
+  return methodsToRender;
+}
+
+function filterStepComponents(methodsToRender, authFlow, continueAuth) {
+  const stepsToRender = {
+    principalAuthMethod: [],
+    secondaryAuthMethods: []
+  }
+
+  if (methodsToRender.principalAuthMethod === null) return stepsToRender;
+  const principalAuthMethodSteps = methodsToRender.principalAuthMethod.steps.filter(
+    step => step.flows.includes(authFlow) && !step.completed
+  );
+  stepsToRender.principalAuthMethod = getStepComponent(principalAuthMethodSteps, methodsToRender.principalAuthMethod.methodType, continueAuth);
+
+  for (let i in methodsToRender.secondaryAuthMethods) {
+    let secondaryAuthMethod = methodsToRender.secondaryAuthMethods[i];
+    let secondaryAuthMethodSteps = secondaryAuthMethod.steps.filter(
+      step => step.flows.includes(authFlow) && !step.completed
+    );
+    stepsToRender.secondaryAuthMethods.push(getStepComponent(secondaryAuthMethodSteps, secondaryAuthMethod.methodType, continueAuth));
+  };
+
+  return stepsToRender;
+}
+
+function getStepComponent(steps, methodType, continueAuth) {
+  if (steps.length === 0) {
+    return [];
+  }
+  const stepTypes = steps[0].stepType;
+  const stepsToRender = [];
+
+  let needContinueButton = false;
+  for (let i in stepTypes) {
+    let stepType = stepTypes[i];
+    if (stepType === 'emailOrPhone') {
+      needContinueButton = true;
+      stepsToRender.push(<EmailOrPhone />);
+    } else if (stepType === 'email') {
+      needContinueButton = true;
+      stepsToRender.push(<Email />);
+    } else if (stepType === 'firstname') {
+      needContinueButton = true;
+      stepsToRender.push(<Firstname />);
+    } else if (stepType === 'lastname') {
+      needContinueButton = true;
+      stepsToRender.push(<Lastname />);
+    } else if (stepType === 'password') {
+      needContinueButton = true;
+      stepsToRender.push(<Password />);
+    } else if (stepType === 'phone') {
+      needContinueButton = true;
+      stepsToRender.push(<Phone />);
+    } else if (stepType === 'social' && methodType === 'Google') {
+      stepsToRender.push(<SocialGoogle />);
+    } else if (stepType === 'social' && methodType === 'Uber') {
+      stepsToRender.push(<SocialUber />);
+    } else if (stepType === 'verificationCode') {
+      needContinueButton = true;
+      stepsToRender.push(<VerificationCode />);
+    }
+  }
+  if (needContinueButton) {
+    stepsToRender.push(
+      <div className="flex flex-col justify-center items-center">
+        <AuthButton
+          onClick={() => continueAuth(methodType)}
+          className="font-semibold text-[16px] font-Poppins"
+        >
+          Continuar
+        </AuthButton>
+      </div>
+    );
+  }
+  return stepsToRender;
+}
 
 const AuthForm = () => {
-  const {
-    currentStep,
-    emailOrPhone,
-    firstname,
-    lastname,
-    email,
-    phone,
-    password,
-    setEmailOrPhone,
-    setFirstname,
-    setLastname,
-    setEmail,
-    setPhone,
-    setVerificationCode,
-    setPassword,
-    submitAuthentication,
-    submitAuthenticationGoogle,
-    handleGoogleSuccess,
-    handleGoogleFailure,
-    handleUberLogin,
-    googleClientId,
-    isGoogleFlow,
-    errorMessage,
-    setErrorMessage,
-    authMethods,
-  } = useAuthContext();
+  const dispatcher = useGlobalDispatch();
+  const authParams = useGlobalAuthParams();
+  const authFlow = useGlobalAuthFlow();
+  const authMethods = useGlobalAuthMethods();
+  const requestPayload = useGlobalRequestPayload();
+  const authenticationError = useGlobalAuthenticationError();
+  const [hasFallback, setHasFallback] = useState(false);
+  const [stepsToRender, setStepsToRender] = useState({
+    principalAuthMethod: [],
+    secondaryAuthMethods: []
+  });
 
-  const [inputError, setInputError] = useState(false);
-  const [passwordWarning, setPasswordWarning] = useState("");
+  const continueAuth = useCallback((methodType) => {
+    const {
+      authSessionId,
+      udiFingerprint,
+    } = authParams;
 
-  const handleBackButtonClick = () => {
-    submitAuthentication(true);
-  };
-
-  useEffect(() => {
-    if (emailOrPhone) {
-      setInputError("");
-    }
-  }, [emailOrPhone]);
-
-  useEffect(() => {
-    setPhonePrefix(setPhone);
-  }, [setPhone]);
-
-  const handleVerificationSubmit = (completeCode) => {
-    setVerificationCode(completeCode);
-
-    if (isGoogleFlow) {
-      submitAuthenticationGoogle();
-    } else {
-      submitAuthentication();
-    }
-  };
-
-  const handlePhoneChange = (e) => {
-    const inputValue = e.target.value;
-    const formattedValue = inputValue.replace(
-      /(\+56|\+506)\s?/g,
-      (match) => `${match.trim()} `
+    console.log(requestPayload)
+    submitAuthentication(
+      AuthDatasource.submitAuthentication,
+      {
+        authSessionId,
+        udiFingerprint,
+        methodType,
+        authenticationActions: requestPayload,
+      },
+      dispatcher
     );
-    setPhone(formattedValue);
-  };
+  }, [authParams, requestPayload, dispatcher]);
 
-  const handleSubmit = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+?\d{10,15}$/;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$/;
-
-    if (currentStep === 4) {
-      if (!passwordRegex.test(password)) {
-        setPasswordWarning(
-          "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, un número y un símbolo especial."
-        );
-        return;
+  useEffect(() => {
+    const methodsToRender = filterAuthMethods(authMethods);
+    if (methodsToRender.principalAuthMethod) {
+      if (methodsToRender.principalAuthMethod.inUse) {
+        setHasFallback(true);
       } else {
-        setPasswordWarning("");
+        setHasFallback(false);
       }
     }
 
-    if (!isGoogleFlow) {
-      if (!emailOrPhone) {
-        setInputError(
-          "Por favor, completa el campo o inicia sesión con Google o Uber."
-        );
-        return;
-      }
+    const stepsToRender = filterStepComponents(methodsToRender, authFlow, continueAuth);
+    setStepsToRender(stepsToRender);
+  }, [authFlow, authMethods, continueAuth]);
 
-      if (!emailRegex.test(emailOrPhone) && !phoneRegex.test(emailOrPhone)) {
-        setInputError(
-          "Por favor, ingresa un correo electrónico válido o un número de teléfono válido."
-        );
-        return;
-      }
+  useEffect(() => {}, [hasFallback, stepsToRender, authenticationError]);
 
-      setInputError("");
-    }
-
-    try {
-      if (isGoogleFlow) {
-        await submitAuthenticationGoogle();
-      } else {
-        await submitAuthentication();
-      }
-    } catch (error) {
-      const serverErrors = error.response?.data?.detail?.errors;
-
-      if (serverErrors === "There's a problem with your account. Please contact support") {
-        setErrorMessage("Hay un problema con tu cuenta, por favor contacta a soporte.");
-      } else {
-        setInputError("Error en la autenticación. Por favor, inténtalo de nuevo.");
-      }
-    }
-  };
-
-  const googleMethod = authMethods?.find((method) => method.name === "Google");
-  const tucarMethod = authMethods?.find((method) => method.name === "Tucar");
-  const uberMethod = authMethods?.find((method) => method.name === "Uber");
-
+  if (authMethods.length === 0) {
+    return (
+      <FormContainer>
+        <div className="flex items-center justify-center my-8">
+          <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+          <div className="mx-4">
+            <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
+          </div>
+          <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+        </div>
+      </FormContainer>
+    );
+  }
+  
   return (
-    <div className="text-center">
-      {currentStep === 0 && (
-        <div>
-          <p>Esperando que se cargue el fingerprint...</p>
+    <FormContainer>
+      {hasFallback ? <Fallback/> : <></>}
+      {
+        stepsToRender.principalAuthMethod.map((step, index) => (
+          <div key={index}>
+            {step}
+          </div>
+        ))
+      }
+      <div className="flex flex-col justify-center items-center">
+        {authenticationError === '' ? null : (
+          <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
+            {authenticationError}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center justify-center my-8">
+        <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+        <div className="mx-4">
+          <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
         </div>
-      )}
-
-      {currentStep === 1 && (
-        <FormContainer>
-          <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
-            <div>
-              <div className="flex justify-center">
-                <Logo color="color" className="cursor-pointer" width={180} />
+        <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+      </div>
+      {
+        stepsToRender.secondaryAuthMethods.map((steps, index) => (
+          <div key={index}>
+            {steps.map((step, secondIndex) => (
+              <div key={secondIndex}>
+                {step}
               </div>
-              <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
-                ¡Bienvenido de vuelta!
-              </h1>
-            </div>
-            <div className="pantallapc:w-[345px] w-[355px]">
-              {tucarMethod && (
-                <>
-                  <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
-                    Ingresa correo o número de teléfono
-                  </p>
-                  <InputField
-                    type="text"
-                    value={emailOrPhone}
-                    onChange={(e) =>
-                      setEmailOrPhone(e.target.value.toLowerCase())
-                    }
-                  />
-                  <div className="flex flex-col justify-center items-center">
-                    {(inputError || errorMessage) && (
-                      <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
-                        {inputError || errorMessage}
-                      </p>
-                    )}
-                    <AuthButton
-                      onClick={handleSubmit}
-                      className="font-semibold text-[16px] font-Poppins"
-                    >
-                      Continuar
-                    </AuthButton>
-                  </div>
-                </>
-              )}
-              {(googleMethod || uberMethod) && (
-                <div className="flex flex-col items-center justify-center w-full">
-                  <div className="flex items-center justify-center my-8 w-[61%]">
-                    <div className="flex-grow border-t-2 border-[#0057b8]"></div>
-                    <div className="mx-4">
-                      <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
-                    </div>
-                    <div className="flex-grow border-t-2 border-[#0057b8]"></div>
-                  </div>
-                  {(inputError || errorMessage) && (
-                      <p className="text-red-500 text-sm mt-2 mb-3 font-Poppins font-light">
-                        {inputError || errorMessage}
-                      </p>
-                    )}
-                  <div className="flex flex-col items-center gap-y-[15px]">
-                    {uberMethod && (
-                      <UberButton onClick={handleUberLogin} className="w-full">
-                        <div className="flex justify-center items-center gap-x-2">
-                          <img
-                            src="uberlog.png"
-                            alt="Uber Logo"
-                            width={18}
-                            className="ml-[px]"
-                          />
-                          <span className="font-Poppins font-normal">
-                            Continuar con Uber
-                          </span>
-                        </div>
-                      </UberButton>
-                    )}
-
-                    {googleMethod && googleClientId && (
-                      <div className="flex justify-center w-full">
-                        <GoogleLogin
-                          onSuccess={handleGoogleSuccess}
-                          onError={handleGoogleFailure}
-                          useOneTap
-                          text="continue_with"
-                          shape="rectangular"
-                          width={350}
-                          size="large"
-                          logo_alignment="center"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div>
-                <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
-                  Al continuar, aceptas nuestros{" "}
-                  <a
-                    href="https://tucar.app/terminos-condiciones"
-                    className="underline"
-                  >
-                    términos y condiciones
-                  </a>
-                  , además de recibir llamadas, mensajes de WhatsApp o SMS,
-                  incluso por medios automatizados de TUCAR y sus filiales
-                  en el número proporcionado.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </FormContainer>
-      )}
-
-      {currentStep === 2 && (
-        <div className="w-full h-full flex justify-center items-center pantallapc:mt-[110px]">
-          <div className="w-[355px]">
-            <Buttonback className="flex justify" onClick={handleBackButtonClick}>
-              <img src="circular.png" alt="Logo" className="ml-[-20px]" width={70} />
-            </Buttonback>
-            <div className="flex justify-start">
-              <p className="text-[28px] font-semibold text-[#0057b8]">¡Hola!</p>
-            </div>
-            <div className="flex justify-start">
-              <p className="text-[16px] font-Poppins font-semibold text-[#0057b8]">
-                Regístrate para comenzar
-              </p>
-            </div>
-            <div className="pt-[20px]">
-              <p className="flex justify-start text-[14px] font-medium font-Poppins text-[#5b5d71] mb-[-5px]">
-                Nombre
-              </p>
-              <InputField
-                type="text"
-                value={firstname}
-                onChange={(e) => setFirstname(e.target.value)}
-              />
-            </div>
-            <div className="mt-5">
-              <p className="flex justify-start text-[14px] font-medium font-Poppins text-[#5b5d71] mb-[-5px]">
-                Apellido
-              </p>
-              <InputField
-                type="text"
-                value={lastname}
-                onChange={(e) => setLastname(e.target.value)}
-              />
-            </div>
-            <div className="mt-5">
-              <p className="flex justify-start text-[14px] font-medium font-Poppins text-[#5b5d71] mb-[-5px]">
-                Correo electrónico
-              </p>
-              <InputField
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value.toLowerCase())}
-              />
-            </div>
-            <div className="mt-5">
-              <p className="flex justify-start text-[14px] font-medium font-Poppins text-[#5b5d71] mb-[-5px]">
-                Teléfono
-              </p>
-              <InputField
-                type="text"
-                value={phone}
-                onChange={handlePhoneChange}
-              />
-            </div>
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
-                {errorMessage}
-              </p>
-            )}
-            <AuthButton onClick={handleSubmit}>
-              <p className="font-Poppins font-medium text-[#5b5d71]">Continuar</p>
-            </AuthButton>
-          </div>
-        </div>
-      )}
-
-      {currentStep === 3 && (
-        <div className="pantallapc:mt-[110px]">
-          <div className="flex justify-start">
-            <Buttonback onClick={handleBackButtonClick}>
-              <img src="circular.png" alt="Logo" className="ml-[-20px]" width={100} />
-            </Buttonback>
-          </div>
-          <div className="w-full h-full flex justify-center items-center ">
-            <div className="w-[355px]">
-              <div className="flex flex-col items-start">
-                <p className="text-[28px] text-left font-Poppins font-semibold text-[#0057b8]">
-                  Código de <span className="">verificación</span>
-                </p>
-              </div>
-              <div className="flex justify-start">
-                <p className="text-[16px] font-Poppins font-medium text-[#0057b8] text-left">
-                  Ingresa el código que hemos enviado al número de teléfono
-                </p>
-              </div>
-
-              <VerificationCodeInput
-                submitVerificationCode={handleVerificationSubmit}
-                isLoading={false}
-              />
-
-              {inputError && (
-                <div className="text-red-500 mt-2">
-                  *Por favor completa todos los campos.
-                </div>
-              )}
-
-              {errorMessage && (
-                <div className="text-red-500 mt-2">{errorMessage}</div>
-              )}
-
-              <AuthButton onClick={() => handleVerificationSubmit()}>
-                <p className="font-Poppins font-medium">Continuar</p>
-              </AuthButton>
-            </div>
-          </div> 
-        </div>
-      )}
-
-      {currentStep === 4 && (
-        <div>
-          <div>
-            <Buttonback onClick={handleBackButtonClick}>
-              <img src="circular.png" alt="Logo" className="ml-[-20px]" width={100} />
-            </Buttonback>
-          </div>
-
-          <div className="w-full h-full flex justify-center items-center pantallapc:mt-[110px]">
-            <div className="w-[350px]">
-              <div className="flex justify-start">
-                <p className="text-[28px] text-center font-Poppins font-semibold text-[#0057b8]">
-                  Ingresa tu <span className="">Contraseña</span>
-                </p>
-              </div>
-              <div className="mt-5">
-                <p className="font-Poppins font-medium text-[14px] text-[#5b5d71] mb-[-10px] text-start">
-                  Ingresar Contraseña
-                </p>
-                <InputField
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setErrorMessage("");
-                  }}
-                />
-                {errorMessage && (
-                  <div className="text-red-500 mt-2">{errorMessage}</div>
-                )}
-                {passwordWarning && (
-                  <div className="text-red-500 mt-2">{passwordWarning}</div>
-                )}
-                <AuthButton onClick={handleSubmit}>
-                  <p className="font-Poppins font-medium">Continuar</p>
-                </AuthButton>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentStep === 5 && (
-        <div className="w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
-          <div className="w-[355px]">
-            <div className="flex justify-center">
-              <p className="text-[28px] text-left font-Poppins font-semibold text-[#0057b8]">
-                Inicia sesión con tu{" "}
-                <span className="block">cuenta de Uber</span>
-              </p>
-            </div>
-            <div className="flex justify-center items-center mt-4">
-              <UberButton onClick={handleUberLogin}>
-                <img
-                  src="uberlog.png"
-                  alt="Uber Logo"
-                  width={18}
-                  className="ml-[-15px]"
-                />
-                <span className="font-Poppins font-normal">
-                  Continuar con Uber
-                </span>
-              </UberButton>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentStep === 6 && (
-        <div className="w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
-          <div className="w-[350px]">
-            <div className="flex justify-center">
-              <p className="text-[28px] text-left font-Poppins font-semibold text-[#0057b8]">
-                Inicia sesión con tu{" "}
-                <span className="block">cuenta de Google</span>
-              </p>
-            </div>
-            <div className="flex justify-center items-center mt-4">
-              {googleClientId && (
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleFailure}
-                  useOneTap
-                  text="continue_with"
-                  shape="square"
-                  size="large"
-                  width={330}
-                  logo_alignment="center"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        ))
+      }
+    </FormContainer>
   );
 };
 

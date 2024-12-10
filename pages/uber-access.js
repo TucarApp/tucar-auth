@@ -9,7 +9,7 @@ const UberAccess = () => {
       localStorage.setItem("uberCode", code);
       window.close(); // Cerrar la ventana emergente
     } else {
-      console.error("No se recibió el código de Uber.");
+      window.close();
     }
   }, []);
 

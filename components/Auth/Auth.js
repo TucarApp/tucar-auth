@@ -1,556 +1,100 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
-import axios from 'axios';
+import styled from "styled-components";
+
+import Logo from "../LogoTucar/LogoTucar";
 import AuthForm from './AuthForm';
-import AuthProvider from './AuthProvider';
+import LoadingScreen from './LoadingScreen';
+import AuthDatasource from '../../datasources/auth';
+import {
+  useGlobalDispatch,
+  useGlobalAuthParams,
+  useGlobalCompleted,
+  useGlobalAuthFlow,
+} from '../context/context';
+import { authorize } from '../../helpers/hooks';
+
+const AuthContainer = styled.div`
+  width: 100%;
+  max-width: 100%;
+  padding: 0 20px;
+
+  @media (min-width: 768px) {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 1440px) {
+    max-width: 60%;
+  }
+`;
+
+const APP_ENV = process.env.APP_ENV || 'development';
 
 const Auth = () => {
+  const authParams = useGlobalAuthParams();
+  const completed = useGlobalCompleted();
+  const authFlow = useGlobalAuthFlow();
+  const dispatch = useGlobalDispatch();
   const router = useRouter();
-  const [authSessionId, setAuthSessionId] = useState('');
-  const [authFlow, setAuthFlow] = useState('');
-  const [completed, setCompleted] = useState(false);
-  const [authData, setAuthData] = useState({});
-  const [authMethods, setAuthMethods] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [udiFingerprint, setUdiFingerprint] = useState('unique-device-identifier');
-  const [state, setState] = useState(''); 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const searchParams = useSearchParams();
 
-  const searchParams = useSearchParams(); 
-
+  if (completed) {
+    router.push('/verify');
+  }
   
-
   useEffect(() => {
-    const storedAuthSessionId = localStorage.getItem('authSessionId');
-    if (storedAuthSessionId && completed) {
-      verifyAuthentication(storedAuthSessionId);
-    }
-  }, [completed]);
-
- 
-
-  useEffect(() => {
-   
-    const responseType = searchParams.get('response_type');
-    const clientId = searchParams.get('client_id');
-    const redirectUri = searchParams.get('redirect_uri');
-    const scope = searchParams.get('scope');
-    const stateParam = searchParams.get('state'); 
-
-    if (stateParam) {
-      setState(stateParam); 
-    }
-
-    if (responseType && clientId && redirectUri && scope && stateParam) {
-     
-
-      authorize(); 
-    } else {
-      
-    }
-  }, [searchParams]); 
-
-  const authorize = async () => {
-    const isAppEnv = window.location.hostname.includes('.app');
-    const baseUrl = isAppEnv 
-      ? 'https://accounts.tucar.app/api/v1/oauth/authorize' 
-      : 'https://accounts.tucar.dev/api/v1/oauth/authorize';
-
-   
-    const responseType = searchParams.get('response_type') || 'code';
-    const stateParam = searchParams.get('state') || state; // Usar el estado capturado
-    const clientId = searchParams.get('client_id') || 'QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s';
-    const redirectUri = searchParams.get('redirect_uri') || 'http://localhost:3000';
-    const scope = searchParams.get('scope') || 'driver';
-    const tenancy = 'production'; // Hardcodeado a 'production'
-
-
-    const params = {
-      response_type: responseType,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      scope: scope,
-      state: stateParam, // Pasamos el estado dinámico aquí
-      tenancy: tenancy
-    };
-
-    const queryString = new URLSearchParams(params).toString();
-    const fullUrl = `${baseUrl}?${queryString}`;
-
-   
-
-    window.history.pushState(null, '', `/?${queryString}`);
-
-    try {
-      const response = await axios.get(fullUrl, {
-        withCredentials: true
-      });
-
-      const data = response.data;
-      
-
-      if (data.authMethods && data.authMethods.length > 0) {
-        setAuthMethods(data.authMethods);
-      } else {
-        console.error('authMethods no está presente en la respuesta o está vacío');
-      }
-
-      setAuthSessionId(data.authSessionId);
-      localStorage.setItem('authSessionId', data.authSessionId);
-      setAuthFlow(data.authFlow);
-      setCompleted(data.completed);
-      setAuthData(data.authData);
-
-      updateFingerprint(data.authSessionId);
-    } catch (error) {
-      console.error('Error en la autorización', error);
-    }
-  };
-
-  const updateFingerprint = async (authSessionId) => {
-    try {
-      const response = await axios.patch('https://accounts.tucar.dev/api/v1/oauth/udi-fingerprint', {
-        authSessionId,
-        udiFingerprint
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-
-     
-      setCurrentStep(1);
-    } catch (error) {
-      console.error('Error en la actualización del fingerprint', error);
-    }
-  };
-
-  const verifyAuthentication = async (authSessionId) => {
-    try {
-      const response = await axios.post('https://accounts.tucar.dev/api/v1/oauth/verify-authentication', {
-        authSessionId,
+    const udiFingerprint = 'random-udi-fingerprint';
+    authorize(
+      AuthDatasource.authorize,
+      AuthDatasource.updateUdiFingerprint,
+      {
+        responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : searchParams.get('response_type'),
+        clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : searchParams.get('client_id'),
+        redirectUri: APP_ENV === 'development' ? process.env.REDIRECT_URI : searchParams.get('redirect_uri'),
+        scope: APP_ENV === 'development' ? process.env.SCOPE : searchParams.get('scope'),
+        state: APP_ENV === 'development' ? process.env.STATE : searchParams.get('state'),
+        tenancy: APP_ENV === 'development' ? process.env.TENANCY : searchParams.get('tenancy'),
         udiFingerprint,
-        state // Usamos el estado capturado de la URL o predeterminado
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-      
-    
-      const redirectUri = response.data?.redirectUri;
+      },
+      dispatch,
+    );
+  }, [searchParams, dispatch]);
 
-      if (typeof window !== 'undefined' && redirectUri) {
-        localStorage.setItem("redirectUri", redirectUri);
-        router.push('/verify');
-      } else {
-        console.error("No se recibió un redirectUri.");
-        setErrorMessage("Error: No se recibió una URL de redirección.");
-      }
-    } catch (error) {
-      console.error('Error en la verificación de la autenticación:', error);
-      setErrorMessage(error.response?.data?.errors || 'Error en la verificación de la autenticación');
-    }
-  };
+  if (!authParams || !authFlow) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <AuthProvider
-      currentStep={currentStep}
-      setCurrentStep={setCurrentStep}
-      authSessionId={authSessionId}
-      udiFingerprint={udiFingerprint}
-      authMethods={authMethods}
-      setAuthMethods={setAuthMethods}
-      authFlow={authFlow}
-      setAuthFlow={setAuthFlow}
-      completed={completed}
-      setCompleted={setCompleted}
-      authData={authData}
-      setAuthData={setAuthData}
-      isSubmitting={isSubmitting}
-      setIsSubmitting={setIsSubmitting}
-      errorMessage={errorMessage}
-      setErrorMessage={setErrorMessage}
-      verifyAuthentication={verifyAuthentication}
-      state={state} // Pasamos el estado como prop
-    >
-      <div className='max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]'>
-        {errorMessage && (
-          <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
-        )}
-        {!authSessionId ? (
-          <div className='w-full h-screen flex justify-center items-center'>
-            <div className="flex flex-row gap-2">
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-              <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
-            </div>
+    <AuthContainer>
+      <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
+        <div className="flex justify-center">
+          <Logo color="color" className="cursor-pointer" width={180} />
+        </div>
+        <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
+          ¡Bienvenido a Tucar!
+        </h1>
+        <div className="pantallapc:w-[345px] w-[355px]">
+          <div className="text-center">
+            <AuthForm />
+            <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
+              Al continuar, aceptas nuestros{" "}
+              <a
+                href="https://tucar.app/terminos-condiciones"
+                className="underline"
+              >
+                términos y condiciones
+              </a>
+              , además de recibir llamadas, mensajes de WhatsApp o SMS,
+              incluso por medios automatizados de TUCAR y sus filiales
+              en el número proporcionado.
+            </p>
           </div>
-        ) : (
-          <AuthForm />
-        )}
+        </div>
       </div>
-    </AuthProvider>
+    </AuthContainer>
   );
 };
 
 export default Auth;
-
-
-// import React, { useEffect, useState } from "react";
-// import { useRouter } from "next/router";
-// import axios from "axios";
-// import AuthForm from "./AuthForm";
-// import AuthProvider from "./AuthProvider";
-// import Logo from "../LogoTucar/LogoTucar";
-
-// const Auth = () => {
-//   const router = useRouter();
-//   const [authSessionId, setAuthSessionId] = useState("");
-//   const [authFlow, setAuthFlow] = useState("");
-//   const [completed, setCompleted] = useState(false);
-//   const [authData, setAuthData] = useState({});
-//   const [authMethods, setAuthMethods] = useState([]);
-//   const [currentStep, setCurrentStep] = useState(0);
-//   const [udiFingerprint, setUdiFingerprint] = useState("unique-device-identifier");
-//   const [state, setState] = useState("random-state");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [errorMessage, setErrorMessage] = useState("");
-
-//   useEffect(() => {
-//     const storedAuthSessionId = localStorage.getItem("authSessionId");
-//     if (storedAuthSessionId && completed) {
-//       verifyAuthentication(storedAuthSessionId);
-//     }
-//   }, [completed]);
-
-//   useEffect(() => {
-//     const storedAuthSessionId = localStorage.getItem('authSessionId');
-//     if (storedAuthSessionId && completed) {
-//       verifyAuthentication(storedAuthSessionId);
-//     }
-//   }, [completed]);
-
-//   useEffect(() => {
-//     console.log("currentStep actualizado:", currentStep);
-//   }, [currentStep]);
-
-//   const authorize = async () => {
-//     try {
-//       const response = await axios.get("/api/v1/oauth/authorize", {
-//         params: {
-//           response_type: "code",
-//           client_id: "QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s",
-//           redirect_uri: "http://localhost:3000",
-//           scope: "driver",
-//           state: "random-state",
-//           tenancy: "development",
-//         },
-//         withCredentials: true,
-//       });
-
-//       const data = response?.data; // Verificar si data está definido
-//       if (!data) {
-//         console.error("Error: La respuesta del servidor no contiene datos.");
-//         return;
-//       }
-
-//       console.log("Respuesta completa del servidor:", data);
-
-//       if (data.authMethods && data.authMethods.length > 0) {
-//         setAuthMethods(data.authMethods);
-//       } else {
-//         console.error("authMethods no está presente en la respuesta o está vacío");
-//       }
-
-//       if (data.authSessionId) {
-//         setAuthSessionId(data.authSessionId);
-//         localStorage.setItem("authSessionId", data.authSessionId); // Guardar en localStorage
-//       } else {
-//         console.error("authSessionId no está definido en la respuesta.");
-//       }
-
-//       setAuthFlow(data.authFlow);
-//       setCompleted(data.completed);
-//       setAuthData(data.authData);
-
-//       // Actualizar fingerprint después de recibir authSessionId
-//       updateFingerprint(data.authSessionId);
-//     } catch (error) {
-//       console.error("Error en la autorización", error);
-//     }
-//   };
-
-//   const updateFingerprint = async (authSessionId) => {
-//     try {
-//       const response = await axios.patch(
-//         "/api/v1/oauth/udi-fingerprint",
-//         {
-//           authSessionId,
-//           udiFingerprint,
-//         },
-//         {
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           withCredentials: true,
-//         }
-//       );
-
-//       console.log("Fingerprint actualizado:", response.data);
-//       setCurrentStep(1);
-//     } catch (error) {
-//       console.error("Error en la actualización del fingerprint", error);
-//     }
-//   };
-
-//   const verifyAuthentication = async (authSessionId) => {
-//     try {
-//       const response = await axios.post("/api/v1/oauth/verify-authentication", {
-//         authSessionId,
-//         udiFingerprint,
-//         state,
-//       },{
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         withCredentials: true,
-//       });
-
-//       console.log("Autenticación verificada:", response.data);
-//       const redirectUri = response.data?.redirectUri;
-
-//       if (redirectUri) {
-//        // Redirigir al `redirectUri` en lugar de /dashboard
-//         router.push(redirectUri);
-//       } else {
-//         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");
-//         router.push("/dashboard");
-//       }
-//     } catch (error) {
-//       console.error("Error en la verificación de la autenticación:", error);
-//       setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
-//     }
-//   };
-
-//   return (
-//     <AuthProvider
-//       currentStep={currentStep}
-//       setCurrentStep={setCurrentStep}
-//       authSessionId={authSessionId}
-//       udiFingerprint={udiFingerprint}
-//       authMethods={authMethods}
-//       setAuthMethods={setAuthMethods}
-//       authFlow={authFlow}
-//       setAuthFlow={setAuthFlow}
-//       completed={completed}
-//       setCompleted={setCompleted}
-//       authData={authData}
-//       setAuthData={setAuthData}
-//       isSubmitting={isSubmitting}
-//       setIsSubmitting={setIsSubmitting}
-//       errorMessage={errorMessage}
-//       setErrorMessage={setErrorMessage}
-//       verifyAuthentication={verifyAuthentication}
-//       state={state}
-//     >
-//       <div className="max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]">
-//         {errorMessage && (
-//           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
-//         )}
-//         {!authSessionId ? (
-//           <button className="text-center" onClick={authorize}>
-//             Iniciar Autenticación
-//           </button>
-//         ) : (
-//           <AuthForm />
-//         )}
-//       </div>
-//     </AuthProvider>
-//   );
-// };
-
-// export default Auth;
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import { useRouter } from "next/router";
-// import axios from "axios";
-// import AuthForm from "./AuthForm";
-// import AuthProvider from "./AuthProvider";
-// import Logo from "../LogoTucar/LogoTucar";
-
-// const Auth = () => {
-//   const router = useRouter();
-//   const [authSessionId, setAuthSessionId] = useState("");
-//   const [authFlow, setAuthFlow] = useState("");
-//   const [completed, setCompleted] = useState(false);
-//   const [authData, setAuthData] = useState({});
-//   const [authMethods, setAuthMethods] = useState([]);
-//   const [currentStep, setCurrentStep] = useState(0);
-//   const [udiFingerprint, setUdiFingerprint] = useState("unique-device-identifier");
-//   const [state, setState] = useState("random-state");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [errorMessage, setErrorMessage] = useState("");
-
-//   useEffect(() => {
-//     const storedAuthSessionId = localStorage.getItem("authSessionId");
-//     if (storedAuthSessionId && completed) {
-//       verifyAuthentication(storedAuthSessionId);
-//     }
-//   }, [completed]);
-
-//   useEffect(() => {
-//     const storedAuthSessionId = localStorage.getItem('authSessionId');
-//     if (storedAuthSessionId && completed) {
-//       verifyAuthentication(storedAuthSessionId);
-//     }
-//   }, [completed]);
-
-//   useEffect(() => {
-//     console.log("currentStep actualizado:", currentStep);
-//   }, [currentStep]);
-
-//   const authorize = async () => {
-//     try {
-//       const response = await axios.get("/api/v1/oauth/authorize", {
-//         params: {
-//           response_type: "code",
-//           client_id: "QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s",
-//           redirect_uri: "http://localhost:3000",
-//           scope: "driver",
-//           state: "random-state",
-//           tenancy: "development",
-//         },
-//         withCredentials: true,
-//       });
-
-//       const data = response?.data; // Verificar si data está definido
-//       if (!data) {
-//         console.error("Error: La respuesta del servidor no contiene datos.");
-//         return;
-//       }
-
-//       console.log("Respuesta completa del servidor:", data);
-
-//       if (data.authMethods && data.authMethods.length > 0) {
-//         setAuthMethods(data.authMethods);
-//       } else {
-//         console.error("authMethods no está presente en la respuesta o está vacío");
-//       }
-
-//       if (data.authSessionId) {
-//         setAuthSessionId(data.authSessionId);
-//         localStorage.setItem("authSessionId", data.authSessionId); // Guardar en localStorage
-//       } else {
-//         console.error("authSessionId no está definido en la respuesta.");
-//       }
-
-//       setAuthFlow(data.authFlow);
-//       setCompleted(data.completed);
-//       setAuthData(data.authData);
-
-
-//       // // Actualizar fingerprint después de recibir authSessionId
-//       updateFingerprint(data.authSessionId);
-//     } catch (error) {
-//       console.error("Error en la autorización", error);
-//     }
-//   };
-
-//   const updateFingerprint = async (authSessionId) => {
-//     try {
-//       const response = await axios.patch(
-//         "/api/v1/oauth/udi-fingerprint",
-//         {
-//           authSessionId,
-//           udiFingerprint,
-//         },
-//         {
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           withCredentials: true,
-//         }
-//       );
-
-//       console.log("Fingerprint actualizado:", response.data);
-//       setCurrentStep(1);
-//     } catch (error) {
-//       console.error("Error en la actualización del fingerprint", error);
-//     }
-//   };
-
-//   const verifyAuthentication = async (authSessionId) => {
-//     try {
-//       const response = await axios.post("/api/v1/oauth/verify-authentication", {
-//         authSessionId,
-//         udiFingerprint,
-//         state,
-//       },{
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         withCredentials: true,
-//       });
-
-//       console.log("Autenticación verificada:", response.data);
-//       const redirectUri = response.data?.redirectUri;
-
-//       if (redirectUri) {
-//        // // Redirigir al `redirectUri` en lugar de /dashboard
-//         router.push(redirectUri);
-//       } else {
-//         console.error("No se recibió un redirectUri, redirigiendo al /dashboard");
-//         router.push("/dashboard");
-//       }
-//     } catch (error) {
-//       console.error("Error en la verificación de la autenticación:", error);
-//       setErrorMessage(error.response?.data?.errors || "Error en la verificación de la autenticación");
-//     }
-//   };
-
-//   return (
-//     <AuthProvider
-//       currentStep={currentStep}
-//       setCurrentStep={setCurrentStep}
-//       authSessionId={authSessionId}
-//       udiFingerprint={udiFingerprint}
-//       authMethods={authMethods}
-//       setAuthMethods={setAuthMethods}
-//       authFlow={authFlow}
-//       setAuthFlow={setAuthFlow}
-//       completed={completed}
-//       setCompleted={setCompleted}
-//       authData={authData}
-//       setAuthData={setAuthData}
-//       isSubmitting={isSubmitting}
-//       setIsSubmitting={setIsSubmitting}
-//       errorMessage={errorMessage}
-//       setErrorMessage={setErrorMessage}
-//       verifyAuthentication={verifyAuthentication}
-//       state={state}
-//     >
-//       <div className="max-w-screen-2xl mx-auto px-3 lg:px-[60px] pt-[20px]">
-//         {errorMessage && (
-//           <div className="text-center py-5 bg-red-400 p-3">{errorMessage}</div>
-//         )}
-//         {!authSessionId ? (
-//           <button className="text-center" onClick={authorize}>
-//             Iniciar Autenticación
-//           </button>
-//         ) : (
-//           <AuthForm />
-//         )}
-//       </div>
-//     </AuthProvider>
-//   );
-// };
-
-// export default Auth;

@@ -11,13 +11,19 @@ module.exports = async (phase, { defaultConfig }) => {
   return {
     env: {
       authBase: 'http://localhost:3000',
+      RESPONSE_TYPE: process.env.RESPONSE_TYPE,
+      CLIENT_ID: process.env.CLIENT_ID,
+      REDIRECT_URI: process.env.REDIRECT_URI,
+      SCOPE: process.env.SCOPE,
+      STATE: process.env.STATE,
+      TENANCY: process.env.TENANCY,
     },
     reactStrictMode: false,
     async rewrites() {
       return [
         {
           source: '/api/:path*',
-          destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path',
+          destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path*',
         },
       ];
     },
@@ -47,7 +53,7 @@ module.exports = async (phase, { defaultConfig }) => {
         return [
           {
             source: '/api/:path*',
-            destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path',
+            destination: 'https://account-service-twvszsnmba-uc.a.run.app/api/:path*',
           },
         ];
       },
@@ -76,7 +82,7 @@ module.exports = async (phase, { defaultConfig }) => {
       return [
         {
           source: '/api/:path*',
-          destination: 'https://account-service-13535404425.us-central1.run.app/api/:path',
+          destination: 'https://account-service-13535404425.us-central1.run.app/api/:path*',
         },
       ];
     },

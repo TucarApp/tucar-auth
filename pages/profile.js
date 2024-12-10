@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { PencilIcon, XIcon, MenuIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronRightIcon } from '@heroicons/react/solid';
 import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
-import InputField from '@/components/Auth/InputField';
-
-
+import InputField from '@/components/Auth/steps/InputField';
 
 // Importamos los mocks
 import { fetchUserData } from '../utils/mocks/mockUsersApi';
