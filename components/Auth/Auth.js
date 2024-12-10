@@ -57,6 +57,7 @@ const Auth = () => {
         tenancy: APP_ENV === 'development' ? process.env.TENANCY : queryParams.get('tenancy'),
         udiFingerprint,
       };
+      console.log('authorizeParams', authorizeParams);
       authorize(
         AuthDatasource.authorize,
         AuthDatasource.updateUdiFingerprint,
