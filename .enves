@@ -1,0 +1,8 @@
+APP_ENV=staging
+
+RESPONSE_TYPE=code
+CLIENT_ID=QT6xCtFyNRNPSsopvf4gbSxhPgxuzV3at4JoSg0YG7s
+REDIRECT_URI=http://localhost:5000
+SCOPE=driver
+STATE=random-state
+TENANCY=development

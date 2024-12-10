@@ -16,7 +16,9 @@
           "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest",
           "--cache-from",
           "us-docker.pkg.dev/$PROJECT_ID/tucar-auth/tucar-auth-image:latest",
-          "-f", 
+          "--build-arg",
+          "APP_ENV=staging",
+          "-f",
           "./Dockerfile",
           "."
         ]
