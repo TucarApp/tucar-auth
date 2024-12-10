@@ -33,7 +33,6 @@ function Meta({ children, title, ...customMeta }) {
         <meta property="og:url" content={`https://tucar.app${router.asPath}`} />
         <link rel="canonical" href={`https://tucar.app${router.asPath}`} />
         <link rel="icon" href={`${cdnUrl}/favicon.ico`} />
-
         <meta charSet="UTF-8" />
         <meta content={meta.description} name="description" />
         <meta property="og:type" content={meta.type} />
@@ -51,20 +50,23 @@ function Meta({ children, title, ...customMeta }) {
         {meta.data && (
           <meta property="article:published_time" content={meta.date} />
         )}
-
-        {/* Google Tag Manager */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BF7HR647WQ"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-BF7HR647WQ');
-            `,
-          }}
-        />
       </Head>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-BF7HR647WQ"
+        strategy="afterInteractive"
+      />
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-BF7HR647WQ');
+          `,
+        }}
+      />
     </>
   );
 }

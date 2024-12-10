@@ -15,7 +15,6 @@ const Logout = () => {
           ? `/api/logout?redirect_uri=${encodeURIComponent(redirect_uri)}`
           : '/api/logout';
 
-
         const response = await fetch(apiUrl, {
           method: 'GET',
         });
