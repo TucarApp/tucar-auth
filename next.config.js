@@ -11,7 +11,7 @@ module.exports = async (phase, { defaultConfig }) => {
   return {
     env: {
       authBase: 'http://localhost:3000',
-      APP_ENV: process.env.APP_ENV,
+      APP_ENV: 'development',
       RESPONSE_TYPE: process.env.RESPONSE_TYPE,
       CLIENT_ID: process.env.CLIENT_ID,
       REDIRECT_URI: process.env.REDIRECT_URI,
@@ -48,7 +48,7 @@ module.exports = async (phase, { defaultConfig }) => {
     return {
       env: {
         authBase: 'https://accounts.tucar.dev',
-        APP_ENV: process.env.APP_ENV,
+        APP_ENV: 'staging',
       },
       reactStrictMode: false,
       async rewrites() {
@@ -78,7 +78,7 @@ module.exports = async (phase, { defaultConfig }) => {
   return {
     env: {
       authBase: 'https://accounts.tucar.app',
-      APP_ENV: process.env.APP_ENV,
+      APP_ENV: 'production',
     },
     reactStrictMode: false,
     async rewrites() {
