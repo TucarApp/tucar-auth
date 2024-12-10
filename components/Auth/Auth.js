@@ -46,20 +46,23 @@ const Auth = () => {
   
   useEffect(() => {
     const udiFingerprint = 'random-udi-fingerprint';
-    authorize(
-      AuthDatasource.authorize,
-      AuthDatasource.updateUdiFingerprint,
-      {
-        responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : searchParams.get('response_type'),
-        clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : searchParams.get('client_id'),
-        redirectUri: APP_ENV === 'development' ? process.env.REDIRECT_URI : searchParams.get('redirect_uri'),
-        scope: APP_ENV === 'development' ? process.env.SCOPE : searchParams.get('scope'),
-        state: APP_ENV === 'development' ? process.env.STATE : searchParams.get('state'),
-        tenancy: APP_ENV === 'development' ? process.env.TENANCY : searchParams.get('tenancy'),
-        udiFingerprint,
-      },
-      dispatch,
-    );
+    const authorizeParams = {
+      responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : searchParams.get('response_type'),
+      clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : searchParams.get('client_id'),
+      redirectUri: APP_ENV === 'development' ? process.env.REDIRECT_URI : searchParams.get('redirect_uri'),
+      scope: APP_ENV === 'development' ? process.env.SCOPE : searchParams.get('scope'),
+      state: APP_ENV === 'development' ? process.env.STATE : searchParams.get('state'),
+      tenancy: APP_ENV === 'development' ? process.env.TENANCY : searchParams.get('tenancy'),
+      udiFingerprint,
+    }
+    if (authorizeParams.responseType) {
+      authorize(
+        AuthDatasource.authorize,
+        AuthDatasource.updateUdiFingerprint,
+        authorizeParams,
+        dispatch,
+      );
+    }
   }, [searchParams, dispatch]);
 
   if (!authParams || !authFlow) {

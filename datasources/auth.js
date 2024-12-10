@@ -9,7 +9,7 @@ const AuthDatasource = {
       tenancy,
     };
     const response = await fetch(
-      `/api/v1/oauth/authorize/?${new URLSearchParams(queryParams)}`,
+      `/api/v1/oauth/authorize?${new URLSearchParams(queryParams)}`,
       {
         method: 'GET',
     });
