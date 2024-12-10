@@ -11,6 +11,7 @@ module.exports = async (phase, { defaultConfig }) => {
   return {
     env: {
       authBase: 'http://localhost:3000',
+      APP_ENV: process.env.APP_ENV,
       RESPONSE_TYPE: process.env.RESPONSE_TYPE,
       CLIENT_ID: process.env.CLIENT_ID,
       REDIRECT_URI: process.env.REDIRECT_URI,
