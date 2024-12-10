@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useSearchParams } from 'next/navigation';
 import styled from "styled-components";
 
 import Logo from "../LogoTucar/LogoTucar";
 import AuthForm from './AuthForm';
 import LoadingScreen from './LoadingScreen';
+import QueryParams from './QueryParams';
+import UdiFingerprint from './UdiFingerprint';
 import AuthDatasource from '../../datasources/auth';
 import {
   useGlobalDispatch,
@@ -38,32 +39,36 @@ const Auth = () => {
   const authFlow = useGlobalAuthFlow();
   const dispatch = useGlobalDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const queryParams = QueryParams();
+  const udiFingerprint = UdiFingerprint();
 
   if (completed) {
     router.push('/verify');
   }
   
   useEffect(() => {
-    const udiFingerprint = 'random-udi-fingerprint';
-    const authorizeParams = {
-      responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : searchParams.get('response_type'),
-      clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : searchParams.get('client_id'),
-      redirectUri: APP_ENV === 'development' ? process.env.REDIRECT_URI : searchParams.get('redirect_uri'),
-      scope: APP_ENV === 'development' ? process.env.SCOPE : searchParams.get('scope'),
-      state: APP_ENV === 'development' ? process.env.STATE : searchParams.get('state'),
-      tenancy: APP_ENV === 'development' ? process.env.TENANCY : searchParams.get('tenancy'),
-      udiFingerprint,
-    }
-    if (authorizeParams.responseType) {
+    if (queryParams && udiFingerprint) {
+      const authorizeParams = {
+        responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : queryParams.get('response_type'),
+        clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : queryParams.get('client_id'),
+        redirectUri: APP_ENV === 'development' ? process.env.REDIRECT_URI : queryParams.get('redirect_uri'),
+        scope: APP_ENV === 'development' ? process.env.SCOPE : queryParams.get('scope'),
+        state: APP_ENV === 'development' ? process.env.STATE : queryParams.get('state'),
+        tenancy: APP_ENV === 'development' ? process.env.TENANCY : queryParams.get('tenancy'),
+        udiFingerprint,
+      };
       authorize(
         AuthDatasource.authorize,
         AuthDatasource.updateUdiFingerprint,
-        authorizeParams,
+        {
+          ...authorizeParams,
+          udiFingerprint
+        },
         dispatch,
       );
     }
-  }, [searchParams, dispatch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryParams, udiFingerprint]);
 
   if (!authParams || !authFlow) {
     return <LoadingScreen />;
