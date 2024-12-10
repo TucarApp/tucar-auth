@@ -47,6 +47,7 @@ module.exports = async (phase, { defaultConfig }) => {
     return {
       env: {
         authBase: 'https://accounts.tucar.dev',
+        APP_ENV: process.env.APP_ENV,
       },
       reactStrictMode: false,
       async rewrites() {
@@ -76,6 +77,7 @@ module.exports = async (phase, { defaultConfig }) => {
   return {
     env: {
       authBase: 'https://accounts.tucar.app',
+      APP_ENV: process.env.APP_ENV,
     },
     reactStrictMode: false,
     async rewrites() {
