@@ -8,7 +8,8 @@ WORKDIR /app
 # Copying this first prevents re-running npm install on every code change.
 COPY . .
 
-
 RUN npm install
+
+ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
 
 RUN npm run build
