@@ -46,7 +46,7 @@ function Lastname() {
         placeholder='Apellido'
         value={lastname}
         onChange={(e) =>
-          updateLastname(e.target.value.toLowerCase())
+          updateLastname(e.target.value)
         }
       />
       <div className="flex flex-col justify-center items-center">

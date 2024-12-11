@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import Image from 'next/image';
 import styled from "styled-components";
+import AuthButton from './AuthButton';
 
 import {
   useGlobalDispatch,
@@ -72,9 +73,9 @@ function Fallback() {
   useEffect(() => {}, [authMethods, authParams, dispatcher]);
 
   return (
-    <Buttonback onClick={callFallback}>
-      <Image src="/circular.png" alt="Logo" className="ml-[-20px]" width={100} height={100} />
-    </Buttonback>
+    <AuthButton width='155px' onClick={callFallback}  className="font-semibold text-[16px] font-Poppins">
+        Volver
+    </AuthButton>
   )
 }
 

@@ -1,9 +1,8 @@
 import styled from 'styled-components';
 
 const InputField = styled.input`
-  width: 350px;
-  height: 45px;
-  flex: 1;
+  width: ${(props) => props.width || '100%'};
+  height: ${(props) => props.height || '45px'}; 
   border-radius: 4px;
   border: 1px solid var(--Blanco, #FFF);
   background: #E3EDF7;

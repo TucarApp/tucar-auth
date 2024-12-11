@@ -61,6 +61,7 @@ function SocialGoogle() {
 
   return (
     <>
+    <div className='flex justify-center items-center mt-5'>
       {googleClientId !== '' ? (
         <GoogleOAuthProvider clientId={googleClientId}>
           <GoogleLogin
@@ -70,8 +71,9 @@ function SocialGoogle() {
             text="continue_with"
             shape="square"
             size="large"
-            width={330}
+            width={315}
             logo_alignment="center"
+            
           />
         </GoogleOAuthProvider>
       ) : (
@@ -83,6 +85,7 @@ function SocialGoogle() {
             {inputError}
           </p>
         )}
+      </div>
       </div>
     </>
   )

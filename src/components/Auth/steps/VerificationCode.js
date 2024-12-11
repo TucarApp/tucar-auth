@@ -107,10 +107,10 @@ function VerificationCode() {
             maxLength={1}
             className="verification-input"
             onChange={(e) => handleInput(e, index)}
-            onKeyDown={(e) => handleBackspace(e, index)}  // Detectar la tecla Backspace
+            onKeyDown={(e) => handleBackspace(e, index)}  
             onPaste={handlePaste}
             onKeyPress={handleKeyPress}
-            type='text'  // Cambiado de 'number' a 'text'
+            type='text' 
           />
         ))}
       </div>

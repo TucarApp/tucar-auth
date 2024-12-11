@@ -44,7 +44,7 @@ function filterAuthMethods(authMethods) {
     principalAuthMethod: null,
     secondaryAuthMethods: []
   }
-  
+
   const inUseAuthMethod = authMethods.filter(authMethod => authMethod.inUse);
   if (inUseAuthMethod.length === 0) {
     if (authMethods.length > 0) {
@@ -62,30 +62,38 @@ function filterAuthMethods(authMethods) {
   return methodsToRender;
 }
 
-function filterStepComponents(methodsToRender, authFlow, continueAuth) {
+function filterStepComponents(methodsToRender, authFlow, continueAuth, hasFallback) {
   const stepsToRender = {
     principalAuthMethod: [],
     secondaryAuthMethods: []
-  }
+  };
 
   if (methodsToRender.principalAuthMethod === null) return stepsToRender;
   const principalAuthMethodSteps = methodsToRender.principalAuthMethod.steps.filter(
     step => step.flows.includes(authFlow) && !step.completed
   );
-  stepsToRender.principalAuthMethod = getStepComponent(principalAuthMethodSteps, methodsToRender.principalAuthMethod.methodType, continueAuth);
+  stepsToRender.principalAuthMethod = getStepComponent(
+    principalAuthMethodSteps,
+    methodsToRender.principalAuthMethod.methodType,
+    continueAuth,
+    hasFallback
+  );
 
   for (let i in methodsToRender.secondaryAuthMethods) {
     let secondaryAuthMethod = methodsToRender.secondaryAuthMethods[i];
     let secondaryAuthMethodSteps = secondaryAuthMethod.steps.filter(
       step => step.flows.includes(authFlow) && !step.completed
     );
-    stepsToRender.secondaryAuthMethods.push(getStepComponent(secondaryAuthMethodSteps, secondaryAuthMethod.methodType, continueAuth));
-  };
+    stepsToRender.secondaryAuthMethods.push(
+      getStepComponent(secondaryAuthMethodSteps, secondaryAuthMethod.methodType, continueAuth, hasFallback)
+    );
+  }
 
   return stepsToRender;
 }
 
-function getStepComponent(steps, methodType, continueAuth) {
+
+function getStepComponent(steps, methodType, continueAuth, hasFallback) {
   if (steps.length === 0) {
     return [];
   }
@@ -124,14 +132,19 @@ function getStepComponent(steps, methodType, continueAuth) {
   }
   if (needContinueButton) {
     stepsToRender.push(
-      <div className="flex flex-col justify-center items-center">
-        <AuthButton
-          onClick={() => continueAuth(methodType)}
-          className="font-semibold text-[16px] font-Poppins"
-        >
-          Continuar
-        </AuthButton>
-      </div>
+      <div className="flex flex-row-reverse justify-center  items-center mt-3 gap-3">
+      <AuthButton
+      width="155px"
+        onClick={() => continueAuth(methodType)}
+        className="font-semibold text-[16px] font-Poppins"
+     
+      >
+        Continuar
+      </AuthButton>
+        <div>    
+        {hasFallback && <Fallback />}</div>
+       </div>
+
     );
   }
   return stepsToRender;
@@ -178,12 +191,13 @@ const AuthForm = () => {
         setHasFallback(false);
       }
     }
-
-    const stepsToRender = filterStepComponents(methodsToRender, authFlow, continueAuth);
+  
+    const stepsToRender = filterStepComponents(methodsToRender, authFlow, continueAuth, hasFallback);
     setStepsToRender(stepsToRender);
-  }, [authFlow, authMethods, continueAuth]);
+  }, [authFlow, authMethods, continueAuth, hasFallback]);
+  
 
-  useEffect(() => {}, [hasFallback, stepsToRender, authenticationError]);
+  useEffect(() => { }, [hasFallback, stepsToRender, authenticationError]);
 
   if (authMethods.length === 0) {
     return (
@@ -198,10 +212,10 @@ const AuthForm = () => {
       </FormContainer>
     );
   }
-  
+
   return (
     <FormContainer>
-      {hasFallback ? <Fallback/> : <></>}
+      {/* {hasFallback ? <div className="flex flex-start z-10 absolute ml-[-65px] mt-[-55px]"><Fallback /></div> : <></>} */}
       {
         stepsToRender.principalAuthMethod.map((step, index) => (
           <div key={index}>
@@ -209,6 +223,7 @@ const AuthForm = () => {
           </div>
         ))
       }
+
       <div className="flex flex-col justify-center items-center">
         {authenticationError === '' ? null : (
           <p className="text-red-500 text-sm mt-5 font-Poppins font-light">

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const AuthButton = styled.button`
-  width: 100%; 
+  width: ${(props) => props.width || '100%'};
   max-width: 348px; 
   height: 42px;
   display: flex; 

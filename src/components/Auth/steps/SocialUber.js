@@ -100,12 +100,13 @@ function SocialUber() {
         } catch (error) {
           setInputError(defaultErrorMessage);
         }
-      }, 1000); // 1000ms = 1s
+      }, 1000); 
     }
   }
 
   return (
     <>
+    <div className='flex justify-center items-center'>
       <UberButton onClick={clickUberButton} className="w-full">
         <div className="flex justify-center items-center gap-x-2">
           <Image
@@ -126,6 +127,7 @@ function SocialUber() {
             {inputError}
           </p>
         )}
+      </div>
       </div>
     </>
   )

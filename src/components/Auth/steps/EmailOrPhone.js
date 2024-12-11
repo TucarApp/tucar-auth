@@ -40,22 +40,28 @@ function EmailOrPhone() {
 
   return (
     <>
+    <div className='flex flex-col justify-center items-center '>
       <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
         Ingresa tu correo o número de teléfono
       </p>
+      <div className='h-[50px] mt-3'>
       <InputField
         type="text"
+        width='320px'
         value={emailOrPhone}
         onChange={(e) =>
           updateEmailOrPhone(e.target.value.toLowerCase())
         }
+      
       />
+      </div>
       <div className="flex flex-col justify-center items-center">
         {inputError === '' ? null : (
           <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
             {inputError}
           </p>
         )}
+      </div>
       </div>
     </>
   )
