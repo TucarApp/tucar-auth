@@ -99,7 +99,7 @@ function VerificationCode() {
       <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
         Ingresa el código que hemos enviado al número de teléfono
       </p>
-      <div className="flex gap-x-[25px] lg:w-[350px]">
+      <div className="flex gap-x-[25px]">
         {[0, 1, 2, 3].map((index) => (
           <VerificatonInput
             key={index}

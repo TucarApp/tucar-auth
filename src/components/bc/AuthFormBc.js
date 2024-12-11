@@ -182,7 +182,7 @@ const AuthForm = () => {
 
       {currentStep === 1 && (
         <FormContainer>
-          <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
+          <div className="flex flex-col items-center mt-[20px] ">
             <div>
               <div className="flex justify-center">
                 <Logo color="color" className="cursor-pointer" width={180} />
@@ -191,7 +191,7 @@ const AuthForm = () => {
                 ¡Bienvenido de vuelta!
               </h1>
             </div>
-            <div className="pantallapc:w-[345px] w-[355px]">
+            <div className=" w-[355px]">
               {tucarMethod && (
                 <>
                   <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
@@ -287,7 +287,7 @@ const AuthForm = () => {
       )}
 
       {currentStep === 2 && (
-        <div className="w-full h-full flex justify-center items-center pantallapc:mt-[110px]">
+        <div className="w-full h-full flex justify-center items-center ">
           <div className="w-[355px]">
             <Buttonback className="flex justify" onClick={handleBackButtonClick}>
               <img src="circular.png" alt="Logo" className="ml-[-20px]" width={70} />
@@ -353,7 +353,7 @@ const AuthForm = () => {
       )}
 
       {currentStep === 3 && (
-        <div className="pantallapc:mt-[110px]">
+        <div>
           <div className="flex justify-start">
             <Buttonback onClick={handleBackButtonClick}>
               <img src="circular.png" alt="Logo" className="ml-[-20px]" width={100} />
@@ -403,7 +403,7 @@ const AuthForm = () => {
             </Buttonback>
           </div>
 
-          <div className="w-full h-full flex justify-center items-center pantallapc:mt-[110px]">
+          <div className="w-full h-full flex justify-center items-center">
             <div className="w-[350px]">
               <div className="flex justify-start">
                 <p className="text-[28px] text-center font-Poppins font-semibold text-[#0057b8]">
@@ -438,7 +438,7 @@ const AuthForm = () => {
       )}
 
       {currentStep === 5 && (
-        <div className="w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
+        <div className="w-full h-full flex justify-center items-center mt-[80px]">
           <div className="w-[355px]">
             <div className="flex justify-center">
               <p className="text-[28px] text-left font-Poppins font-semibold text-[#0057b8]">
@@ -464,7 +464,7 @@ const AuthForm = () => {
       )}
 
       {currentStep === 6 && (
-        <div className="w-full h-full flex justify-center items-center mt-[80px] pantallapc:mt-[110px]">
+        <div className="w-full h-full flex justify-center items-center mt-[80px]">
           <div className="w-[350px]">
             <div className="flex justify-center">
               <p className="text-[28px] text-left font-Poppins font-semibold text-[#0057b8]">

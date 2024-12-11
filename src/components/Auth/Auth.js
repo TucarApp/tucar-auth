@@ -76,14 +76,14 @@ const Auth = () => {
 
   return (
     <AuthContainer>
-      <div className="flex flex-col items-center mt-[20px] pantallapc:mt-[160px]">
+      <div className="flex flex-col items-center mt-[20px]">
         <div className="flex justify-center">
           <Logo color="color" className="cursor-pointer" width={180} />
         </div>
         <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
           ¡Bienvenido a Tucar!
         </h1>
-        <div className="pantallapc:w-[345px] w-[355px]">
+        <div className=" w-[355px]">
           <div className="text-center">
             <AuthForm />
             <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">

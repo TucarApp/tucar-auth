@@ -28,15 +28,6 @@ const FormContainer = styled.div`
   width: 100%;
   max-width: 100%;
   padding: 0 20px;
-
-  @media (min-width: 768px) {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  @media (min-width: 1440px) {
-    max-width: 60%;
-  }
 `;
 
 function filterAuthMethods(authMethods) {
@@ -203,7 +194,7 @@ const AuthForm = () => {
     return (
       <FormContainer>
         <div className="flex items-center justify-center my-8">
-          <div className="flex-grow border-t-2 border-[#0057b8]"></div>
+          <div className="flex-grow  border-t-2 border-[#0057b8]"></div>
           <div className="mx-4">
             <div className="text-[#5B5D71] font-Poppins font-bold">O</div>
           </div>
@@ -215,7 +206,7 @@ const AuthForm = () => {
 
   return (
     <FormContainer>
-      {/* {hasFallback ? <div className="flex flex-start z-10 absolute ml-[-65px] mt-[-55px]"><Fallback /></div> : <></>} */}
+      <VerificationCode />
       {
         stepsToRender.principalAuthMethod.map((step, index) => (
           <div key={index}>

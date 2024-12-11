@@ -40,7 +40,7 @@ function EmailOrPhone() {
 
   return (
     <>
-    <div className='flex flex-col justify-center items-center '>
+    <div className='flex flex-col justify-center items-center'>
       <p className="text-[#5B5D71] font-Poppins text-[14px] font-medium text-start pt-[25px] mb-[-10px]">
         Ingresa tu correo o número de teléfono
       </p>
