@@ -206,7 +206,7 @@ const AuthForm = () => {
 
   return (
     <FormContainer>
-      <VerificationCode />
+   
       {
         stepsToRender.principalAuthMethod.map((step, index) => (
           <div key={index}>
