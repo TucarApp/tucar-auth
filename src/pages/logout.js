@@ -27,7 +27,7 @@
 //   useEffect(() => {
 //     const logoutUser = async () => {
 //       try {
-        
+
 //         const response = await fetch(
 //           'api/logout',
 //           {
@@ -108,6 +108,7 @@ import styled from 'styled-components';
 
 import AuthButton from '@/components/Auth/AuthButton';
 import QueryParams from '@/components/Auth/QueryParams';
+import LoadingScreen from '@/components/Auth/LoadingScreen';
 
 const LogOutContainer = styled.div`
   display: flex;
@@ -203,7 +204,7 @@ const Logout = () => {
   return (
     <div className="text-[#5b5d71] text-[15px] font-Poppins font-normal flex justify-center items-center w-full">
       <LogOutContainer>
-        <p>Cerrando sesión...</p>
+        <LoadingScreen />
       </LogOutContainer>
     </div>
   );
