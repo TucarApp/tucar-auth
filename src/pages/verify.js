@@ -57,13 +57,14 @@ const Verify = () => {
     if (redirectUri) {
       const timer = setInterval(() => {
         setSecondsLeft((prev) => prev - 1);
-        if (secondsLeft === 0) router.push(redirectUri);
+        if (secondsLeft <= 0) router.push(redirectUri);
       }, 1000);
       return () => {
         clearInterval(timer);
       };
     }
-  }, [redirectUri, router, secondsLeft]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [redirectUri, secondsLeft]);
 
   if (redirectUri === '') {
     return <LoadingScreen />;

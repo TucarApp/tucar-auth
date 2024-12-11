@@ -5,11 +5,7 @@ import AuthButton from '@/components/Auth/AuthButton';
 import InputField from '@/components/Auth/steps/InputField';
 
 // Importamos los mocks
-import { fetchUserData } from '../utils/mocks/mockUsersApi';
-import { updateCredentials } from '../utils/mocks/mockCredentialsApi';
-import { verifyUser } from '../utils/mocks/mockVerifyApi';
-import { changePassword } from '../utils/mocks/mockChangePasswordApi';
-import { confirmChangePassword } from '../utils/mocks/mockConfirmChangePasswordApi';
+
 import { useRouter } from 'next/router';
 
 // Dentro del componente
