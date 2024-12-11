@@ -48,7 +48,6 @@ const Auth = () => {
   
   useEffect(() => {
     if (queryParams && udiFingerprint) {
-      console.log(process.env.NEXT_PUBLIC_APP_ENV)
       const authorizeParams = {
         responseType: APP_ENV === 'development' ? process.env.RESPONSE_TYPE : queryParams.get('response_type'),
         clientId: APP_ENV === 'development' ? process.env.CLIENT_ID : queryParams.get('client_id'),
@@ -58,7 +57,6 @@ const Auth = () => {
         tenancy: APP_ENV === 'development' ? process.env.TENANCY : queryParams.get('tenancy'),
         udiFingerprint,
       };
-      console.log('authorizeParams', authorizeParams);
       authorize(
         AuthDatasource.authorize,
         AuthDatasource.updateUdiFingerprint,
