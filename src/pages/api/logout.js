@@ -6,8 +6,8 @@ export default function handler(req, res) {
     res.setHeader('Set-Cookie', [
       'sid=; Path=/; Domain=.tucar.dev; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict',
     ]);
-    console.log('App environment:', process.env.APP_ENV)
-    console.log('APP_ENV:', process.env.APP_ENV)
+    console.log('App environment:', process.env.NEXT_PUBLIC_APP_ENV)
+    console.log('APP_ENV:', process.env.NEXT_PUBLIC_APP_ENV)
 
 
     if (redirect_uri) {
