@@ -37,7 +37,7 @@ const Logout = () => {
 
         if (response.status > 300) {
           setError('Ups algo salió mal');
-          router.push(nextUri);
+          setNextUri('https://tucar.app');
         } else {
           router.push(nextUri);
         }
