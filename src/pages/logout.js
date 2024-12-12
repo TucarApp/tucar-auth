@@ -28,33 +28,25 @@ const Logout = () => {
   useEffect(() => {
     const logoutUser = async () => {
       try {
-        // Construir la URL del logout con o sin redirect_uri
-        const redirectUri = queryParams.get('redirect_uri');
-        const apiUrl = redirectUri
-          ? `/api/logout?redirect_uri=${encodeURIComponent(redirectUri)}`
-          : '/api/logout';
-
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-        });
+        const response = await fetch(
+          '/api/logout',
+          {
+            method: 'GET',
+          }
+        );
 
         if (response.ok) {
-          // Redirigir al redirect_uri o a la página principal
           const redirectTarget = redirectUri || '/';
           router.push(redirectTarget);
         } else {
-          console.error('Error en la solicitud de logout');
           setError('Ups algo salió mal');
           setNextUri(redirectUri || 'https://tucar.app');
         }
       } catch (error) {
-        console.error('Error durante el logout:', error);
         setError('Ups algo salió mal');
         setNextUri('https://tucar.app');
       }
     };
-
-    // Ejecutar logout si los queryParams están disponibles
     if (queryParams) {
       logoutUser();
     }
