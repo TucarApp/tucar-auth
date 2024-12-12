@@ -35,12 +35,11 @@ const Logout = () => {
           }
         );
 
-        if (response.ok) {
-          const redirectTarget = redirectUri || '/';
-          router.push(redirectTarget);
-        } else {
+        if (response.status > 300) {
           setError('Ups algo salió mal');
-          setNextUri(redirectUri || 'https://tucar.app');
+          router.push(nextUri);
+        } else {
+          router.push(nextUri);
         }
       } catch (error) {
         setError('Ups algo salió mal');
@@ -48,9 +47,16 @@ const Logout = () => {
       }
     };
     if (queryParams) {
+      if (queryParams.toString() === '') {
+        setNextUri('https://tucar.app');
+      } else {
+        setNextUri(`/?${queryParams.toString()}`);
+      }
       logoutUser();
     }
-  }, [queryParams, router]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryParams, nextUri]);
 
   useEffect(() => {
     if (error !== '') {
@@ -62,10 +68,12 @@ const Logout = () => {
           }
           return prev - 1;
         });
-      }, 1000);
+      }, 999);
       return () => clearInterval(timer);
     }
-  }, [error, nextUri, router]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, nextUri, secondsLeft]);
 
   const handleImmediateRedirect = () => {
     router.push(nextUri);
