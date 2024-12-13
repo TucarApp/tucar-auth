@@ -23,7 +23,7 @@ import {
 import AuthDatasource from '../../datasources/auth';
 import { submitAuthentication } from '../../helpers/hooks';
 
-// Contenedor para el formulario
+
 const FormContainer = styled.div`
   width: 100%;
   max-width: 100%;
