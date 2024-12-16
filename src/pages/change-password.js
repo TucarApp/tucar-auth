@@ -6,6 +6,7 @@ function changePassword() {
   return (
     <div>
         <Password />
+     
     </div>
   )
 }
