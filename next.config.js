@@ -5,7 +5,7 @@ module.exports = async (phase, { defaultConfig }) => {
   */
   // @ts-ignore
   const app_env = process.env.NEXT_PUBLIC_APP_ENV || 'development';
-  console.log('APP_ENV:', app_env);
+  
 
   // @ts-ignore
   if (app_env === 'development') {

@@ -160,7 +160,7 @@ const AuthForm = () => {
       udiFingerprint,
     } = authParams;
 
-    console.log(requestPayload)
+
     submitAuthentication(
       AuthDatasource.submitAuthentication,
       {

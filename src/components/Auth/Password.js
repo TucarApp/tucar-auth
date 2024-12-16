@@ -97,62 +97,6 @@ const SimplePasswordChange = () => {
               <div className=" max-w-md p-6 rounded-md text-[#333333]">
                   <h2 className="text-2xl font-bold mb-5">Cambiar contraseña</h2>
                   <div className='flex flex-col'>
-                      <input
-                          type="email"
-                          className="w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] px-4 py-2"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder='Email'
-                      />
-                      <input
-                          type="password"
-                          className="w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] px-4 py-2 mt-5"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder='Nueva contraseña'
-                      />
-
-                      {isCodeSent && (
-                          <input
-                              type="text"
-                              className="w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] px-4 py-2"
-                              value={verificationCode}
-                              onChange={(e) => setVerificationCode(e.target.value)}
-                              placeholder='Código de verificación'
-                          />
-                      )}
-
-                      {statusMessage && (
-                          <p className="text-sm text-red-600 mt-2">{statusMessage}</p>
-                      )}
-
-
-                      <div className="flex gap-2 mt-6">
-                          <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleCancel}>
-                              Cancelar
-                          </button>
-                          {isCodeSent ? (
-                              <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleConfirmChangePassword}>
-                                  Confirmar cambio
-                              </button>
-                          ) : (
-                              <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleChangePassword}>
-                                  Continuar
-                              </button>
-                          )}
-                      </div>
-                  </div>
-                  <a href='https://profile.tucar.dev'>
-                  <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" >
-                      Regresar al perfil
-                  </button>
-                  </a>
-              </div>
-          </FormContainer>
-           {/* <FormContainer className="flex justify-center items-start mt-10">
-              <div className=" max-w-md p-6 rounded-md text-[#333333]">
-                  <h2 className="text-2xl font-bold mb-5">Cambiar contraseña</h2>
-                  <div className='flex flex-col'>
                       <InputField
                           type="email"
                           className="w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] px-4 py-2"
@@ -182,7 +126,7 @@ const SimplePasswordChange = () => {
                           <p className="text-sm text-red-600 mt-2">{statusMessage}</p>
                       )}
 
-
+ 
                       <div className="flex gap-2 mt-6">
                           <AuthButton className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" onClick={handleCancel}>
                               Cancelar
@@ -199,12 +143,13 @@ const SimplePasswordChange = () => {
                       </div>
                   </div>
                   <a href='https://profile.tucar.dev'>
-                  <button className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" >
+                  <AuthButton className="flex-1 w-full max-w-[348px] h-[42px] flex justify-center items-center gap-[10px] rounded-[10px] border border-[#E3EDF7] bg-[#E3EDF7] shadow-[inset_-6px_-6px_20px_#FFF,4px_4px_20px_rgba(111,140,176,0.41)] mt-[20px] text-[#5B5D71] text-[15px]" >
                       Regresar al perfil
-                  </button>
+                  </AuthButton>
                   </a>
               </div>
-          </FormContainer> */}
+          </FormContainer>
+         
       </div>
   );
 };

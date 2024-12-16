@@ -17,5 +17,4 @@ export const buildAuthUri = () => {
     return `${BASE_URL}?${buildRequestParams(params)}`;
 };
 
-// Debug para verificar el resultado
-console.log('AUTH_URI:', buildAuthUri());
+
