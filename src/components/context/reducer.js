@@ -47,6 +47,9 @@ const ERROR_MESSAGES = {
   'Phone have to be the same as the previous step': {
     cl: 'El teléfono debe ser el mismo ingresado en el paso anterior'
   },
+  "Phone already exists": {
+    cl: 'El teléfono ya está en uso, por favor intenta con otro'
+  },
   default: {
     cl: 'Ups algo salió mal, por favor recarga la página o contacta a soporte'
   }
