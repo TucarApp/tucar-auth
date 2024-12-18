@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import InputField from './steps/InputField';
 import AuthButton from './AuthButton';
 
+
 const FormContainer = styled.div`
   width: 100%;
   max-width: 100%;

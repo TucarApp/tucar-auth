@@ -15,6 +15,7 @@ import {
   useGlobalAuthFlow,
 } from '../context/context';
 import { authorize } from '../../helpers/hooks';
+import Meta from '@/Layouts/Meta';
 
 const AuthContainer = styled.div`
   width: 100%;
@@ -75,6 +76,8 @@ const Auth = () => {
   }
 
   return (
+    <>
+    <Meta title='Autenticación' />
     <AuthContainer>
       <div className="flex flex-col items-center mt-[20px]">
         <div className="flex justify-center">
@@ -102,6 +105,7 @@ const Auth = () => {
         </div>
       </div>
     </AuthContainer>
+    </>
   );
 };
 

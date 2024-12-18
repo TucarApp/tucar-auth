@@ -4,7 +4,7 @@ import TucarLogo from '../components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
 import InputField from '@/components/Auth/steps/InputField';
 
-// Importamos los mocks
+import Meta from '@/Layouts/Meta';
 
 import { useRouter } from 'next/router';
 
@@ -401,6 +401,8 @@ const Cuenta = () => {
 
 
     return (
+        <>
+        <Meta title='Perfil'  />
         <div className='font-Poppins'>
             {/* Barra superior */}
             <div className="w-full bg-[#0057b8] h-16 flex items-center justify-between px-4 lg:px-6">
@@ -717,6 +719,7 @@ const Cuenta = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
