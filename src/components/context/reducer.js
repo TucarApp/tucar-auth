@@ -47,6 +47,27 @@ const ERROR_MESSAGES = {
   'Phone have to be the same as the previous step': {
     cl: 'El teléfono debe ser el mismo ingresado en el paso anterior'
   },
+  'Email already exists': {
+    cl: 'El correo ya está en uso, por favor intenta con otro'
+  },
+  'Invalid email domain': {
+    cl: 'Dominio de correo inválido, por favor intenta con otro'
+  },
+  'Invalid password': {
+    cl: 'Contraseña inválida, por favor intenta de nuevo'
+  },
+  'Email not verified': {
+    cl: 'El correo no ha sido verificado, por favor utiliza otro método'
+  },
+  'Users with this email and phone already exists': {
+    cl: 'El correo y teléfono ya están en uso, por favor intenta con otro'
+  },
+  'User with this email already exists': {
+    cl: 'El correo ya está en uso, por favor intenta con otro'
+  },
+  'User with this phone already exists': {
+    cl: 'El teléfono ya está en uso, por favor intenta con otro'
+  },
   'Phone already exists': {
     cl: 'El teléfono ya está en uso, por favor intenta con otro'
   },
