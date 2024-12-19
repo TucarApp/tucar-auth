@@ -106,7 +106,7 @@ function SocialUber() {
 
   return (
     <>
-    <div className='flex justify-center items-center'>
+    <div className='flex justify-center items-center mt-7'>
       <UberButton onClick={clickUberButton} className="w-full">
         <div className="flex justify-center items-center gap-x-2">
           <Image

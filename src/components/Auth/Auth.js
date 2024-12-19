@@ -46,7 +46,7 @@ const Auth = () => {
   if (completed) {
     router.push('/verify');
   }
-  
+
   useEffect(() => {
     if (queryParams && udiFingerprint) {
       const authorizeParams = {
@@ -68,7 +68,7 @@ const Auth = () => {
         dispatch,
       );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryParams, udiFingerprint]);
 
   if (!authParams || !authFlow) {
@@ -77,34 +77,34 @@ const Auth = () => {
 
   return (
     <>
-    <Meta title='Autenticación' />
-    <AuthContainer>
-      <div className="flex flex-col items-center mt-[20px]">
-        <div className="flex justify-center">
-          <Logo color="color" className="cursor-pointer" width={180} />
-        </div>
-        <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
-          ¡Bienvenido a Tucar!
-        </h1>
-        <div className=" w-[355px]">
-          <div className="text-center">
-            <AuthForm />
-            <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
-              Al continuar, aceptas nuestros{" "}
-              <a
-                href="https://tucar.app/terminos-condiciones"
-                className="underline"
-              >
-                términos y condiciones
-              </a>
-              , además de recibir llamadas, mensajes de WhatsApp o SMS,
-              incluso por medios automatizados de TUCAR y sus filiales
-              en el número proporcionado.
-            </p>
+      <Meta title='Autenticación' />
+      <AuthContainer>
+        <div className="flex flex-col items-center mt-[20px]">
+          <div className="flex justify-center">
+            <Logo color="color" className="cursor-pointer" width={180} />
+          </div>
+          <h1 className="font-Poppins font-medium text-[16px] text-[#0057b8] mt-[30px]">
+            ¡Bienvenido a Tucar!
+          </h1>
+          <div className=" w-[355px]">
+            <div className="text-center">
+              <AuthForm />
+              <p className="text-[#5B5D71] font-Poppins font-normal text-[13px] mx-5 mt-[25px]">
+                Al continuar, aceptas nuestros{" "}
+                <a
+                  href="https://tucar.app/terminos-condiciones"
+                  className="underline"
+                >
+                  términos y condiciones
+                </a>
+                , además de recibir llamadas, mensajes de WhatsApp o SMS,
+                incluso por medios automatizados de TUCAR y sus filiales
+                en el número proporcionado.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </AuthContainer>
+      </AuthContainer>
     </>
   );
 };
