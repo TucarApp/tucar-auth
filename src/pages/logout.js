@@ -38,28 +38,26 @@ const Logout = () => {
         if (response.status > 300) {
           setError('Ups algo salió mal');
           setNextUri('https://tucar.app');
+          return
+        }
+        if (queryParams.toString() === '') {
+          setNextUri('https://tucar.app');
         } else {
-          router.push(nextUri);
+          setNextUri(`/?${queryParams.toString()}`);
         }
       } catch (error) {
         setError('Ups algo salió mal');
         setNextUri('https://tucar.app');
       }
     };
+
     if (queryParams) {
-      if (queryParams.toString() === '') {
-        setNextUri('https://tucar.app');
-      } else {
-        setNextUri(`/?${queryParams.toString()}`);
-      }
       logoutUser();
     }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryParams, nextUri]);
+  }, [queryParams]);
 
   useEffect(() => {
-    if (error !== '') {
+    if (error !== '' || nextUri !== '') {
       const timer = setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
