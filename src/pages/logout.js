@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
+import Logo from '@/components/LogoTucar/LogoTucar';
 import AuthButton from '@/components/Auth/AuthButton';
 import QueryParams from '@/components/Auth/QueryParams';
 import LoadingScreen from '@/components/Auth/LoadingScreen';
@@ -88,14 +89,17 @@ const Logout = () => {
     return (
       <div className="text-[#5b5d71] text-[15px] font-Poppins font-normal flex justify-center items-center w-full">
         <LogOutContainer>
-          <div className="flex flex-col justify-center items-center">
+          <div className='my-[15px]'>
+            <Logo color="color" className="cursor-pointer" width={180} />
+          </div>
           {error !== '' ? 
-            <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
-              {error}
-            </p>
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
+                {error}
+              </p>
+            </div>
             : <></>
           }
-          </div>
           <p>Serás redirigido en {secondsLeft} segundos...</p>
           <AuthButton onClick={handleImmediateRedirect}>
             Redirigir ahora

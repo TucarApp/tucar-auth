@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
-import Logo from '../components/LogoTucar/LogoTucar'
+import Logo from '../components/LogoTucar/LogoTucar';
 import LoadingScreen from '../components/Auth/LoadingScreen';
 import { useGlobalAuthParams } from '../components/context/context';
 import AuthDatasource from '../datasources/auth';
