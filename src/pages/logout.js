@@ -26,7 +26,7 @@ const Logout = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const logoutUser = async () => {
+    const logoutUser = async (queryParamsString) => {
       try {
         const response = await fetch(
           '/api/logout',
@@ -40,10 +40,12 @@ const Logout = () => {
           setNextUri('https://tucar.app');
           return
         }
-        if (queryParams.toString() === '') {
+        if (queryParamsString === '') {
           setNextUri('https://tucar.app');
+          return
         } else {
-          setNextUri(`/?${queryParams.toString()}`);
+          setNextUri(`/?${queryParamsString}`);
+          return
         }
       } catch (error) {
         setError('Ups algo salió mal');
@@ -52,7 +54,7 @@ const Logout = () => {
     };
 
     if (queryParams) {
-      logoutUser();
+      logoutUser(queryParams.toString());
     }
   }, [queryParams]);
 
@@ -77,14 +79,17 @@ const Logout = () => {
     router.push(nextUri);
   };
 
-  if (error !== '') {
+  if (error !== '' || nextUri !== '') {
     return (
       <div className="text-[#5b5d71] text-[15px] font-Poppins font-normal flex justify-center items-center w-full">
         <LogOutContainer>
           <div className="flex flex-col justify-center items-center">
+          {error !== '' ? 
             <p className="text-red-500 text-sm mt-5 font-Poppins font-light">
               {error}
             </p>
+            : <></>
+          }
           </div>
           <p>Serás redirigido en {secondsLeft} segundos...</p>
           <AuthButton onClick={handleImmediateRedirect}>
