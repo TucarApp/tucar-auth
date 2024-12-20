@@ -22,7 +22,7 @@ const Logout = () => {
   const router = useRouter();
   const queryParams = QueryParams();
   const [nextUri, setNextUri] = useState('');
-  const [secondsLeft, setSecondsLeft] = useState(2);
+  const [secondsLeft, setSecondsLeft] = useState(5);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -54,12 +54,17 @@ const Logout = () => {
     };
 
     if (queryParams) {
+      console.log('Executing logout');
+      console.log('Query params:', queryParams.toString());
       logoutUser(queryParams.toString());
     }
   }, [queryParams]);
 
   useEffect(() => {
     if (error !== '' || nextUri !== '') {
+      console.log('Redirecting in 5 seconds...');
+      console.log('Error:', error);
+      console.log('Next URI:', nextUri);
       const timer = setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
